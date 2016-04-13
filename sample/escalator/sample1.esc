@@ -1,0 +1,4 @@
+NOP
+LD X0
+OUT Y0
+
