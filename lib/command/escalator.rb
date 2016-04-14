@@ -52,6 +52,7 @@ module Escalator
       
     def dump 
       @codes.map do |c|
+p [:c, c]
         c.to_s(16).rjust(2, "0")
       end
       .join(" ")
@@ -64,13 +65,30 @@ module Escalator
 
     private
     
+      OPERAND_TPE_NONE                    = 0
+      OPERAND_TYPE_TYPE_AND_NUMBER        = 1
+      OPERAND_TYPE_TYPE_AND_NUMBER_NUMBER = 2
+      
       def parse
         a = line.split(/\s/)
-        c = encode_mnemonic a[0]
-        @codes << c if c
+        mnemonic, operand1, operand2 = a
+        @codes << encode_mnemonic(mnemonic) if mnemonic
+        case operand_type(mnemonic)
+        when OPERAND_TYPE_TYPE_AND_NUMBER
+p 1
+          @codes += parse_type_and_number(operand1)
+p @codes
+        end
       end
       
-
+      def operand_type mnemonic
+        case mnemonic
+        when /LD/, /AND/, /OR/, /OUT/, "SET", "RST", "PLS", "PLF", "FF", /SF(L|R)/
+          OPERAND_TYPE_TYPE_AND_NUMBER
+        else
+          OPERAND_TPE_NONE
+        end
+      end
     
       MNEMONIC_DEF = <<EOB
 | |00|10|20|30|40|50|60|70|80|90|A0|B0|C0|D0|E0|F0|
@@ -110,12 +128,43 @@ EOB
       def encode_mnemonic mnemonic
         mnemonic_dict[mnemonic]
       end
+      
+      def parse_type_and_number operand
+        /(\w*)(\d+[0-9A-Fa-f]*)\.?(\d*)?/ =~ operand
+        suffix = $1
+        number = $2
+        bit = $3
+        len = 16
+        case suffix
+        when "X", "Y"
+          number = number.to_i(16)
+        else
+          number = number.to_i
+        end
+        type_code = %W(X Y M - C T L SC CC TC D NOP - CS TS H SD).index(suffix)
+p [operand, suffix]
+        raise "undefind suffix: #{suffix}" if type_code.nil?
+        
+        case (type_code & 0xc >> 2)
+        when 0, 1
+          type_code |= 0x80
+        else
+          type_code |= 0xa0
+        end
+        
+        if number < 256
+          [type_code, number]
+        else
+          [type_code | 0x10, number & 0xff, (number & 0xff00) >> 8]
+        end
+      end
     
   end
 
 
 end
 
-
-asm = Escalator::Asm.new ARGF
-puts asm.dump_line
+if $0 == __FILE__
+  asm = Escalator::Asm.new ARGF
+  puts asm.dump_line
+end
