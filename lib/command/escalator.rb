@@ -3,12 +3,17 @@ module Escalator
   class Asm
 
     attr_reader :codes
+    attr_reader :endian
     
-    def initialize stream
+    LITTLE_ENDIAN   = 0
+    BIG_ENDIAN      = 1
+    
+    def initialize stream, endian = nil
+      @endian = endian || LITTLE_ENDIAN
       @lines = []
       address = 0
       stream.each do | line|
-        @lines << AsmLine.new(line, address)
+        @lines << AsmLine.new(line, address, @endian)
         address = @lines.last.next_address
       end
     end
@@ -25,6 +30,12 @@ module Escalator
       end
     end
     
+    def codes
+      @lines.map do |line|
+        line.codes
+      end.flatten
+    end
+    
     private
     
       def parse line
@@ -38,8 +49,10 @@ module Escalator
     attr_reader :line
     attr_reader :codes
     attr_reader :address
+    attr_reader :endian
     
-    def initialize line, address = 0
+    def initialize line, address = 0, endian = nil
+      @endian = endian || Asm::LITTLE_ENDIAN
       @line = line.upcase.chomp
       @codes = []
       @address = address
@@ -52,7 +65,6 @@ module Escalator
       
     def dump 
       @codes.map do |c|
-p [:c, c]
         c.to_s(16).rjust(2, "0")
       end
       .join(" ")
@@ -75,9 +87,7 @@ p [:c, c]
         @codes << encode_mnemonic(mnemonic) if mnemonic
         case operand_type(mnemonic)
         when OPERAND_TYPE_TYPE_AND_NUMBER
-p 1
           @codes += parse_type_and_number(operand1)
-p @codes
         end
       end
       
@@ -130,7 +140,7 @@ EOB
       end
       
       def parse_type_and_number operand
-        /(\w*)(\d+[0-9A-Fa-f]*)\.?(\d*)?/ =~ operand
+        /([[:alpha:]]*)(\d+[0-9A-Fa-f]*)\.?(\d*)?/ =~ operand
         suffix = $1
         number = $2
         bit = $3
@@ -142,10 +152,9 @@ EOB
           number = number.to_i
         end
         type_code = %W(X Y M - C T L SC CC TC D NOP - CS TS H SD).index(suffix)
-p [operand, suffix]
         raise "undefind suffix: #{suffix}" if type_code.nil?
         
-        case (type_code & 0xc >> 2)
+        case (type_code & 0xc) >> 2
         when 0, 1
           type_code |= 0x80
         else
@@ -155,7 +164,12 @@ p [operand, suffix]
         if number < 256
           [type_code, number]
         else
-          [type_code | 0x10, number & 0xff, (number & 0xff00) >> 8]
+          case endian
+          when Asm::LITTLE_ENDIAN
+            [type_code | 0x10, number & 0xff, (number & 0xff00) >> 8]
+          when Asm::BIG_ENDIAN
+            [type_code | 0x10, (number & 0xff00) >> 8, number & 0xff]
+          end
         end
       end
     
