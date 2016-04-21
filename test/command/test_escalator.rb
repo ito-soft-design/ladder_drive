@@ -68,4 +68,16 @@ EOB
     assert_equal [0x10, 0xba, 0x01, 0x00], asm.codes
   end
 
+  def test_orb
+    source = StringIO.new <<EOB
+LD M0
+AND M1
+LD M2
+AND M3
+ORB
+EOB
+    asm = Escalator::Asm.new source, Escalator::Asm::BIG_ENDIAN
+    assert_equal [0x10, 0x82, 0x00, 0x20, 0x82, 0x01, 0x10, 0x82, 0x02, 0x20, 0x82, 0x03, 0x05], asm.codes
+  end
+
 end

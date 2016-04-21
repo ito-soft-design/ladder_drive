@@ -100,7 +100,7 @@ module Escalator
 
     private
     
-      OPERAND_TPE_NONE                    = 0
+      OPERAND_TYPE_NONE                    = 0
       OPERAND_TYPE_TYPE_AND_NUMBER        = 1
       OPERAND_TYPE_TYPE_AND_NUMBER_NUMBER = 2
       
@@ -116,10 +116,10 @@ module Escalator
       
       def operand_type mnemonic
         case mnemonic
-        when /LD/, /AND/, /OR/, /OUT/, "SET", "RST", "PLS", "PLF", "FF", /SF(L|R)/
+        when /LD/, /AND/, /OR[^B]?$/, /OUT/, "SET", "RST", "PLS", "PLF", "FF", /SF(L|R)/
           OPERAND_TYPE_TYPE_AND_NUMBER
         else
-          OPERAND_TPE_NONE
+          OPERAND_TYPE_NONE
         end
       end
     
