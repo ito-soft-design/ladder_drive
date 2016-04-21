@@ -2,7 +2,7 @@ require 'test/unit'
 require 'escalator'
 require 'stringio'
 
-class TestEscalator < Test::Unit::TestCase
+class TestAsm < Test::Unit::TestCase
 
   def test_nop
     source = StringIO.new <<EOB
