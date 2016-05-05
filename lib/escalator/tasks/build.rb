@@ -21,6 +21,19 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-module Escalator
-  VERSION = "0.1.0"
+require 'escalator'
+#require 'bundler/gem_tasks'
+require 'rake/loaders/makefile'
+
+desc "Assemble codes"
+task :asm do
+  dir = "./asm"
+  stream = StringIO.new
+  sources = Dir.glob("asm/**/*.esc").each do |filename|
+    stream << File.read(filename)
+  end
+  stream.rewind
+  asm = Escalator::Asm.new stream
+  puts asm.dump_line
+  mkdir_p "build"
 end
