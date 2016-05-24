@@ -1,0 +1,28 @@
+LD	X0			
+OUT	Y0			
+LD	M0			
+OR	M3			
+ANI	M2			
+OUT	M3			
+LD	M4			
+ANI	M5			
+LDI	M7			
+AND	M8			
+ORB				
+LD	M4			
+ANI	M5			
+LDI	M7			
+AND	M8			
+ORB				
+ANB				
+OUT	M6			
+LD	M9			
+ANI	M10			
+OUT	M6			
+MPS				
+AND	M11			
+OUT	M12			
+MPP				
+AND	M13			
+OUT	M14			
+END				

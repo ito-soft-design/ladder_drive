@@ -31,11 +31,11 @@ module Escalator
     LITTLE_ENDIAN   = 0
     BIG_ENDIAN      = 1
     
-    def initialize stream, endian = nil
+    def initialize source, endian = nil
       @endian = endian || LITTLE_ENDIAN
       @lines = []
       address = 0
-      stream.each do | line|
+      source.each_line do | line|
         @lines << AsmLine.new(line, address, @endian)
         address = @lines.last.next_address
       end
@@ -51,6 +51,7 @@ module Escalator
       @lines.map do |line|
         "#{line.address.to_s(16).rjust(4, "0")} #{line.dump_line}"
       end
+      .join("\n") << "\n"
     end
     
     def codes
@@ -100,12 +101,12 @@ module Escalator
 
     private
     
-      OPERAND_TPE_NONE                    = 0
+      OPERAND_TYPE_NONE                    = 0
       OPERAND_TYPE_TYPE_AND_NUMBER        = 1
       OPERAND_TYPE_TYPE_AND_NUMBER_NUMBER = 2
       
       def parse
-        a = line.split(/\s/)
+        a = line.split(/\s+/)
         mnemonic, operand1, operand2 = a
         @codes << encode_mnemonic(mnemonic) if mnemonic
         case operand_type(mnemonic)
@@ -116,10 +117,10 @@ module Escalator
       
       def operand_type mnemonic
         case mnemonic
-        when /LD/, /AND/, /OR/, /OUT/, "SET", "RST", "PLS", "PLF", "FF", /SF(L|R)/
+        when /LD/, /AND/, /OR[^B]?$/, /OUT/, "SET", "RST", "PLS", "PLF", "FF", /SF(L|R)/
           OPERAND_TYPE_TYPE_AND_NUMBER
         else
-          OPERAND_TPE_NONE
+          OPERAND_TYPE_NONE
         end
       end
     
