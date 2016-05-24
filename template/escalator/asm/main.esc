@@ -1,0 +1,7 @@
+LD  X0
+OUT Y0
+LD  X1
+OR  M0
+ANI X2
+OUT M0
+END

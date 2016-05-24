@@ -24,6 +24,7 @@
 require "escalator/version"
 require "escalator/cli"
 require "escalator/asm"
+require "escalator/intel_hex"
 
 Escalator_root = File.expand_path(File.join(File.dirname(__FILE__), ".."))
 

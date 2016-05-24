@@ -21,19 +21,52 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-require 'escalator'
-#require 'bundler/gem_tasks'
+Escalator_root = File.expand_path(File.join(File.dirname(__FILE__), "../../../"))
+
+require 'escalator/asm'
+require 'escalator/intel_hex'
 require 'rake/loaders/makefile'
+
+directory "build"
 
 desc "Assemble codes"
 task :asm do
+  # @refer: https://github.com/rsutphin/handbrake.rb/issues/1
+  begin
+    $stderr = File.open('hb.log', 'w')
+    $stdout = $stderr
+    mkdir_p "build"
+  ensure
+    $stdout = STDOUT
+    $stderr = STDERR
+  end
   dir = "./asm"
   stream = StringIO.new
   sources = Dir.glob("asm/**/*.esc").each do |filename|
-    stream << File.read(filename)
+    puts "asm #{filename}"
+    asm = Escalator::Asm.new File.read(filename)
+    dst = File.join("build", File.basename(filename, ".*") + ".lst")
+    File.write(dst, asm.dump_line)
   end
-  stream.rewind
-  asm = Escalator::Asm.new stream
-  puts asm.dump_line
-  mkdir_p "build"
+end
+
+desc "Make hex codes"
+task :hex do
+  begin
+    $stderr = File.open('hb.log', 'w')
+    $stdout = $stderr
+    mkdir_p "build"
+  ensure
+    $stdout = STDOUT
+    $stderr = STDERR
+  end
+  dir = "./asm"
+  stream = StringIO.new
+  sources = Dir.glob("asm/**/*.esc").each do |filename|
+    puts "hex #{filename}"
+    asm = Escalator::Asm.new File.read(filename)
+    dst = File.join("build", File.basename(filename, ".*") + ".hex")
+    hex = Escalator::IntelHex.new asm.codes
+    File.write(dst, hex.dump)
+  end
 end

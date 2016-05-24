@@ -36,18 +36,5 @@ module Escalator
 
     end
     
-    desc "asm", "Assemble codes"
-    def asm
-      dir = "./asm"
-      stream = StringIO.new
-      sources = Dir.glob("asm/**/*.esc").each do |filename|
-        stream << File.read(filename)
-      end
-      stream.rewind
-      asm = Escalator::Asm.new stream
-      puts asm.dump_line
-      mkdir_p "build"
-    end
-
   end
 end
