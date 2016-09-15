@@ -9,7 +9,7 @@ class TestAsm < Test::Unit::TestCase
 NOP
 EOB
     asm = Escalator::Asm.new source
-    assert_equal [0x00], asm.codes
+    assert_equal [0x07], asm.codes
   end
 
   def test_ld
