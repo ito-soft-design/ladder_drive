@@ -11,12 +11,12 @@ class TestIntelHex < Test::Unit::TestCase
 :00000001FF
 EOB
     assert_equal expected, hex.dump
-    
+
     source = StringIO.new <<EOB
 NOP
 EOB
     asm = Escalator::Asm.new source
-    assert_equal [0x00], asm.codes
+    assert_equal [0x07], asm.codes
   end
 
   def test_dump_2_lines
@@ -28,12 +28,12 @@ EOB
 :00000001FF
 EOB
     assert_equal expected, hex.dump
-    
+
     source = StringIO.new <<EOB
 NOP
 EOB
     asm = Escalator::Asm.new source
-    assert_equal [0x00], asm.codes
+    assert_equal [0x07], asm.codes
   end
 
 end

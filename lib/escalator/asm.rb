@@ -101,7 +101,7 @@ module Escalator
 
     private
 
-      OPERAND_TYPE_NONE                    = 0
+      OPERAND_TYPE_NONE                   = 0
       OPERAND_TYPE_TYPE_AND_NUMBER        = 1
       OPERAND_TYPE_TYPE_AND_NUMBER_NUMBER = 2
 
@@ -155,7 +155,6 @@ EOB
               h[mnemonic] = code
             end
           end
-p h
           h
         end
       end
