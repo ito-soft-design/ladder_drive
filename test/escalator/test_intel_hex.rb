@@ -36,4 +36,11 @@ EOB
     assert_equal [0x07], asm.codes
   end
 
+  def test_gxworks_memory_image
+    codes = (0...16).to_a
+    hex = Escalator::IntelHex.new codes
+    expected = "0\t1\t2\t3\t4\t5\t6\t7\n8\t9\t10\t11\t12\t13\t14\t15"
+    assert_equal expected, hex.gxworks_memory_image
+  end
+
 end

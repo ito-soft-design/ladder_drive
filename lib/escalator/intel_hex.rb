@@ -1,14 +1,14 @@
 module Escalator
 
   class IntelHex
-  
+
     attr_reader :offset, :codes
-    
+
     def initialize codes, offset = 0
       @offset = offset
       @codes = codes
     end
-    
+
     def dump
       addr = offset
       lines = []
@@ -25,14 +25,21 @@ module Escalator
         lines << s
         addr += c
       end
-      
+
       lines << ":00000001FF"
       lines << ""
       lines.join("\n")
     end
-    
+
+    def gxworks_memory_image
+      lines = []
+      @codes.each_slice(8) do |line_codes|
+        lines << line_codes.join("\t")
+      end
+
+      lines.join("\n")
+    end
+
   end
-  
+
 end
-
-
