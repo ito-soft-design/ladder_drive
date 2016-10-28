@@ -48,7 +48,7 @@ module Protocol
       end
 
       def set_bits_to_device bits, device
-        packet = make_packet(body_for_set_bits_device(bits, device))
+        packet = make_packet(body_for_set_bits_to_device(bits, device))
         @logger.debug("> #{dump_packet packet}")
         open
         @socket.write(packet.pack("c*"))
@@ -69,46 +69,24 @@ module Protocol
         @socket.write(packet.pack("c*"))
         @socket.flush
         res = receive
-        values = []
+        words = []
         res[11, 2 * count].each_slice(2) do |pair|
-          values << pair.pack("c*").unpack("v").first
+          words << pair.pack("c*").unpack("v").first
         end
-        @logger.debug("get from: #{device.name} => #{values}")
-        values
+        @logger.debug("get from: #{device.name} => #{words}")
+        words
       end
 
-      def set_words_to_device values, device
-        packet = make_packet(body_for_set_values_to_device(values, device))
+      def set_words_to_device words, device
+        packet = make_packet(body_for_set_words_to_device(words, device))
         @logger.debug("> #{dump_packet packet}")
         open
         @socket.write(packet.pack("c*"))
         @socket.flush
         res = receive
-        @logger.debug("set #{values} to: #{device.name}")
+        @logger.debug("set #{words} to: #{device.name}")
       end
       alias :set_word_to_device :set_words_to_device
-
-      def set_words values, device
-        packet = make_packet(body_for_set_values_to_device(device, values))
-        @logger.debug("> #{dump_packet packet}")
-        open
-        @socket.write(packet.pack("c*"))
-        @socket.flush
-        res = receive
-        @logger.debug("set #{value} => #{device.name}")
-      end
-
-      def bit_device? device
-        return name_elements_for_bit_device device
-      rescue
-        false
-      end
-
-      def word_device? device
-        return name_elements_for_word_device device
-      rescue
-        false
-      end
 
 
 
@@ -157,30 +135,31 @@ module Protocol
       end
 
 
-      def body_for_set_bits_device bits, device
-        body_for_set_values_to_device bits, device, false
-      end
-      alias :body_for_set_bit_device :body_for_set_bits_device
-
-      def body_for_set_values_to_device values, device, word = true
-        body = [0x01, 0x14, 0x00, 0x00, 0x00, 0x00, 0x00, 0x90, 0x01, 0x00]
+      def body_for_set_bits_to_device bits, device
+        body = [0x01, 0x14, 0x01, 0x00, 0x00, 0x00, 0x00, 0x90, 0x01, 0x00]
         d = device
-        values = [values] unless values.is_a? Array
-        if word
-          values.each do |v|
-            body += data_for_short v
-            d = d.next_device
-          end
-        else
-          body[2] = 1
-          values.each_slice(2) do |pair|
-            body << (pair.first ? 0x10 : 0x00)
-            body[-1] |= (pair.last ? 0x1 : 0x00) if pair.size == 2
-            d = d.next_device
-          end
+        bits = [bits] unless bits.is_a? Array
+        bits.each_slice(2) do |pair|
+          body << (pair.first ? 0x10 : 0x00)
+          body[-1] |= (pair.last ? 0x1 : 0x00) if pair.size == 2
+          d = d.next_device
         end
         body[4..7] = data_for_device(device)
-        body[8..9] = data_for_short values.size
+        body[8..9] = data_for_short bits.size
+        body
+      end
+      alias :body_for_set_bit_to_device :body_for_set_bits_to_device
+
+      def body_for_set_words_to_device words, device
+        body = [0x01, 0x14, 0x00, 0x00, 0x00, 0x00, 0x00, 0x90, 0x01, 0x00]
+        d = device
+        words = [words] unless words.is_a? Array
+        words.each do |v|
+          body += data_for_short v
+          d = d.next_device
+        end
+        body[4..7] = data_for_device(device)
+        body[8..9] = data_for_short words.size
         body
       end
 
