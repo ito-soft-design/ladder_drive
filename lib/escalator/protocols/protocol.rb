@@ -4,7 +4,29 @@ module Protocol
 
   class Protocol
 
-    attr_accessor :ip, :port
+    attr_accessor :host, :port
+
+    def initialize options={}
+      @logger = Logger.new(STDOUT)
+      @logger.level = options[:log_level] || Logger::INFO
+    end
+
+    def log_level= level
+      case level
+      when :debug
+        @logger.level = Logger::DEBUG
+      when :error
+        @logger.level = Logger::ERROR
+      when :fatal
+        @logger.level = Logger::FATAL
+      when :info
+        @logger.level = Logger::INFO
+      when :unknown
+        @logger.level = Logger::UNKNOWN
+      when :warn
+        @logger.level = Logger::WARN
+      end
+    end
 
     def read_device device
       0
@@ -17,4 +39,4 @@ module Protocol
 
 end
 
-require 'mitsubishi/mc_protocol'
+require 'mitsubishi/mitsubishi'

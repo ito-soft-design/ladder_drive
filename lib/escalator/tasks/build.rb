@@ -23,6 +23,7 @@
 
 Escalator_root = File.expand_path(File.join(File.dirname(__FILE__), "../../../"))
 
+require "escalator/config"
 require 'escalator/asm'
 require 'escalator/intel_hex'
 require 'rake/loaders/makefile'
@@ -85,9 +86,15 @@ rule %r{^build/.+\.gxwm} => ['%{^build,asm}X.esc'] do |t|
   File.write(t.name, hex.gxworks_memory_image)
 end
 
-# Clean all generated files.
+desc "Clean all generated files."
 task :clean do
   FileUtils.rm_r "build"
+end
+
+@config = EscalatorConfig.default
+
+desc "Install program to PLCs."
+task :device => @config.output do
 end
 
 task :default => %w(build/main.lst build/main.hex build/main.gxwm)
