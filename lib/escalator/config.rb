@@ -27,8 +27,9 @@ module Escalator
       @protocol ||= begin
         plc_info = @config[:plc]
         p = eval("#{plc_info[:protocol].camelize}.new")
-        p.host = plc_info[:host]
-        p.port = plc_info[:port]
+        p.host = plc_info[:host] if plc_info[:host]
+        p.port = plc_info[:port] if plc_info[:port]
+        p.log_level = plc_info[:log_level] if plc_info[:log_level]
         p
       rescue
         nil

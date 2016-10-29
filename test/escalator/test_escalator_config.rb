@@ -34,4 +34,10 @@ class TestEscalatorConfig < Test::Unit::TestCase
     assert_equal Uploader, config.uploader.class
   end
 
+  def test_log_lebel
+    h = { plc: { host:"192.168.0.10", port:1234, protocol:"mc_protocol", program_area:"D10000", log_level:"debug" } }
+    config = EscalatorConfig.new h
+    assert_equal :debug, config.protocol.log_level
+  end
+
 end

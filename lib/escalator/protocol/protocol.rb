@@ -5,7 +5,7 @@ module Protocol
 
   class Protocol
 
-    attr_accessor :host, :port
+    attr_accessor :host, :port, :log_level
 
     def initialize options={}
       @logger = Logger.new(STDOUT)
@@ -13,7 +13,8 @@ module Protocol
     end
 
     def log_level= level
-      case level
+      @log_level = level.is_a?(String) ? level.to_sym : level
+      case @log_level
       when :debug
         @logger.level = Logger::DEBUG
       when :error
@@ -30,7 +31,7 @@ module Protocol
     end
 
     # abstract methods
-    
+
     def open; end
     def close; end
 
