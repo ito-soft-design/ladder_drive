@@ -2,6 +2,6 @@
   :cpu: iq-r
   :protocol: mc_protocol
   :ip: 192.168.0.1
-  :port: 5010
+  :port: 5007
   :program_area: d10000
   :interaction_area: d9998
