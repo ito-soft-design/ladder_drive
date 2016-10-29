@@ -57,7 +57,7 @@ EOB
 LD D256
 EOB
     asm = Escalator::Asm.new source
-    assert_equal [0x10, 0xba, 0x00, 0x01], asm.codes
+    assert_equal [0x10, 0xba, 0x01, 0x00], asm.codes
   end
 
   def test_d256_with_bigendian

@@ -32,7 +32,7 @@ module Escalator
     BIG_ENDIAN      = 1
 
     def initialize source, endian = nil
-      @endian = endian || LITTLE_ENDIAN
+      @endian = endian || BIG_ENDIAN
       @lines = []
       address = 0
       source.each_line do | line|

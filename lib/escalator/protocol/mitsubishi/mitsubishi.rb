@@ -21,21 +21,16 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-require 'thor'
-require 'fileutils'
-
-include FileUtils
+$:.unshift File.dirname(__FILE__)
 
 module Escalator
-  class CLI < Thor
+module Protocol
 
-    desc "create", "Create a new project"
-    def create(name)
-      template_path = File.join(Escalator_root, "template", "escalator")
-      cp_r template_path, name
-      temlate_plc_path = File.join(Escalator_root, "plc")
-      cp_r temlate_plc_path, name
-    end
+require 'socket'
+require 'logger'
+require 'timeout'
+require 'qdevice'
+require 'mc_protocol'
 
-  end
+end
 end

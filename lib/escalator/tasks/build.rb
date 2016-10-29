@@ -23,9 +23,11 @@
 
 Escalator_root = File.expand_path(File.join(File.dirname(__FILE__), "../../../"))
 
+require "escalator/config"
 require 'escalator/asm'
 require 'escalator/intel_hex'
 require 'rake/loaders/makefile'
+require 'fileutils'
 
 #directory "build"
 
@@ -61,6 +63,7 @@ rule %r{^build/.+\.hex} => ['%{^build,asm}X.esc'] do |t|
     $stderr = STDERR
   end
   stream = StringIO.new
+  puts "hex #{t.source}"
   asm = Escalator::Asm.new File.read(t.source)
   hex = Escalator::IntelHex.new asm.codes
   File.write(t.name, hex.dump)
@@ -77,51 +80,28 @@ rule %r{^build/.+\.gxwm} => ['%{^build,asm}X.esc'] do |t|
     $stderr = STDERR
   end
   stream = StringIO.new
+  puts "gxwm #{t.source}"
   asm = Escalator::Asm.new File.read(t.source)
   hex = Escalator::IntelHex.new asm.codes
   File.write(t.name, hex.gxworks_memory_image)
 end
 
-=begin
-desc "Assemble codes"
-task :asm do
-  # @refer: https://github.com/rsutphin/handbrake.rb/issues/1
-  begin
-    $stderr = File.open('hb.log', 'w')
-    $stdout = $stderr
-    mkdir_p "build"
-  ensure
-    $stdout = STDOUT
-    $stderr = STDERR
-  end
-  dir = "./asm"
-  stream = StringIO.new
-  sources = Dir.glob("asm/**/*.esc").each do |filename|
-    puts "asm #{filename}"
-    asm = Escalator::Asm.new File.read(filename)
-    dst = File.join("build", File.basename(filename, ".*") + ".lst")
-    File.write(dst, asm.dump_line)
-  end
+desc "Clean all generated files."
+task :clean do
+  FileUtils.rm_r "build"
 end
 
-desc "Make hex codes"
-task :hex do
-  begin
-    $stderr = File.open('hb.log', 'w')
-    $stdout = $stderr
-    mkdir_p "build"
-  ensure
-    $stdout = STDOUT
-    $stderr = STDERR
-  end
-  dir = "./asm"
-  stream = StringIO.new
-  sources = Dir.glob("asm/**/*.esc").each do |filename|
-    puts "hex #{filename}"
-    asm = Escalator::Asm.new File.read(filename)
-    dst = File.join("build", File.basename(filename, ".*") + ".hex")
-    hex = Escalator::IntelHex.new asm.codes
-    File.write(dst, hex.dump)
-  end
+@config = Escalator::EscalatorConfig.default
+
+task :upload => @config.output do
+  u = @config.uploader
+  u.source = @config.output
+  u.upload
+  puts "upload #{u.source}"
 end
-=end
+
+desc "Install program to PLCs."
+task :plc => :upload do
+end
+
+task :default => %w(build/main.lst build/main.hex build/main.gxwm)
