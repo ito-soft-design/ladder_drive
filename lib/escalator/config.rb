@@ -64,6 +64,7 @@ module Escalator
         u = Uploader.new
         u.protocol = self.protocol
         u.program_area = u.protocol.device_by_name(@config[:plc][:program_area]) if @config[:plc] && @config[:plc][:program_area]
+        u.interaction_area = u.protocol.device_by_name(@config[:plc][:interaction_area]) if @config[:plc] && @config[:plc][:interaction_area]
         u
       end
     end

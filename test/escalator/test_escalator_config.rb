@@ -24,6 +24,13 @@ class TestEscalatorConfig < Test::Unit::TestCase
     assert_equal "D10000", uploader.program_area.name
   end
 
+  def test_interaction_area
+    h = { plc: { host:"192.168.0.10", port:1234, protocol:"mc_protocol", program_area:"D10000", interaction_area:"D9998" } }
+    config = EscalatorConfig.new h
+    uploader = config.uploader
+    assert_equal "D9998", uploader.interaction_area.name
+  end
+
   def test_default
     config = EscalatorConfig.new
     assert_equal "build/main.hex", config.output
