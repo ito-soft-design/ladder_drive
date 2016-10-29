@@ -91,10 +91,17 @@ task :clean do
   FileUtils.rm_r "build"
 end
 
-@config = EscalatorConfig.default
+@config = Escalator::EscalatorConfig.default
+
+task :upload => @config.output do
+  u = @config.uploader
+  u.source = @config.output
+  u.upload
+  puts "upload #{u.source}"
+end
 
 desc "Install program to PLCs."
-task :device => @config.output do
+task :device => :upload do
 end
 
 task :default => %w(build/main.lst build/main.hex build/main.gxwm)

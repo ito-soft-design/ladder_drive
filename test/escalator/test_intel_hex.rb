@@ -3,6 +3,14 @@ require 'escalator'
 
 class TestIntelHex < Test::Unit::TestCase
 
+  def setup
+    @hex_path = "/tmp/test.hex"
+  end
+
+  def teardown
+    FileUtils.rm @hex_path if File.exist? @hex_path
+  end
+
   def test_dump
     codes = (0...16).to_a
     hex = Escalator::IntelHex.new codes
@@ -36,11 +44,12 @@ EOB
     assert_equal [0x07], asm.codes
   end
 
-  def test_gxworks_memory_image
-    codes = (0...16).to_a
+  def test_load
+    codes = (0..16).to_a
     hex = Escalator::IntelHex.new codes
-    expected = "0\t1\t2\t3\t4\t5\t6\t7\n8\t9\t10\t11\t12\t13\t14\t15"
-    assert_equal expected, hex.gxworks_memory_image
+    hex.write_to @hex_path
+    hex2 = Escalator::IntelHex.load @hex_path
+    assert_equal hex.codes, hex2.codes
   end
 
 end

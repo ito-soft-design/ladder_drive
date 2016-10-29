@@ -4,9 +4,29 @@ module Escalator
 
     attr_reader :offset, :codes
 
+    def self.load path
+      offset = 0
+      codes = []
+      File.read(path).lines.each do |l|
+        case l[7,2]
+        when "00"
+          address = l[3,4].to_i(16)
+          offset ||= address
+          l.chomp[9..-3].each_char.each_slice(2).each_with_index do |pair, i|
+            codes[address - offset + i] = pair.join("").to_i(16)
+          end
+        end
+      end
+      new codes, offset
+    end
+
     def initialize codes, offset = 0
       @offset = offset
       @codes = codes
+    end
+
+    def write_to path
+      File.write(path, dump)
     end
 
     def dump
@@ -28,15 +48,6 @@ module Escalator
 
       lines << ":00000001FF"
       lines << ""
-      lines.join("\n")
-    end
-
-    def gxworks_memory_image
-      lines = []
-      @codes.each_slice(8) do |line_codes|
-        lines << line_codes.join("\t")
-      end
-
       lines.join("\n")
     end
 

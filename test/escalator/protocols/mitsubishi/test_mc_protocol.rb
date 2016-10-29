@@ -1,6 +1,8 @@
 require 'test/unit'
 require 'escalator'
 
+include Escalator
+
 class TestMcProtocol < Test::Unit::TestCase
   include Protocol::Mitsubishi
 
