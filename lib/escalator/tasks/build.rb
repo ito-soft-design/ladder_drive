@@ -101,7 +101,7 @@ task :upload => @config.output do
 end
 
 desc "Install program to PLCs."
-task :device => :upload do
+task :plc => :upload do
 end
 
 task :default => %w(build/main.lst build/main.hex build/main.gxwm)
