@@ -49,8 +49,7 @@ plc以下にエスカレーターを実行するPLCプロジェクトの雛形�
                 └── r08.gx3
 ```
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/aFEtOIgKLvQ" frameborder="0" allowfullscreen></iframe>
-
+[![](http://img.youtube.com/vi/aFEtOIgKLvQ/0.jpg)](https://www.youtube.com/embed/aFEtOIgKLvQ)
 
 ## 通信設定
 
@@ -59,7 +58,7 @@ plc以下にエスカレーターを実行するPLCプロジェクトの雛形�
 plc以下のプロジェクトファイルを開いてIPアドレスなど変更します。
 変更後PLCに設定とプログラムを書き込みます。
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/fGdyIo9AmuE" frameborder="0" allowfullscreen></iframe>
+[![](http://img.youtube.com/vi/fGdyIo9AmuE/0.jpg)](https://www.youtube.com/embed/fGdyIo9AmuE)
 
 ### エスカレーターの設定
 
@@ -77,7 +76,7 @@ config/plc.ymlファイルで設定します。
   :interaction_area: d9998
 ```
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/m0JaOBFIHqw" frameborder="0" allowfullscreen></iframe>
+[![](http://img.youtube.com/vi/m0JaOBFIHqw/0.jpg)](https://www.youtube.com/embed/m0JaOBFIHqw)
 
 ## エスカレータープログラム作成
 
@@ -96,7 +95,7 @@ OUT M2
 END
 ```
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/OjaSqrkWv8Q" frameborder="0" allowfullscreen></iframe>
+[![](http://img.youtube.com/vi/OjaSqrkWv8Q/0.jpg)](https://www.youtube.com/embed/OjaSqrkWv8Q)
 
 ## プログラムの転送
 
@@ -107,7 +106,7 @@ END
 $ rake plc
 ```
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/qGbicGLB7Gs" frameborder="0" allowfullscreen></iframe>
+[![](http://img.youtube.com/vi/qGbicGLB7Gs/0.jpg)](https://www.youtube.com/embed/qGbicGLB7Gs)
 
 # エスカレーターに関する情報
 
