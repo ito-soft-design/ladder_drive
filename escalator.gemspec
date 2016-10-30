@@ -10,8 +10,8 @@ Gem::Specification.new do |spec|
   spec.email         = ["kito@itosoft.com"]
 
   spec.summary       = %q{The escalator is a simple abstract ladder for PLC (Programmable Logic Controller).}
-  spec.description   = %q{The escalator is a simple abstract ladder for PLC (Programmable Logic Controller). My aim is to design runnable abstraction ladder which is running on any PLC with same ladder source or binary and prepare full stack tools.}
-  spec.homepage      = "https://github.com/ito-soft-design/escalator/wiki"
+  spec.description   = %q{The escalator is a simple abstract ladder for PLC (Programmable Logic Controller). We aim to design runnable abstraction ladder which is running on any PLC with same ladder source or binary and prepare full stack tools.}
+  spec.homepage      = "https://github.com/ito-soft-design/escalator"
   spec.license       = "MIT"
 
   spec.add_dependency "thor"
