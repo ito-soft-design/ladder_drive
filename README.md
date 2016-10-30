@@ -1,3 +1,5 @@
+[[Japanese description is here.]](https://github.com/ito-soft-design/escalator/blob/master/README_jp.md)
+
 # Escalator
 
 The escalator is a simple abstract ladder for PLC (Programmable Logic Controller).
