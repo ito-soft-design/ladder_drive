@@ -41,7 +41,7 @@ Created files are consisted like below the tree.
                 └── r08.gx3
 ```
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/aFEtOIgKLvQ" frameborder="0" allowfullscreen></iframe>
+[![](http://img.youtube.com/vi/aFEtOIgKLvQ/0.jpg)](https://www.youtube.com/embed/aFEtOIgKLvQ)
 
 # Connection configuration
 
@@ -54,7 +54,7 @@ Launch the one of the plc project which you want to use.
 Configure ethernet connection by the tool which is provided by plc maker.
 Then upload settings and plc program to the plc.
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/fGdyIo9AmuE" frameborder="0" allowfullscreen></iframe>
+[![](http://img.youtube.com/vi/fGdyIo9AmuE/0.jpg)](https://www.youtube.com/embed/fGdyIo9AmuE)
 
 
 ## Escalator configuration
@@ -72,7 +72,7 @@ Though currently we support MITSUBISHI iQ-R R08CUP only, you only change host to
   :interaction_area: d9998
 ```
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/m0JaOBFIHqw" frameborder="0" allowfullscreen></iframe>
+[![](http://img.youtube.com/vi/m0JaOBFIHqw/0.jpg)](https://www.youtube.com/embed/m0JaOBFIHqw)
 
 
 ## Escalator programming
@@ -90,7 +90,7 @@ OUT M2
 END
 ```
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/OjaSqrkWv8Q" frameborder="0" allowfullscreen></iframe>
+[![](http://img.youtube.com/vi/OjaSqrkWv8Q/0.jpg)](https://www.youtube.com/embed/OjaSqrkWv8Q)
 
 
 # Transfer the Escalator program
@@ -102,7 +102,7 @@ The Escalator program is running immediate after uploaded.
 $ rake plc
 ```
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/qGbicGLB7Gs" frameborder="0" allowfullscreen></iframe>
+[![](http://img.youtube.com/vi/qGbicGLB7Gs/0.jpg)](https://www.youtube.com/embed/qGbicGLB7Gs)
 
 
 # Information related escalator
