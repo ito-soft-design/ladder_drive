@@ -104,7 +104,7 @@ The Escalator program is running immediate after uploaded.
 $ rake plc
 ```
 
-[![](http://img.youtube.com/vi/qGbicGLB7Gs/0.jpg)](https://www.youtube.com/embed/qGbicGLB7Gs)
+[![](http://img.youtube.com/vi/qGbicGLB7Gs/0.jpg)](https://youtu.be/qGbicGLB7Gs)
 
 
 # Information related escalator
