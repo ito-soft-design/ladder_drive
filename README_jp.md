@@ -106,7 +106,7 @@ END
 $ rake plc
 ```
 
-[![](http://img.youtube.com/vi/qGbicGLB7Gs/0.jpg)](https://www.youtube.com/embed/qGbicGLB7Gs)
+[![](http://img.youtube.com/vi/qGbicGLB7Gs/0.jpg)](https://youtu.be/qGbicGLB7Gs)
 
 # エスカレーターに関する情報
 
