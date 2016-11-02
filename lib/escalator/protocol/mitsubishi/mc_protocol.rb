@@ -34,6 +34,12 @@ module Mitsubishi
     end
 
     def open
+      open!
+    rescue
+      nil
+    end
+
+    def open!
       @socket ||= TCPSocket.open(@host, @port)
     end
 

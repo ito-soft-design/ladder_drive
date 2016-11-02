@@ -12,6 +12,7 @@ class TestUploader < Test::Unit::TestCase
     @protocol = McProtocol.new host:"localhost", port:5010, log_level: :debug
     @uploader = Uploader.new protocol:@protocol, program_area:"D10000"
     @uploader.source = @hex_path
+    @running = !!@protocol.open
   end
 
   def teardown
@@ -23,10 +24,12 @@ class TestUploader < Test::Unit::TestCase
   end
 
   def test_word_data
+    omit_if(!@running)
     assert_equal (256..265).to_a, @uploader.word_data
   end
 
   def test_upload
+    omit_if(!@running)
     @uploader.upload
     assert_equal (256..265).to_a, @protocol.get_words_from_device(10, "D10000")
   end
