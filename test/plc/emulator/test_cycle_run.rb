@@ -6,6 +6,7 @@ include Plc::Emulator
 
 class EscalatorPlc
   def _run_cycle; run_cycle; end
+  def _stacks; @stacks; end
 end
 
 class TestCycleRun < Test::Unit::TestCase
@@ -202,5 +203,46 @@ class TestCycleRun < Test::Unit::TestCase
     @plc._run_cycle
     assert_equal true, @plc.bool
   end
+
+  def test_mps
+    @plc.program_data = Escalator::Asm.new("LD X0\nMPS\n").codes
+    set_values X0:true
+    @plc._run_cycle
+    assert_equal 2, @plc._stacks.size
+    assert_equal true, @plc._stacks.last.last
+  end
+
+  def test_mrd_and_mpp
+    @plc.program_data = Escalator::Asm.new("LD X0\nMPS\nOUT Y0\nMRD\nINV\nOUT Y1\nMPP\nAND X1\nOUT Y2").codes
+    set_values X0:true, X1:true
+    @plc._run_cycle
+    assert_equal true, @plc.device_by_name("Y0").bool
+    assert_equal false, @plc.device_by_name("Y1").bool
+    assert_equal true, @plc.device_by_name("Y2").bool
+  end
+
+  def test_set
+    @plc.program_data = Escalator::Asm.new("LD X0\nSET M0").codes
+    set_values X0:false
+    @plc._run_cycle
+    assert_equal false, @plc.device_by_name("M0").bool
+
+    set_values X0:true
+    @plc._run_cycle
+    assert_equal true, @plc.device_by_name("M0").bool
+  end
+
+  def test_rst
+    @plc.program_data = Escalator::Asm.new("LD X0\nRST M0").codes
+    @plc.device_by_name("M0").bool = true
+    set_values X0:false
+    @plc._run_cycle
+    assert_equal true, @plc.device_by_name("M0").bool
+
+    set_values X0:true
+    @plc._run_cycle
+    assert_equal false, @plc.device_by_name("M0").bool
+  end
+
 
 end

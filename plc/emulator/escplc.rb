@@ -45,29 +45,35 @@ module Emulator
 
     def run_cycle
       @program_pointer = 0
-      @stack = []
+      @stacks = [[]]
       while fetch_and_execution; end
     end
 
     def bool
-      !!@stack.last
+      unless @stacks.empty?
+        !!@stacks.last.last
+      else
+        nil
+      end
     end
 
     private
 
 
+      def stack
+        @stacks.last
+      end
+
       def bool= value
-        if @stack.empty?
-          @stack << value
+        if stack.empty?
+          stack << value
         else
-          @stack[-1] = value
+          stack[-1] = value
         end
       end
 
       def and_join_stack
-p [:stack, @stack]
-        @stack = [@stack.inject(true){|r,b| r & b}]
-p [:stack, @stack]
+        @stacks[-1] = [@stacks.last.inject(true){|r,b| r & b}]
       end
 
       def mnenonic_table
@@ -77,7 +83,7 @@ p [:stack, @stack]
 |10|LD|LDI|LDP|LDPI|LDF|LDFI|MC|MCR|
 |20|AND|ANI|ANDP|ANPI|ANDF|ANFI|
 |30|OR|ORI|ORP|ORPI|ORF|ORFI|
-|40|OUT|OUTI|MPS|MPD|MPP| |
+|40|OUT|OUTI|MPS|MRD|MPP| |
 |50|SET|RST|PLS| |PLF||
 |60|FF||||||
 |70|
@@ -172,19 +178,20 @@ p [mnemonic, self.bool]
 
 
       # --- mnenonic ---
-      def ld inverse=nil
+      def ld inverse=false
         b = fetch_bool_value inverse
         return false if b.nil?
-        @stack << b
+        stack << b
         true
       end
       def ldi; ld true; end
 
       def inv
         self.bool = !self.bool
+        true
       end
 
-      def and inverse=nil
+      def and inverse=false
         b = fetch_bool_value inverse
         return false if b.nil?
         self.bool &= b
@@ -192,7 +199,7 @@ p [mnemonic, self.bool]
       end
       def ani; send :and, true; end
 
-      def or inverse=nil
+      def or inverse=false
         b = fetch_bool_value inverse
         return false if b.nil?
         self.bool |= b
@@ -200,7 +207,34 @@ p [mnemonic, self.bool]
       end
       def ori; send :or, true; end
 
-      def out inverse=nil
+      def anb
+        true
+      end
+
+      def orb
+        b = self.bool
+        stack.pop
+        self.bool != b
+
+        true
+      end
+
+      def nop; true; end
+
+      def mps
+        and_join_stack
+        @stacks << [self.bool]
+        true
+      end
+
+      def mrd
+        @stacks.pop
+        @stacks << [self.bool]
+        true
+      end
+      def mpp; mrd; end
+
+      def out inverse=false
         and_join_stack
         d = fetch_device_or_value
         unless d.is_a? Device
@@ -213,24 +247,20 @@ p [mnemonic, self.bool]
       end
       def outi; out true; end
 
-      def anb
-=begin
-        b = self.bool
-        @stack.pop
-        self.bool &= b
-=end
+      def set inverse=false
+        and_join_stack
+        d = fetch_device_or_value
+        unless d.is_a? Device
+          add_error "ld must be specify a device nor number #{d}"
+          return false
+        end
+        return true if d.input?
+        return true unless self.bool
+        d.bool = !inverse
         true
       end
+      def rst; set true; end
 
-      def orb
-        b = self.bool
-        @stack.pop
-        self.bool != b
-
-        true
-      end
-
-      def nop; true; end
 
 
   end
