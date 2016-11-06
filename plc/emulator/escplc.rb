@@ -187,6 +187,7 @@ p [mnemonic, self.bool]
       def ldi; ld true; end
 
       def inv
+        and_join_stack
         self.bool = !self.bool
         true
       end
