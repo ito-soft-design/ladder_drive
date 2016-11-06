@@ -39,17 +39,36 @@ module Emulator
     end
 
     def reset
-      @bool = false
       @word = 0
       @program_pointer = 0
     end
 
     def run_cycle
       @program_pointer = 0
+      @stack = []
       while fetch_and_execution; end
     end
 
+    def bool
+      !!@stack.last
+    end
+
     private
+
+
+      def bool= value
+        if @stack.empty?
+          @stack << value
+        else
+          @stack[-1] = value
+        end
+      end
+
+      def and_join_stack
+p [:stack, @stack]
+        @stack = [@stack.inject(true){|r,b| r & b}]
+p [:stack, @stack]
+      end
 
       def mnenonic_table
         @mnemonic_table ||= begin
@@ -82,7 +101,7 @@ EOB
         code = fetch_1_byte
         return false unless code
         mnemonic = mnenonic_table[code]
-p [mnemonic, @bool]
+p [mnemonic, self.bool]
         if mnemonic && respond_to?(mnemonic, true)
           r = send mnemonic
           r
@@ -144,7 +163,6 @@ p [mnemonic, @bool]
           add_error "ld must be specify a device nor number #{d}"
           return false
         end
-p [d.name, d.bool]
         inverse ? !d.bool : d.bool
       end
 
@@ -157,15 +175,19 @@ p [d.name, d.bool]
       def ld inverse=nil
         b = fetch_bool_value inverse
         return false if b.nil?
-        @bool = b
+        @stack << b
         true
       end
       def ldi; ld true; end
 
+      def inv
+        self.bool = !self.bool
+      end
+
       def and inverse=nil
         b = fetch_bool_value inverse
         return false if b.nil?
-        @bool &= b
+        self.bool &= b
         true
       end
       def ani; send :and, true; end
@@ -173,22 +195,43 @@ p [d.name, d.bool]
       def or inverse=nil
         b = fetch_bool_value inverse
         return false if b.nil?
-        @bool |= b
+        self.bool |= b
         true
       end
       def ori; send :or, true; end
 
       def out inverse=nil
+        and_join_stack
         d = fetch_device_or_value
         unless d.is_a? Device
           add_error "ld must be specify a device nor number #{d}"
           return false
         end
         return true if d.input?
-        d.bool = inverse ? !@bool : @bool
+        d.bool = inverse ? !self.bool : self.bool
         true
       end
       def outi; out true; end
+
+      def anb
+=begin
+        b = self.bool
+        @stack.pop
+        self.bool &= b
+=end
+        true
+      end
+
+      def orb
+        b = self.bool
+        @stack.pop
+        self.bool != b
+
+        true
+      end
+
+      def nop; true; end
+
 
   end
 

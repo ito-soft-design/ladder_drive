@@ -52,6 +52,7 @@ module Emulator
     def initialize device_type, number
       @device_type = device_type
       @number = number
+      @value = nil
     end
 
     def name
@@ -62,8 +63,8 @@ module Emulator
       device_type == X
     end
 
-    def bool; !!value; end
-    alias :bool= :value=
+    def bool; !!@value; end
+    def bool= v; @value = v; end
     alias :word :value
     alias :word= :value=
 
