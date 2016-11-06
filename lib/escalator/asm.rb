@@ -117,7 +117,7 @@ module Escalator
 
       def operand_type mnemonic
         case mnemonic
-        when /LD/, /AND/, /OR[^B]?$/, /OUT/, "SET", "RST", "PLS", "PLF", "FF", /SF(L|R)/
+        when /LD/, /AND/, /ANI/, /OR[^B]?$/, /OUT/, "SET", "RST", "PLS", "PLF", "FF", /SF(L|R)/
           OPERAND_TYPE_TYPE_AND_NUMBER
         else
           OPERAND_TYPE_NONE

@@ -19,4 +19,10 @@ class TestDevice < Test::Unit::TestCase
     end unless k == '-'
   end
 
+  def test_parse
+    d = Device.parse "X0A"
+    assert_equal Device::X, d.device_type
+    assert_equal 10, d.number
+  end
+
 end

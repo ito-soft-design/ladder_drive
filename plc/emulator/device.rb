@@ -33,15 +33,37 @@ module Emulator
     include DeviceType
     attr_reader :number
 
+    attr_accessor :value
+
+    class << self
+      def parse name
+        /^([a-z]+)(\d[0-9a-f]*)/i =~ name
+        device_type = DeviceType::SUFFIXES.index $1
+        case device_type
+        when DeviceType::X, DeviceType::Y
+          number = $2.to_i(16)
+        else
+          number = $2.to_i
+        end
+        new device_type, number
+      end
+    end
+
     def initialize device_type, number
       @device_type = device_type
       @number = number
     end
 
+    alias :bool :value
+    alias :bool= :value=
+    alias :word :value
+    alias :word= :value=
+
+
+
     def name
       "#{suffix}#{formatted_number}"
     end
-
   end
 
 end
