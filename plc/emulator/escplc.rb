@@ -107,7 +107,6 @@ EOB
         code = fetch_1_byte
         return false unless code
         mnemonic = mnenonic_table[code]
-p [mnemonic, self.bool]
         if mnemonic && respond_to?(mnemonic, true)
           r = send mnemonic
           r
