@@ -68,7 +68,7 @@ module Emulator
 EOB
           table = {}
           s.lines.each_with_index do |line, h|
-            line.split("|")[2..-1].each_with_index do |mnemonic, l|
+            line.chomp.split("|")[2..-1].each_with_index do |mnemonic, l|
               unless mnemonic.length == 0
                 table[h << 4 | l] = mnemonic.downcase.to_sym
               end
@@ -84,7 +84,8 @@ EOB
         mnemonic = mnenonic_table[code]
 p [mnemonic, @bool]
         if mnemonic && respond_to?(mnemonic, true)
-          send mnemonic
+          r = send mnemonic
+          r
         else
           nil
         end
@@ -144,7 +145,7 @@ p [mnemonic, @bool]
           return false
         end
 p [d.name, d.bool]
-        inverse ? !d.bool : !!d.bool
+        inverse ? !d.bool : d.bool
       end
 
       def add_error reason
@@ -157,18 +158,37 @@ p [d.name, d.bool]
         b = fetch_bool_value inverse
         return false if b.nil?
         @bool = b
+        true
       end
       def ldi; ld true; end
 
       def and inverse=nil
-p __LINE__
         b = fetch_bool_value inverse
         return false if b.nil?
-p [@bool , b]
-        @bool = @bool && b
+        @bool &= b
+        true
       end
       def ani; send :and, true; end
 
+      def or inverse=nil
+        b = fetch_bool_value inverse
+        return false if b.nil?
+        @bool |= b
+        true
+      end
+      def ori; send :or, true; end
+
+      def out inverse=nil
+        d = fetch_device_or_value
+        unless d.is_a? Device
+          add_error "ld must be specify a device nor number #{d}"
+          return false
+        end
+        return true if d.input?
+        d.bool = inverse ? !@bool : @bool
+        true
+      end
+      def outi; out true; end
 
   end
 

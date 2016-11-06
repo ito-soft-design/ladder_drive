@@ -54,16 +54,19 @@ module Emulator
       @number = number
     end
 
-    alias :bool :value
+    def name
+      "#{suffix}#{formatted_number}"
+    end
+
+    def input?
+      device_type == X
+    end
+
+    def bool; !!value; end
     alias :bool= :value=
     alias :word :value
     alias :word= :value=
 
-
-
-    def name
-      "#{suffix}#{formatted_number}"
-    end
   end
 
 end
