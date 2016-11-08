@@ -77,7 +77,8 @@ end
 @config = Escalator::EscalatorConfig.default
 
 task :upload => @config.output do
-  u = @config.uploader
+  t = @config.target ENV['target']
+  u = t.uploader
   u.source = @config.output
   u.upload
   puts "upload #{u.source}"

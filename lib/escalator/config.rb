@@ -25,6 +25,7 @@ require 'active_support/core_ext/string/inflections'
 require "escalator/protocol/protocol"
 require 'escalator/uploader'
 require 'yaml'
+require 'json'
 
 include Escalator::Protocol::Mitsubishi
 
@@ -33,26 +34,81 @@ module Escalator
 
   class EscalatorConfig
 
-    def self.default
-      @config ||= begin
-        config_path = File.join "config", "plc.yml"
-        h = YAML.load(File.read(config_path)) if File.exist?(config_path)
+    class << self
+
+      def default
+        @config ||= begin
+          load File.join("config", "plc.yml")
+        end
+      end
+
+      def load path
+        h = {}
+        if File.exist?(path)
+          h = YAML.load(File.read(path))
+          h = JSON.parse(h.to_json, symbolize_names: true)
+        end
         new h || {}
       end
+
     end
 
     def initialize options={}
-      default = {input: "asm/main.asm", output: "build/main.hex"}
-      @config = options.merge default
+      default = {
+        input: "asm/main.asm",
+        output: "build/main.hex",
+        emulator: {
+          host: "localhost",
+          port: 5555,
+        },
+      }
+      @config = default.merge options
+      @targets = {}
+    end
+
+    def [] key
+      @config[key]
+    end
+
+    def target name=nil
+      name ||= :emulator
+      name = name.to_sym if name.is_a? String
+      target = @targets[name]
+      unless target
+        h = @config[name]
+        unless h.nil? || h.empty?
+          h = {name:name}.merge h
+          target = EscalatorConfigTarget.new h
+          @targets[name] = target
+        end
+      end
+      target
+    end
+
+    def method_missing(name, *args)
+      name = name.to_s unless name.is_a? String
+      case name.to_s
+      when /(.*)=$/
+        @config[$1.to_sym] = args.first
+      else
+        @config[name.to_sym]
+      end
+    end
+
+  end
+
+  class EscalatorConfigTarget
+
+    def initialize options={}
+      @target_info = options
     end
 
     def protocol
       @protocol ||= begin
-        plc_info = @config[:plc]
-        p = eval("#{plc_info[:protocol].camelize}.new")
-        p.host = plc_info[:host] if plc_info[:host]
-        p.port = plc_info[:port] if plc_info[:port]
-        p.log_level = plc_info[:log_level] if plc_info[:log_level]
+        p = eval("#{@target_info[:protocol].camelize}.new")
+        p.host = @target_info[:host] if @target_info[:host]
+        p.port = @target_info[:port] if @target_info[:port]
+        p.log_level = @target_info[:log_level] if @target_info[:log_level]
         p
       rescue
         nil
@@ -63,8 +119,8 @@ module Escalator
       @uploader ||= begin
         u = Uploader.new
         u.protocol = self.protocol
-        u.program_area = u.protocol.device_by_name(@config[:plc][:program_area]) if @config[:plc] && @config[:plc][:program_area]
-        u.interaction_area = u.protocol.device_by_name(@config[:plc][:interaction_area]) if @config[:plc] && @config[:plc][:interaction_area]
+        u.program_area = u.protocol.device_by_name(@target_info[:program_area]) if @target_info[:program_area]
+        u.interaction_area = u.protocol.device_by_name(@target_info[:interaction_area]) if @target_info[:interaction_area]
         u
       end
     end
@@ -73,9 +129,9 @@ module Escalator
       name = name.to_s unless name.is_a? String
       case name.to_s
       when /(.*)=$/
-        @config[$1.to_sym] = args.first
+        @target_info[$1.to_sym] = args.first
       else
-        @config[name.to_sym]
+        @target_info[name.to_sym]
       end
     end
 
