@@ -69,23 +69,6 @@ rule %r{^build/.+\.hex} => ['%{^build,asm}X.esc'] do |t|
   File.write(t.name, hex.dump)
 end
 
-desc "GX Works Memory Image"
-rule %r{^build/.+\.gxwm} => ['%{^build,asm}X.esc'] do |t|
-  Rake::Task["build"].invoke
-  begin
-    $stderr = File.open('hb.log', 'w')
-    $stdout = $stderr
-  ensure
-    $stdout = STDOUT
-    $stderr = STDERR
-  end
-  stream = StringIO.new
-  puts "gxwm #{t.source}"
-  asm = Escalator::Asm.new File.read(t.source)
-  hex = Escalator::IntelHex.new asm.codes
-  File.write(t.name, hex.gxworks_memory_image)
-end
-
 desc "Clean all generated files."
 task :clean do
   FileUtils.rm_r "build"
@@ -104,4 +87,4 @@ desc "Install program to PLCs."
 task :plc => :upload do
 end
 
-task :default => %w(build/main.lst build/main.hex build/main.gxwm)
+task :default => :plc
