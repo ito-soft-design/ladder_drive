@@ -4,7 +4,7 @@ require 'emulator/emulator'
 
 include Plc::Emulator
 
-class EscalatorPlc
+class EmuPlc
   def _run_cycle; run_cycle; end
   def _stacks; @stacks; end
 end
@@ -12,7 +12,7 @@ end
 class TestCycleRun < Test::Unit::TestCase
 
   setup do
-    @plc = EscalatorPlc.new
+    @plc = EmuPlc.new
   end
 
   def set_values h

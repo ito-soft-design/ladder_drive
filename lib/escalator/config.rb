@@ -138,7 +138,7 @@ module Escalator
     def run
       case self.name
       when :emulator
-        @emulator ||= EscalatorPlc.new
+        @emulator ||= EmuPlc.new
         @emulator.run
       else
         # DO NOTHIN

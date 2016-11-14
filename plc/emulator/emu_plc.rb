@@ -1,7 +1,7 @@
 module Plc
 module Emulator
 
-  class EscalatorPlc
+  class EmuPlc
 
     attr_accessor :program_data
     attr_reader :program_pointer
@@ -14,13 +14,15 @@ module Emulator
       attr_reader :"#{k}_devices"
     end
 
+    STOP_PLC_FLAG         = 2     # bit 1
+    CLEAR_PROGRAM_FLAG    = 4     # bit 2  require bit 1 on
+
+    CYCLE_RUN_FLAG        = 2
 
     def initialize
-      @program_data = []
       SUFFIXES.each do |k|
         eval "@#{k}_devices = []"
       end
-      @device_dict = {}
       reset
     end
 
@@ -40,7 +42,8 @@ module Emulator
 
     def reset
       @word = 0
-      @program_pointer = 0
+      @program_data = []
+      @device_dict = {}
     end
 
     def run_cycle
@@ -58,13 +61,30 @@ module Emulator
     end
 
     def run
-      #  TODO:
-      # launch server
-      # launch plc
+      Thread.new do
+        status_to_plc = device_by_name "SD0"
+        status_form_plc = device_by_name "SD1"
+        loop do
+          case status_to_plc.value & (STOP_PLC_FLAG | CLEAR_PROGRAM_FLAG)
+          when STOP_PLC_FLAG
+            status_to_plc.value = 0
+            sleep 0.1
+          when STOP_PLC_FLAG | CLEAR_PROGRAM_FLAG
+            reset
+            status_to_plc.value = CLEAR_PROGRAM_FLAG
+            sleep 0.1
+          when 0
+            status_to_plc.value = CYCLE_RUN_FLAG
+            run_cycle
+            sleep 0.0001
+          else
+            sleep 0.1
+          end
+        end
+      end
     end
 
     private
-
 
       def stack
         @stacks.last

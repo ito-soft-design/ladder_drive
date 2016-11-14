@@ -4,10 +4,10 @@ require 'emulator/emulator'
 
 include Plc::Emulator
 
-class TestEscalatorPlc < Test::Unit::TestCase
+class TestEmuPlc < Test::Unit::TestCase
 
   setup do
-    @plc = EscalatorPlc.new
+    @plc = EmuPlc.new
   end
 
   def test_program_data

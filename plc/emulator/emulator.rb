@@ -1,4 +1,5 @@
 $:.unshift File.dirname(__FILE__)
 
 require 'device'
-require 'escplc'
+require 'emu_plc'
+require 'emu_plc_server'
