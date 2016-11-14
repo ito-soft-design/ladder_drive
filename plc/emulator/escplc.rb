@@ -57,6 +57,12 @@ module Emulator
       end
     end
 
+    def run
+      #  TODO:
+      # launch server
+      # launch plc
+    end
+
     private
 
 

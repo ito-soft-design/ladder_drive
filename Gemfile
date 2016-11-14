@@ -5,3 +5,4 @@ gemspec
 
 gem "test-unit"
 gem "activesupport"
+gem "webrick"

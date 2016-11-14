@@ -23,14 +23,14 @@
 
 module Escalator
 module Protocol
-module Mitsubishi
+module Keyence
 
-  class McProtocol < Protocol
+  class KvProtocol < Protocol
 
     def initialize options={}
       super
       @host = options[:host] || "192.168.0.10"
-      @port = options[:port] || 5010
+      @port = options[:port] || 8501
     end
 
     def open
@@ -54,36 +54,26 @@ module Mitsubishi
     end
 
     def get_bits_from_device count, device
-      device = device_by_name device
-      packet = make_packet(body_for_get_bits_from_deivce(count, device))
-      @logger.debug("> #{dump_packet packet}")
-      open
-      @socket.write(packet.pack("c*"))
-      @socket.flush
-      res = receive
-      bits = []
-      count.times do |i|
-        v = res[11 + i / 2]
-        if i % 2 == 0
-          bits << ((v >> 4) != 0)
-        else
-          bits << ((v & 0xf) != 0)
-        end
-      end
-      @logger.debug("get #{device.name} => #{bits}")
-      bits
+      values = get_words_from_device count, device
+      values.map{|v| v == 0 ? false : true}
     end
 
     def set_bits_to_device bits, device
       device = device_by_name device
-      packet = make_packet(body_for_set_bits_to_device(bits, device))
-      @logger.debug("> #{dump_packet packet}")
-      open
-      @socket.write(packet.pack("c*"))
-      @socket.flush
-      res = receive
-      @logger.debug("set #{bits} to:#{device.name}")
+      bits = [bits] unless bits.is_a? Array
+      bits.each do |v|
+        cmd = v ? "ST" : "RS"
+        packet = "#{cmd} #{device.name}\r"
+        @logger.debug("> #{dump_packet packet}")
+        open
+        @socket.write(packet)
+        @socket.flush
+        res = receive
+        raise res unless /OK/i =~ res
+        device += 1
+      end
     end
+    alias :set_bit_to_device :set_bits_to_device
 
 
     def get_word_from_device device
@@ -93,36 +83,34 @@ module Mitsubishi
 
     def get_words_from_device(count, device)
       device = device_by_name device
-      packet = make_packet(body_for_get_words_from_deivce(count, device))
+      packet = "RDS #{device.name} #{count}\r"
       @logger.debug("> #{dump_packet packet}")
       open
-      @socket.write(packet.pack("c*"))
+      @socket.write(packet)
       @socket.flush
       res = receive
-      words = []
-      res[11, 2 * count].each_slice(2) do |pair|
-        words << pair.pack("c*").unpack("v").first
-      end
-      @logger.debug("get from: #{device.name} => #{words}")
-      words
+      values = res.split(/\s/).map{|v| v.to_i}
+      @logger.debug("get #{device.name} => #{values}")
+      values
     end
 
     def set_words_to_device words, device
-      device = device_by_name device
-      packet = make_packet(body_for_set_words_to_device(words, device))
+      words = [words] unless words.is_a? Array
+      packet = "WRS #{device.name} #{words.size} #{words.map{|w| w.to_s}.join(" ")}\r"
       @logger.debug("> #{dump_packet packet}")
       open
-      @socket.write(packet.pack("c*"))
+      @socket.write(packet)
       @socket.flush
       res = receive
-      @logger.debug("set #{words} to: #{device.name}")
+      raise res unless /OK/i =~ res
     end
+    alias :set_word_to_device :set_words_to_device
 
 
     def device_by_name name
       case name
       when String
-        QDevice.new name
+        KVDevice.new name
       else
         # it may be already QDevice
         name
@@ -131,23 +119,15 @@ module Mitsubishi
 
 
     def receive
-      res = []
-      len = 0
+      res = ""
       begin
         Timeout.timeout(0.1) do
-          while  true
-            c = @socket.read(1)
-            next if c.nil? || c == ""
-
-            res << c.bytes.first
-            len = res[7] + res[8] << 8 if res.length >= 9
-            break if (len + 9 == res.length)
-          end
+          res = @socket.gets
         end
       rescue Timeout::Error
       end
       @logger.debug("< #{dump_packet res}")
-      res
+      res.chomp
     end
 
   private
@@ -218,13 +198,7 @@ module Mitsubishi
     end
 
     def dump_packet packet
-      a = []
-      len = packet.length
-      bytes = packet.dup
-      len.times do |i|
-        a << ("0" + bytes[i].to_s(16))[-2, 2]
-      end
-      "[" + a.join(", ") + "]"
+      packet.dup.chomp
     end
 
   end

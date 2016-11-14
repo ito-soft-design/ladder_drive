@@ -21,20 +21,16 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Escalator_root = File.expand_path(File.join(File.dirname(__FILE__), ".."))
-$:.unshift Escalator_root unless $:.include? Escalator_root
-
-require "escalator/version"
-require "escalator/cli"
-require "escalator/asm"
-require "escalator/intel_hex"
-require "escalator/config"
-require "escalator/config"
-require "escalator/protocol/protocol"
-require 'plc/emulator/emulator'
+$:.unshift File.dirname(__FILE__)
 
 module Escalator
+module Protocol
+
+require 'socket'
+require 'logger'
+require 'timeout'
+require 'kv_device'
+require 'kv_protocol'
+
 end
-
-
-Escalator::CLI.start
+end

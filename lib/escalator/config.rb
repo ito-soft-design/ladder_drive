@@ -135,6 +135,17 @@ module Escalator
       end
     end
 
+    def run
+      case self.name
+      when :emulator
+        @emulator ||= EscalatorPlc.new
+        @emulator.run
+      else
+        # DO NOTHIN
+        # Actual device is running independently.
+      end
+    end
+
   end
 
 end

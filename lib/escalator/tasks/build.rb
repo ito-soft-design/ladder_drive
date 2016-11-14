@@ -21,15 +21,18 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Escalator_root = File.expand_path(File.join(File.dirname(__FILE__), "../../../"))
+root = File.expand_path(File.join(File.dirname(__FILE__), "../../../"))
+$:.unshift root unless $:.include? root
 
 require "escalator/config"
 require 'escalator/asm'
 require 'escalator/intel_hex'
 require 'rake/loaders/makefile'
 require 'fileutils'
+require 'plc/emulator/emulator'
 
-#directory "build"
+include Plc::Emulator
+
 
 directory "build"
 
@@ -78,6 +81,7 @@ end
 
 task :upload => @config.output do
   t = @config.target ENV['target']
+  t.run
   u = t.uploader
   u.source = @config.output
   u.upload
