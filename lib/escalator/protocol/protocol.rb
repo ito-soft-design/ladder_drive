@@ -75,5 +75,6 @@ module Protocol
 end
 end
 
+require 'plc_device'
 require 'mitsubishi/mitsubishi'
 require 'keyence/keyence'
