@@ -55,7 +55,7 @@ class TestEscalatorConfig < Test::Unit::TestCase
 
   def test_emulator
     config = EscalatorConfig.new
-    expected = { host:"localhost", port:5555 }
+    expected = { host:"localhost", port:5555, :protocol=>"emu_protocol" }
     assert_equal expected, config[:emulator]
   end
 

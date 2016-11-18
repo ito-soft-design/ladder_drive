@@ -32,6 +32,22 @@ module Protocol
     NUMBER_TYPE_DEC_HEX = 1
     NUMBER_TYPE_HEX     = 2
 
+    class << self
+
+      def status_to_plc_device
+        @status_to_plc_device ||= new "SD0"
+      end
+
+      def status_from_plc_device
+        @status_from_plc_device ||= new "SD1"
+      end
+
+      def program_area_device
+        @program_area_device ||= new "PRG0"
+      end
+
+    end
+
     def initialize a, b = nil
       case a
       when String
@@ -94,7 +110,7 @@ module Protocol
 
     private
 
-      SUFFIXES_FOR_DEC      = %w(M C T L SC CC TC D CS TS H SD)
+      SUFFIXES_FOR_DEC      = %w(PRG M C T L SC CC TC D CS TS H SD)
       SUFFIXES_FOR_DEC_HEX  = %w()
       SUFFIXES_FOR_HEX      = %w(X Y)
       SUFFIXES_FOR_BIT     = %w(X Y M C T L SC)

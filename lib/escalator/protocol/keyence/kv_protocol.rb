@@ -67,7 +67,7 @@ module Keyence
         @logger.debug("> #{dump_packet packet}")
         open
         @socket.write(packet)
-        @socket.flush
+        #@socket.flush
         res = receive
         raise res unless /OK/i =~ res
         device += 1
@@ -95,12 +95,12 @@ module Keyence
     end
 
     def set_words_to_device words, device
+      device = local_device device
       words = [words] unless words.is_a? Array
       packet = "WRS #{device.name} #{words.size} #{words.map{|w| w.to_s}.join(" ")}\r"
       @logger.debug("> #{dump_packet packet}")
       open
-      @socket.write(packet)
-      @socket.flush
+      @socket.puts(packet)
       res = receive
       raise res unless /OK/i =~ res
     end
@@ -110,9 +110,9 @@ module Keyence
     def device_by_name name
       case name
       when String
-        KVDevice.new name
+        device_class.new name
       else
-        # it may be already QDevice
+        # it may be already Device
         name
       end
     end
@@ -130,76 +130,20 @@ module Keyence
       res.chomp
     end
 
-  private
-
-    def make_packet body
-      header = [0x50, 0x00,  0x00,  0xff,  0xff, 0x03,  0x00,  0x00, 0x00,  0x10,  0x00]
-      header[7..8] = data_for_short(body.length + 2)
-      header + body
-    end
-
-    def body_for_get_bit_from_deivce device
-      body_for_get_bits_from_deivce 1, device
-    end
-
-    def body_for_get_bits_from_deivce count, device
-      body_for_get_words_from_deivce count, device, false
-    end
-
-    def body_for_get_words_from_deivce count, device, word = true
-      body = [0x01, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x90, 0x01, 0x00]
-      body[2] = 1 unless word
-      body[4..7] = data_for_device(device)
-      body[8..9] = data_for_short count
-      body
-    end
-
-
-    def body_for_set_bits_to_device bits, device
-      body = [0x01, 0x14, 0x01, 0x00, 0x00, 0x00, 0x00, 0x90, 0x01, 0x00]
-      d = device
-      bits = [bits] unless bits.is_a? Array
-      bits.each_slice(2) do |pair|
-        body << (pair.first ? 0x10 : 0x00)
-        body[-1] |= (pair.last ? 0x1 : 0x00) if pair.size == 2
-        d = d.next_device
-      end
-      body[4..7] = data_for_device(device)
-      body[8..9] = data_for_short bits.size
-      body
-    end
-    alias :body_for_set_bit_to_device :body_for_set_bits_to_device
-
-    def body_for_set_words_to_device words, device
-      body = [0x01, 0x14, 0x00, 0x00, 0x00, 0x00, 0x00, 0x90, 0x01, 0x00]
-      d = device
-      words = [words] unless words.is_a? Array
-      words.each do |v|
-        body += data_for_short v
-        d = d.next_device
-      end
-      body[4..7] = data_for_device(device)
-      body[8..9] = data_for_short words.size
-      body
-    end
-
-    def data_for_device device
-      a = data_for_int device.number
-      a[3] = device.suffix_code
-      a
-    end
-
-    def data_for_short value
-      [value].pack("v").unpack("c*")
-    end
-
-    def data_for_int value
-      [value].pack("V").unpack("c*")
-    end
-
     def dump_packet packet
       packet.dup.chomp
     end
+
+    private
+
+      def local_device device
+        # TODO:
+        device
+      end
+
+      def device_class
+        KvDevice
+      end
 
   end
 

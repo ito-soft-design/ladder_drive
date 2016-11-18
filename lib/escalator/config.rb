@@ -28,6 +28,8 @@ require 'yaml'
 require 'json'
 
 include Escalator::Protocol::Mitsubishi
+include Escalator::Protocol::Keyence
+include Escalator::Protocol::Emulator
 
 module Escalator
 
@@ -60,6 +62,7 @@ module Escalator
         emulator: {
           host: "localhost",
           port: 5555,
+          protocol: "emu_protocol",
         },
       }
       @config = default.merge options
@@ -99,8 +102,19 @@ module Escalator
 
   class EscalatorConfigTarget
 
+    class << self
+
+      def finalize
+        proc {
+          EmuPlcServer.terminate
+        }
+      end
+
+    end
+
     def initialize options={}
       @target_info = options
+      ObjectSpace.define_finalizer(self, self.class.finalize)
     end
 
     def protocol
@@ -119,8 +133,6 @@ module Escalator
       @uploader ||= begin
         u = Uploader.new
         u.protocol = self.protocol
-        u.program_area = u.protocol.device_by_name(@target_info[:program_area]) if @target_info[:program_area]
-        u.interaction_area = u.protocol.device_by_name(@target_info[:interaction_area]) if @target_info[:interaction_area]
         u
       end
     end
@@ -138,8 +150,7 @@ module Escalator
     def run
       case self.name
       when :emulator
-        @emulator ||= EmuPlc.new
-        @emulator.run
+        EmuPlcServer.launch
       else
         # DO NOTHIN
         # Actual device is running independently.

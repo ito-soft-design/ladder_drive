@@ -7,7 +7,7 @@ class TestKvProtocol < Test::Unit::TestCase
 
   def setup
     @protocol = KvProtocol.new host:"10.0.1.200", log_level: :debug
-    @running = !!@protocol.open
+    @running = false #!!@protocol.open
   end
 
   def teardown

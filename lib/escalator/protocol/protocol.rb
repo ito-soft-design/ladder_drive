@@ -76,5 +76,6 @@ end
 end
 
 require 'plc_device'
-require 'mitsubishi/mitsubishi'
 require 'keyence/keyence'
+require 'emulator/emulator'
+require 'mitsubishi/mitsubishi'

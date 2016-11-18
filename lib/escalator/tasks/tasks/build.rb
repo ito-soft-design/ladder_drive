@@ -30,7 +30,6 @@ require 'escalator/intel_hex'
 require 'rake/loaders/makefile'
 require 'fileutils'
 require "escalator/plc_define"
-require "escalator/console"
 require 'plc/emulator/emulator'
 
 include Plc::Emulator
@@ -92,7 +91,7 @@ task :upload => @config.output do
 end
 
 task :console => :upload do
-  Escalator::Console.instance.run
+  Console.instance.run
 end
 
 task :default => :console

@@ -1,4 +1,7 @@
 require 'webrick'
+require 'fileutils'
+
+include FileUtils
 
 module Plc
 module Emulator
@@ -7,10 +10,37 @@ module Emulator
 
     class << self
 
+      def pid_dir
+        @pid_dir ||= File.expand_path(File.join(Dir.pwd, "tmp", "pids"))
+      end
+
+      def pid_file_path
+        @pid_path ||= File.join(pid_dir, "emu_plc.pid")
+      end
+
       def launch
-        server = EmuPlc.new(:Port => 5555)
-        trap(:INT) { server.shutdown }
-        server.start
+        @server ||= begin
+          mkdir_p pid_dir
+          server = new( Port:5555,
+                        ServerType: WEBrick::Daemon,
+                        StartCallback: Proc.new {
+                          File.write(pid_file_path, $$)
+                        }
+          )
+          fork do
+            trap(:INT) { server.shutdown }
+            server.start
+          end
+          server
+        end
+      end
+
+      def finalize
+        proc { terminate }
+      end
+
+      def terminate
+        `kill #{File.read(pid_file_path)}` if File.exist? pid_file_path
       end
 
     end
@@ -18,6 +48,7 @@ module Emulator
     def initialize config = {}, default = WEBrick::Config::General
       super
       @plc = EmuPlc.new
+      ObjectSpace.define_finalizer(self, self.class.finalize)
     end
 
     def run socket
@@ -25,8 +56,10 @@ module Emulator
       loop do
         c = socket.gets
         puts c.chomp
+        socket.puts "OK\n"
       end
     end
+
 
   end
 
