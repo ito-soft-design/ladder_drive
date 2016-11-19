@@ -22,9 +22,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 require "escalator/plc_define"
-require "escalator/protocol/plc_device"
-
-include Escalator::Protocol
+require "escalator/plc_device"
 
 module Escalator
 
@@ -63,28 +61,28 @@ module Escalator
     private
 
       def stop_plc
-        @protocol.set_word_to_device ESC_STATUS_TO_PLC_STOP_PLC_FLAG, PlcDevice.status_to_plc_device
+        @protocol.set_word_to_device ESC_STATUS_TO_PLC_STOP_PLC_FLAG, EscDevice.status_to_plc_device
         Timeout.timeout(5) do
-          v = @protocol.get_word_from_device PlcDevice.status_from_plc_device
+          v = @protocol.get_word_from_device EscDevice.status_from_plc_device
           break if (v & ESC_STATUS_TO_PLC_STOP_PLC_FLAG) != 0
           sleep 0.1
         end
       end
 
       def clear_program
-        @protocol.set_word_to_device ESC_STATUS_TO_PLC_STOP_PLC_FLAG | ESC_STATUS_TO_PLC_CLEAR_PROGRAM, PlcDevice.status_to_plc_device
+        @protocol.set_word_to_device ESC_STATUS_TO_PLC_STOP_PLC_FLAG | ESC_STATUS_TO_PLC_CLEAR_PROGRAM, EscDevice.status_to_plc_device
         Timeout.timeout(5) do
-          v = @protocol.get_word_from_device PlcDevice.status_from_plc_device
+          v = @protocol.get_word_from_device EscDevice.status_from_plc_device
           break if (v & ESC_STATUS_TO_PLC_CLEAR_PROGRAM) != 0
           sleep 0.1
         end
-        @protocol.set_word_to_device ESC_STATUS_TO_PLC_STOP_PLC_FLAG, PlcDevice.status_to_plc_device
+        @protocol.set_word_to_device ESC_STATUS_TO_PLC_STOP_PLC_FLAG, EscDevice.status_to_plc_device
       end
 
       def run_plc
-        @protocol.set_word_to_device 0, PlcDevice.status_to_plc_device
+        @protocol.set_word_to_device 0, EscDevice.status_to_plc_device
         Timeout.timeout(5) do
-          v = @protocol.get_word_from_device PlcDevice.status_from_plc_device
+          v = @protocol.get_word_from_device EscDevice.status_from_plc_device
           break if (v & ESC_STATUS_FROM_PLC_CYCLE_RUN) != 0
           sleep 0.1
         end
@@ -92,7 +90,7 @@ module Escalator
 
       def write_program
         word_data.each_slice(2*1024) do |chunk|
-          @protocol.set_words_to_device chunk, PlcDevice.program_area_device
+          @protocol.set_words_to_device chunk, EscDevice.program_area_device
         end
       end
 

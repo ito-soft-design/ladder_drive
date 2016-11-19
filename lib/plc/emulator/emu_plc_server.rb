@@ -1,6 +1,6 @@
 require 'webrick'
 require 'fileutils'
-require 'plc_device'
+require 'escalator/plc_device'
 
 include FileUtils
 

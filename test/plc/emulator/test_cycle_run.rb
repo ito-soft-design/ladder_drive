@@ -1,6 +1,6 @@
 require 'test/unit'
 require File.expand_path(File.join(File.dirname(__FILE__), "../../helper"))
-require 'emulator/emulator'
+require 'plc'
 
 include Plc::Emulator
 
@@ -13,6 +13,7 @@ class TestCycleRun < Test::Unit::TestCase
 
   setup do
     @plc = EmuPlc.new
+    #@plc = Plc::Emulator::EmuPlc.new
   end
 
   def set_values h

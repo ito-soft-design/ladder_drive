@@ -2,8 +2,6 @@ require 'test/unit'
 require File.expand_path(File.join(File.dirname(__FILE__), "../../helper"))
 require 'emulator/emulator'
 
-include Plc::Emulator
-
 class TestEmuPlc < Test::Unit::TestCase
 
   setup do
@@ -21,7 +19,7 @@ class TestEmuPlc < Test::Unit::TestCase
   end
 
   def test_name
-    d = Device.new DeviceType::X, 1
+    d = PlcDevice.new "X", 1
     assert_equal "X1", d.name
   end
 

@@ -22,17 +22,15 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 require 'active_support/core_ext/string/inflections'
-require "escalator/protocol/protocol"
-require 'escalator/uploader'
 require 'yaml'
 require 'json'
+require 'protocol/protocol'
 
 include Escalator::Protocol::Mitsubishi
 include Escalator::Protocol::Keyence
 include Escalator::Protocol::Emulator
 
 module Escalator
-
 
   class EscalatorConfig
 
@@ -59,13 +57,15 @@ module Escalator
       default = {
         input: "asm/main.asm",
         output: "build/main.hex",
-        emulator: {
-          host: "localhost",
-          port: 5555,
-          protocol: "emu_protocol",
-        },
       }
+      emulator_default = {
+        host: "localhost",
+        port: 5555,
+        protocol: "emu_protocol",
+      }
+
       @config = default.merge options
+      @config[:emulator] = @config[:emulator] ? emulator_default.merge(@config[:emulator]) : emulator_default
       @targets = {}
     end
 
@@ -95,65 +95,6 @@ module Escalator
         @config[$1.to_sym] = args.first
       else
         @config[name.to_sym]
-      end
-    end
-
-  end
-
-  class EscalatorConfigTarget
-
-    class << self
-
-      def finalize
-        proc {
-          EmuPlcServer.terminate
-        }
-      end
-
-    end
-
-    def initialize options={}
-      @target_info = options
-      ObjectSpace.define_finalizer(self, self.class.finalize)
-    end
-
-    def protocol
-      @protocol ||= begin
-        p = eval("#{@target_info[:protocol].camelize}.new")
-        p.host = @target_info[:host] if @target_info[:host]
-        p.port = @target_info[:port] if @target_info[:port]
-        p.log_level = @target_info[:log_level] if @target_info[:log_level]
-        p
-      rescue
-        nil
-      end
-    end
-
-    def uploader
-      @uploader ||= begin
-        u = Uploader.new
-        u.protocol = self.protocol
-        u
-      end
-    end
-
-    def method_missing(name, *args)
-      name = name.to_s unless name.is_a? String
-      case name.to_s
-      when /(.*)=$/
-        @target_info[$1.to_sym] = args.first
-      else
-        @target_info[name.to_sym]
-      end
-    end
-
-    def run
-      case self.name
-      when :emulator
-        EmuPlcServer.launch
-      else
-        # DO NOTHIN
-        # Actual device is running independently.
       end
     end
 

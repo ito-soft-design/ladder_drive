@@ -1,4 +1,4 @@
-require 'plc_device'
+require 'escalator/plc_device'
 
 include Escalator
 

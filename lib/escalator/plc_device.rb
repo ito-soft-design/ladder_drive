@@ -22,15 +22,17 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 module Escalator
-module Protocol
 
   class PlcDevice
 
     attr_reader :suffix, :number
+    attr_accessor :value
 
     NUMBER_TYPE_DEC     = 0
     NUMBER_TYPE_DEC_HEX = 1
     NUMBER_TYPE_HEX     = 2
+
+    ESC_SUFFIXES = %w(X Y M - C T L SC CC TC D - CS TS H SD)
 
     class << self
 
@@ -49,7 +51,12 @@ module Protocol
     end
 
     def initialize a, b = nil
+      @suffix = nil
+      @value = 0
       case a
+      when Fixnum
+        @suffix = ESC_SUFFIXES[a]
+        @number = b
       when String
         if b
           @suffix = a.upcase
@@ -108,17 +115,39 @@ module Protocol
       self.class.new self.suffix, [self.number - value, 0].max
     end
 
+    def input?
+      suffixes_for_input.include? @suffix
+    end
+
+    def bool
+      case @value
+      when Fixnum
+        @value != 0
+      else
+        !!@value
+      end
+    end
+    def bool= v; @value = v; end
+    alias :word :value
+    alias :word= :value=
+
+    def device_code
+      ESC_SUFFIXES.index @suffix
+    end
+
     private
 
       SUFFIXES_FOR_DEC      = %w(PRG M C T L SC CC TC D CS TS H SD)
       SUFFIXES_FOR_DEC_HEX  = %w()
       SUFFIXES_FOR_HEX      = %w(X Y)
-      SUFFIXES_FOR_BIT     = %w(X Y M C T L SC)
+      SUFFIXES_FOR_BIT      = %w(X Y M C T L SC)
+      SUFFIXES_FOR_INPUT    = %w(X)
 
       def suffixes_for_dec; SUFFIXES_FOR_DEC; end
       def suffixes_for_dec_hex; SUFFIXES_FOR_DEC_HEX; end
-      def suffixeds_for_hex; SUFFIXES_FOR_HEX; end
+      def suffixes_for_hex; SUFFIXES_FOR_HEX; end
       def suffixes_for_bit; SUFFIXES_FOR_BIT; end
+      def suffixes_for_input; SUFFIXES_FOR_INPUT; end
 
       def suffixes
         suffixes_for_dec + suffixes_for_dec_hex + suffixeds_for_hex
@@ -135,5 +164,4 @@ module Protocol
 
   class EscDevice < PlcDevice; end
 
-end
 end

@@ -21,7 +21,13 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-$:.unshift File.dirname(__FILE__)
+dir = File.expand_path(File.dirname(__FILE__))
+$:.unshift dir unless $:.include? dir
+
+module Escalator
+module Protocol
+end
+end
 
 module Escalator
 module Protocol
@@ -75,7 +81,7 @@ module Protocol
 end
 end
 
-require 'plc_device'
 require 'keyence/keyence'
-require 'emulator/emulator'
+# Use load instead require, because there are two emulator files.
+load File.join(dir, 'emulator/emulator.rb')
 require 'mitsubishi/mitsubishi'

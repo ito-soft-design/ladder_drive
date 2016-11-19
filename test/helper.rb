@@ -1,2 +1,7 @@
-dir = File.expand_path(File.join(File.dirname(__FILE__), "../plc"))
-$:.unshift dir unless $:.include? dir
+root = File.expand_path(File.join(File.dirname(__FILE__), ".."))
+d = File.join(root, "lib")
+$:.unshift d unless $:.include? d
+d = File.join(root, "plc")
+$:.unshift d unless $:.include? d
+
+p "helper==" * 80

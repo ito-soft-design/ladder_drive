@@ -66,12 +66,12 @@ module Keyence
         packet = "#{cmd} #{device.name}\r"
         @logger.debug("> #{dump_packet packet}")
         open
-        @socket.write(packet)
-        #@socket.flush
+        @socket.puts(packet)
         res = receive
         raise res unless /OK/i =~ res
         device += 1
       end
+      @logger.debug("#{device.name}[#{bits.size}] <= #{bits}")
     end
     alias :set_bit_to_device :set_bits_to_device
 
@@ -86,11 +86,10 @@ module Keyence
       packet = "RDS #{device.name} #{count}\r"
       @logger.debug("> #{dump_packet packet}")
       open
-      @socket.write(packet)
-      @socket.flush
+      @socket.puts(packet)
       res = receive
       values = res.split(/\s/).map{|v| v.to_i}
-      @logger.debug("get #{device.name} => #{values}")
+      @logger.debug("#{device.name}[#{count}] => #{values}")
       values
     end
 
@@ -102,6 +101,7 @@ module Keyence
       open
       @socket.puts(packet)
       res = receive
+      @logger.debug("#{device.name}[#{words.size}] <= #{words}")
       raise res unless /OK/i =~ res
     end
     alias :set_word_to_device :set_words_to_device

@@ -21,16 +21,11 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-$:.unshift File.dirname(__FILE__)
-
-module Escalator
-module Protocol
+dir = File.expand_path(File.dirname(__FILE__))
+$:.unshift dir unless $:.include? dir
 
 require 'socket'
 require 'logger'
 require 'timeout'
 require 'kv_device'
 require 'kv_protocol'
-
-end
-end

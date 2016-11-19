@@ -21,21 +21,8 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Escalator_root = File.expand_path(File.join(File.dirname(__FILE__), ".."))
-$:.unshift Escalator_root unless $:.include? Escalator_root
+dir = File.expand_path(File.dirname(__FILE__))
+$:.unshift dir unless $:.include? dir
 
-require "escalator/version"
-require "escalator/cli"
-require "escalator/asm"
-require "escalator/intel_hex"
-require "escalator/plc_define"
-require "escalator/uploader"
-require "escalator/protocol/protocol"
-require "escalator/config"
-require 'plc/emulator/emulator'
-
-module Escalator
-end
-
-
-Escalator::CLI.start
+require "plc/plc"
+require "escalator/escalator"
