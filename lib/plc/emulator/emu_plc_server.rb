@@ -56,47 +56,8 @@ module Emulator
       @plc.run
       loop do
         begin
-          line = socket.gets
-          line.chomp!
-          a = line.split(/\s/)
-          case a.first
-          when /^ST/i
-            d = @plc.device_by_name a[1]
-            d.bool = true
-            socket.puts "OK\r"
-          when /^RS/i
-            d = @plc.device_by_name a[1]
-            d.bool = false
-            socket.puts "OK\r"
-          when /^RDS/i
-            d = @plc.device_by_name a[1]
-            c = a[2].to_i
-            r = c.times.map do
-              v = 0
-              if d.bit_device?
-                v = d.bool ? 1 : 0
-              else
-                v = d.word
-              end
-              d += 1
-              v
-            end
-            socket.puts r.map{|e| e.to_s}.join(" ") + "\r"
-          when /^WRS/i
-            d = @plc.device_by_name a[1]
-            c = a[2].to_i
-            a[3, c].each do |v|
-              v = v.to_i
-              if d.bit_device?
-                d.bool = v == 0 ? false : true
-              else
-                d.word = v
-              end
-            end
-            socket.puts "OK\r"
-          else
-            raise "Unknown command #{a.first}"
-          end
+          r = @plc.execute_console_commands socket.gets
+          socket.puts r
         rescue => e
           socket.puts "E0 #{e}\r"
         end

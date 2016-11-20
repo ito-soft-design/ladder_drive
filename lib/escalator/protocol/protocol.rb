@@ -76,6 +76,24 @@ module Protocol
 
     def device_by_name name; nil; end
 
+    def get_from_devices device, count = 1
+      d = device_by_name device
+      if d.bit_device?
+        get_bits_from_device count, d
+      else
+        get_words_from_device count, d
+      end
+    end
+
+    def set_to_devices device, values
+      d = device_by_name device
+      if d.bit_device?
+        set_bits_to_device values, d
+      else
+        set_words_to_device values, d
+      end
+    end
+
   end
 
 end

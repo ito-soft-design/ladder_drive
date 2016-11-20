@@ -32,16 +32,6 @@ module Emulator
       super
     end
 
-    def upload
-      # stop plc
-      stop_plc
-=begin # DEBUGME:
-      clear_program
-      write_program
-      run_plc
-=end
-    end
-
     private
 
       def device_class

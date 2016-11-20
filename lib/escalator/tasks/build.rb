@@ -92,7 +92,9 @@ task :emulator do
 end
 
 task :console => :upload do
-  Escalator::Console.instance.run
+  c = Escalator::Console.instance
+  c.target = @config.target ENV['target']
+  c.run
 end
 
 task :default => :console

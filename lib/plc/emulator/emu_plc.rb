@@ -88,6 +88,48 @@ module Emulator
       end
     end
 
+    def execute_console_commands line
+      a = line.chomp.split(/\s+/)
+      case a.first
+      when /^ST/i
+        d = device_by_name a[1]
+        d.bool = true
+        "OK\r"
+      when /^RS/i
+        d = device_by_name a[1]
+        d.bool = false
+        "OK\r"
+      when /^RDS/i
+        d = device_by_name a[1]
+        c = a[2].to_i
+        r = []
+        c.times do
+          if d.bit_device?
+            r << (d.bool ? 1 : 0)
+          else
+            r << d.word
+          end
+          d = device_by_name (d+1).name
+        end
+        r.map{|e| e.to_s}.join(" ") + "\r"
+      when /^WRS/i
+        d = device_by_name a[1]
+        c = a[2].to_i
+        a[3, c].each do |v|
+          v = v.to_i
+          if d.bit_device?
+            d.bool = v == 0 ? false : true
+          else
+            d.word = v
+          end
+          d = device_by_name (d+1).name
+        end
+        "OK\r"
+      else
+        raise "Unknown command #{a.first}"
+      end
+    end
+
     private
 
       def stack

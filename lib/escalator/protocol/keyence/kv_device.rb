@@ -27,6 +27,11 @@ module Keyence
 
   class KvDevice < PlcDevice
 
+    def initialize a, b = nil
+      super
+      @suffix = "R" if @suffix.nil? || @suffix.length == 0
+    end
+
     private
 
       SUFFIXES_FOR_DEC      = %w(DM EM FM ZF TM Z T TC TS C CC CS CTH CTC AT CM VM)

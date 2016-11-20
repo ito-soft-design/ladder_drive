@@ -62,16 +62,16 @@ module Escalator
           @suffix = a.upcase
           @number = b
         else
-          /([A-Z]+)(\d+)/i =~ a
-          @suffix = $1 || "R"
+          /([A-Z]+)?(\d+)/i =~ a
+          @suffix = ($1 || "").upcase
           case number_type
-          when NUMBER_TYPE_DEC
-            @number = $2.to_i
           when NUMBER_TYPE_DEC_HEX
             n = $2.to_i
             @number = (n / 100) * 16 + (n % 100)
           when NUMBER_TYPE_HEX
             @number = $2.to_i(16)
+          else
+            @number = $2.to_i
           end
         end
       end

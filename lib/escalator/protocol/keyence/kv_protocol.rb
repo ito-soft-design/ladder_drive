@@ -56,22 +56,31 @@ module Keyence
     def get_bits_from_device count, device
       values = get_words_from_device count, device
       values.map{|v| v == 0 ? false : true}
+      values.each do |v|
+        device.bool = v
+        device = device_by_name (device+1).name
+      end
+      values
     end
 
     def set_bits_to_device bits, device
       device = device_by_name device
       bits = [bits] unless bits.is_a? Array
+      @logger.debug("#{device.name}[#{bits.size}] <= #{bits}")
       bits.each do |v|
-        cmd = v ? "ST" : "RS"
+        cmd = "ST"
+        case v
+        when false, 0
+          cmd = "RS"
+        end
         packet = "#{cmd} #{device.name}\r"
         @logger.debug("> #{dump_packet packet}")
         open
         @socket.puts(packet)
         res = receive
         raise res unless /OK/i =~ res
-        device += 1
+        device = device_by_name (device+1).name
       end
-      @logger.debug("#{device.name}[#{bits.size}] <= #{bits}")
     end
     alias :set_bit_to_device :set_bits_to_device
 
@@ -88,7 +97,7 @@ module Keyence
       open
       @socket.puts(packet)
       res = receive
-      values = res.split(/\s/).map{|v| v.to_i}
+      values = res.split(/\s+/).map{|v| v.to_i}
       @logger.debug("#{device.name}[#{count}] => #{values}")
       values
     end

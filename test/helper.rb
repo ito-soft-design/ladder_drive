@@ -3,5 +3,3 @@ d = File.join(root, "lib")
 $:.unshift d unless $:.include? d
 d = File.join(root, "plc")
 $:.unshift d unless $:.include? d
-
-p "helper==" * 80
