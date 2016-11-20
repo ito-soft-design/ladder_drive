@@ -59,9 +59,27 @@ module Emulator
     end
 
     def run_cycle
-      @program_pointer = 0
-      @stacks = [[]]
-      while fetch_and_execution; end
+      status_to_plc = device_by_name "SD0"
+      status_form_plc = device_by_name "SD1"
+      sync_input
+      case status_to_plc.value & (STOP_PLC_FLAG | CLEAR_PROGRAM_FLAG)
+      when STOP_PLC_FLAG
+        status_form_plc.value = 0
+        sleep 0.1
+      when STOP_PLC_FLAG | CLEAR_PROGRAM_FLAG
+        reset
+        status_form_plc.value = CLEAR_PROGRAM_FLAG
+        sleep 0.1
+      when 0
+        status_form_plc.value = CYCLE_RUN_FLAG
+        @program_pointer = 0
+        @stacks = [[]]
+        while fetch_and_execution; end
+        sleep 0.0001
+      else
+        sleep 0.1
+      end
+      sync_output
     end
 
     def bool
@@ -74,26 +92,8 @@ module Emulator
 
     def run
       Thread.new do
-        status_to_plc = device_by_name "SD0"
-        status_form_plc = device_by_name "SD1"
         loop do
-          sync_input
-          case status_to_plc.value & (STOP_PLC_FLAG | CLEAR_PROGRAM_FLAG)
-          when STOP_PLC_FLAG
-            status_form_plc.value = 0
-            sleep 0.1
-          when STOP_PLC_FLAG | CLEAR_PROGRAM_FLAG
-            reset
-            status_form_plc.value = CLEAR_PROGRAM_FLAG
-            sleep 0.1
-          when 0
-            status_form_plc.value = CYCLE_RUN_FLAG
-            run_cycle
-            sleep 0.0001
-          else
-            sleep 0.1
-          end
-          sync_output
+          run_cycle
         end
       end
     end
