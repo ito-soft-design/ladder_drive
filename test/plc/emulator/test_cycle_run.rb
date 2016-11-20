@@ -19,7 +19,7 @@ class TestCycleRun < Test::Unit::TestCase
   def set_values h
     h.each do |k, v|
       d = @plc.device_by_name k.to_s
-      d.value = v
+      d.set_value v, :in
     end
   end
 
@@ -235,8 +235,7 @@ class TestCycleRun < Test::Unit::TestCase
 
   def test_rst
     @plc.program_data = Escalator::Asm.new("LD X0\nRST M0").codes
-    @plc.device_by_name("M0").bool = true
-    set_values X0:false
+    set_values M0:true, X0:false
     @plc._run_cycle
     assert_equal true, @plc.device_by_name("M0").bool
 

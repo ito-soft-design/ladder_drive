@@ -135,6 +135,10 @@ module Escalator
       ESC_SUFFIXES.index @suffix
     end
 
+    def reset
+      @value = 0
+    end
+
     private
 
       SUFFIXES_FOR_DEC      = %w(PRG M C T L SC CC TC D CS TS H SD)

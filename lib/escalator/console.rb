@@ -38,6 +38,8 @@ module Escalator
           d = protocol.device_by_name $1
           v = $'.scan(/\d+/).map{|e| e.to_i}
           protocol.set_to_devices d, v
+        when /^E\s+/
+          puts protocol.execute(line)
         end
       end
     end

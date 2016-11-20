@@ -27,27 +27,35 @@ module Emulator
       SUFFIXES.each do |k|
         eval "@#{k}_devices = []"
       end
+      @lock = Mutex.new
       reset
     end
 
     def device_by_name name
-      d = device_dict[name]
-      unless d
-        d = PlcDevice.new name
-        device_dict[name] = d
-      end
-      d
+      @lock.synchronize {
+        d = device_dict[name]
+        unless d
+          d = EmuDevice.new name
+          device_dict[name] = d
+        end
+        d
+      }
     end
 
     def device_by_type_and_number type, number
-      d = PlcDevice.new type, number
+      d = EmuDevice.new type, number
       device_by_name d.name
     end
 
     def reset
       @word = 0
       @program_data = []
-      @device_dict = {}
+      @device_dict ||= {}
+      @lock.synchronize {
+        @device_dict.values.each do |d|
+          d.reset
+        end
+      }
     end
 
     def run_cycle
@@ -69,21 +77,23 @@ module Emulator
         status_to_plc = device_by_name "SD0"
         status_form_plc = device_by_name "SD1"
         loop do
+          sync_input
           case status_to_plc.value & (STOP_PLC_FLAG | CLEAR_PROGRAM_FLAG)
           when STOP_PLC_FLAG
-            status_to_plc.value = 0
+            status_form_plc.value = 0
             sleep 0.1
           when STOP_PLC_FLAG | CLEAR_PROGRAM_FLAG
             reset
-            status_to_plc.value = CLEAR_PROGRAM_FLAG
+            status_form_plc.value = CLEAR_PROGRAM_FLAG
             sleep 0.1
           when 0
-            status_to_plc.value = CYCLE_RUN_FLAG
+            status_form_plc.value = CYCLE_RUN_FLAG
             run_cycle
             sleep 0.0001
           else
             sleep 0.1
           end
+          sync_output
         end
       end
     end
@@ -93,11 +103,11 @@ module Emulator
       case a.first
       when /^ST/i
         d = device_by_name a[1]
-        d.bool = true
+        d.set_value true, :in
         "OK\r"
       when /^RS/i
         d = device_by_name a[1]
-        d.bool = false
+        d.set_value false, :in
         "OK\r"
       when /^RDS/i
         d = device_by_name a[1]
@@ -105,7 +115,7 @@ module Emulator
         r = []
         if d.bit_device?
           c.times do
-            r << (d.bool ? 1 : 0)
+            r << (d.bool(:out) ? 1 : 0)
             d = device_by_name (d+1).name
           end
         else
@@ -117,7 +127,7 @@ module Emulator
             end
           else
             c.times do
-              r << d.word
+              r << d.word(:out)
               d = device_by_name (d+1).name
             end
           end
@@ -135,17 +145,20 @@ module Emulator
         else
           if d.bit_device?
             a[3, c].each do |v|
-              d.bool = v == "0" ? false : true
+              d.set_value v == "0" ? false : true, :in
               d = device_by_name (d+1).name
             end
           else
             a[3, c].each do |v|
               d.word = v.to_i
+              d.set_value v.to_i, :in
               d = device_by_name (d+1).name
             end
           end
         end
         "OK\r"
+      when /E/
+        eval(a[1..-1].join(" ")).inspect
       else
         raise "Unknown command #{a.first}"
       end
@@ -155,6 +168,22 @@ module Emulator
 
       def stack
         @stacks.last
+      end
+
+      def sync_input
+        @lock.synchronize {
+          device_dict.values.each do |d|
+            d.sync_input
+          end
+        }
+      end
+
+      def sync_output
+        @lock.synchronize {
+          device_dict.values.each do |d|
+            d.sync_output
+          end
+        }
       end
 
       def bool= value
@@ -257,7 +286,7 @@ EOB
       def fetch_bool_value inverse=false
         d = fetch_device_or_value
         return false unless d
-        unless d.is_a? PlcDevice
+        unless d.is_a? EmuDevice
           add_error "ld must be specify a device nor number #{d}"
           return false
         end
@@ -329,7 +358,7 @@ EOB
       def out inverse=false
         and_join_stack
         d = fetch_device_or_value
-        unless d.is_a? PlcDevice
+        unless d.is_a? EmuDevice
           add_error "ld must be specify a device nor number #{d}"
           return false
         end
@@ -342,7 +371,7 @@ EOB
       def set inverse=false
         and_join_stack
         d = fetch_device_or_value
-        unless d.is_a? PlcDevice
+        unless d.is_a? EmuDevice
           add_error "ld must be specify a device nor number #{d}"
           return false
         end

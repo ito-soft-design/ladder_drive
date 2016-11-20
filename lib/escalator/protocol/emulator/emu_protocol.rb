@@ -32,6 +32,11 @@ module Emulator
       super
     end
 
+    def execute line
+      @socket.puts(line)
+      @socket.gets
+    end
+
     private
 
       def device_class

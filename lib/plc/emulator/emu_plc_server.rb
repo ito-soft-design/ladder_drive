@@ -1,69 +1,45 @@
-require 'webrick'
-require 'fileutils'
+require 'socket'
 require 'escalator/plc_device'
-
-include FileUtils
 
 module Plc
 module Emulator
 
-  class EmuPlcServer < WEBrick::GenericServer
+  class EmuPlcServer
 
     class << self
 
-      def pid_dir
-        @pid_dir ||= File.expand_path(File.join(Dir.pwd, "tmp", "pids"))
-      end
-
-      def pid_file_path
-        @pid_path ||= File.join(pid_dir, "emu_plc.pid")
-      end
-
       def launch
         @server ||= begin
-          mkdir_p pid_dir
-          server = new( Port:5555,
-                        ServerType: WEBrick::Daemon,
-                        StartCallback: Proc.new {
-                          File.write(pid_file_path, $$)
-                        }
-          )
-          fork do
-            trap(:INT) { server.shutdown }
-            server.start
-          end
+          server = new
+          server.run
           server
         end
       end
 
-      def finalize
-        proc { terminate }
-      end
-
-      def terminate
-        `kill #{File.read(pid_file_path)}` if File.exist? pid_file_path
-      end
-
     end
 
-    def initialize config = {}, default = WEBrick::Config::General
-      super
+    def initialize config = {}
+      @port = config[:port] || 5555
       @plc = EmuPlc.new
-      ObjectSpace.define_finalizer(self, self.class.finalize)
     end
 
-    def run socket
+    def run
       @plc.run
-      loop do
-        begin
-          r = @plc.execute_console_commands socket.gets
-          socket.puts r
-        rescue => e
-          socket.puts "E0 #{e}\r"
+      Thread.new do
+        server = TCPServer.open @port
+        loop do
+          socket = server.accept
+          while line = socket.gets
+            begin
+              r = @plc.execute_console_commands line
+              socket.puts r
+            rescue => e
+              socket.puts "E0 #{e}\r"
+            end
+          end
         end
       end
     end
-
 
   end
 
