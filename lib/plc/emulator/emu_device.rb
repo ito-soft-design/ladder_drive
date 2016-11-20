@@ -80,7 +80,7 @@ module Emulator
 
     def sync_input
       @lock.synchronize {
-        if @in_value
+        unless @in_value.nil?
           @value = @in_value
           @in_value = nil
         end
