@@ -29,4 +29,11 @@ class TestCycleRun < Test::Unit::TestCase
     assert_equal "1 2 3 4\r", r
   end
 
+  def test_it_should_receive_wrs_to_prg
+    @plc.execute_console_commands "WRS PRG0 4 1 2 3 4"
+    r = @plc.execute_console_commands "RDS PRG0 4"
+    assert_equal "1 2 3 4\r", r
+    assert_equal [0,1,0,2,0,3,0,4], @plc.program_data
+  end
+
 end

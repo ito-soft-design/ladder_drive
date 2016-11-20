@@ -103,26 +103,47 @@ module Emulator
         d = device_by_name a[1]
         c = a[2].to_i
         r = []
-        c.times do
-          if d.bit_device?
+        if d.bit_device?
+          c.times do
             r << (d.bool ? 1 : 0)
-          else
-            r << d.word
+            d = device_by_name (d+1).name
           end
-          d = device_by_name (d+1).name
+        else
+          case d.suffix
+          when "PRG"
+            c.times do
+              r << program_data[d.number * 2, 2].pack("c*").unpack("n").first
+              d = device_by_name (d+1).name
+            end
+          else
+            c.times do
+              r << d.word
+              d = device_by_name (d+1).name
+            end
+          end
         end
         r.map{|e| e.to_s}.join(" ") + "\r"
       when /^WRS/i
         d = device_by_name a[1]
         c = a[2].to_i
-        a[3, c].each do |v|
-          v = v.to_i
-          if d.bit_device?
-            d.bool = v == 0 ? false : true
-          else
-            d.word = v
+        case d.suffix
+        when "PRG"
+          a[3, c].each do |v|
+            program_data[d.number * 2, 2] = [v.to_i].pack("n").unpack("c*")
+            d = device_by_name (d+1).name
           end
-          d = device_by_name (d+1).name
+        else
+          if d.bit_device?
+            a[3, c].each do |v|
+              d.bool = v == "0" ? false : true
+              d = device_by_name (d+1).name
+            end
+          else
+            a[3, c].each do |v|
+              d.word = v.to_i
+              d = device_by_name (d+1).name
+            end
+          end
         end
         "OK\r"
       else
