@@ -146,6 +146,7 @@ class TestCycleRun < Test::Unit::TestCase
     @plc._run_cycle
     assert_equal false, @plc.bool
     assert_equal false, @plc.device_by_name("Y0").bool
+    assert_equal [[]], @plc._stacks
   end
 
   def test_out_is_no_effected_to_input_device
@@ -178,19 +179,19 @@ class TestCycleRun < Test::Unit::TestCase
 
     set_values X0:false, X1:false, X2:false, X3:false
     @plc._run_cycle
-    assert_equal false, @plc.bool
+    assert_equal false, @plc.device_by_name("Y0").bool
 
     set_values X0:true, X1:false, X2:false, X3:false
     @plc._run_cycle
-    assert_equal false, @plc.bool
+    assert_equal false, @plc.device_by_name("Y0").bool
 
     set_values X0:false, X1:false, X2:true, X3:false
     @plc._run_cycle
-    assert_equal false, @plc.bool
+    assert_equal false, @plc.device_by_name("Y0").bool
 
     set_values X0:true, X1:false, X2:true, X3:false
     @plc._run_cycle
-    assert_equal true, @plc.bool
+    assert_equal true, @plc.device_by_name("Y0").bool
   end
 
   def test_orb
@@ -231,6 +232,19 @@ class TestCycleRun < Test::Unit::TestCase
     set_values X0:true
     @plc._run_cycle
     assert_equal true, @plc.device_by_name("M0").bool
+    assert_equal [[]], @plc._stacks
+  end
+
+  def test_should_not_set_if_device_is_input
+    @plc.program_data = Escalator::Asm.new("LD X0\nSET X1").codes
+    set_values X0:false
+    @plc._run_cycle
+    assert_equal false, @plc.device_by_name("X1").bool
+
+    set_values X0:true
+    @plc._run_cycle
+    assert_equal false, @plc.device_by_name("X1").bool
+    assert_equal [[]], @plc._stacks
   end
 
   def test_rst
@@ -242,6 +256,19 @@ class TestCycleRun < Test::Unit::TestCase
     set_values X0:true
     @plc._run_cycle
     assert_equal false, @plc.device_by_name("M0").bool
+    assert_equal [[]], @plc._stacks
+  end
+
+  def test_should_not_rst_if_device_is_input
+    @plc.program_data = Escalator::Asm.new("LD X0\nRST X1").codes
+    set_values X0:false, X1:true
+    @plc._run_cycle
+    assert_equal true, @plc.device_by_name("X1").bool
+
+    set_values X0:true
+    @plc._run_cycle
+    assert_equal true, @plc.device_by_name("X1").bool
+    assert_equal [[]], @plc._stacks
   end
 
 

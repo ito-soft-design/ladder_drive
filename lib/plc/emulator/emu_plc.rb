@@ -362,8 +362,8 @@ EOB
           add_error "ld must be specify a device nor number #{d}"
           return false
         end
-        return true if d.input?
-        d.bool = inverse ? !self.bool : self.bool
+        d.bool = inverse ? !self.bool : self.bool unless d.input?
+        stack.pop
         true
       end
       def outi; out true; end
@@ -375,9 +375,8 @@ EOB
           add_error "ld must be specify a device nor number #{d}"
           return false
         end
-        return true if d.input?
-        return true unless self.bool
-        d.bool = !inverse
+        d.bool = !inverse if self.bool unless d.input?
+        stack.pop
         true
       end
       def rst; set true; end
