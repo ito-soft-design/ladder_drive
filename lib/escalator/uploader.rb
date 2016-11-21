@@ -54,6 +54,7 @@ module Escalator
 
     def word_data
       data.each_slice(2).map do |pair|
+        pair << 0 if pair.size == 1
         pair.pack("c*").unpack("n*")
       end.flatten
     end
