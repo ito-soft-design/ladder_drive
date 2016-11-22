@@ -21,8 +21,9 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-dir = File.expand_path(File.dirname(__FILE__))
-$:.unshift dir unless $:.include? dir
+$:.unshift File.dirname(__FILE__)
 
-require "plc/plc"
-require "escalator/escalator"
+require 'socket'
+require 'logger'
+require 'timeout'
+require 'emu_protocol'

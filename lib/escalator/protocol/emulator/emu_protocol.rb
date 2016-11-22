@@ -21,8 +21,29 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-dir = File.expand_path(File.dirname(__FILE__))
-$:.unshift dir unless $:.include? dir
+module Escalator
+module Protocol
+module Emulator
 
-require "plc/plc"
-require "escalator/escalator"
+  class EmuProtocol < Escalator::Protocol::Keyence::KvProtocol
+
+    def initialize options={}
+      options.merge host:"localhost", port:5555
+      super
+    end
+
+    def execute line
+      @socket.puts(line)
+      @socket.gets
+    end
+
+    private
+
+      def device_class
+        EscDevice
+      end
+  end
+
+end
+end
+end

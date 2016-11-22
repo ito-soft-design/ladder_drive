@@ -24,5 +24,8 @@
 dir = File.expand_path(File.dirname(__FILE__))
 $:.unshift dir unless $:.include? dir
 
-require "plc/plc"
-require "escalator/escalator"
+require 'socket'
+require 'logger'
+require 'timeout'
+require 'kv_device'
+require 'kv_protocol'

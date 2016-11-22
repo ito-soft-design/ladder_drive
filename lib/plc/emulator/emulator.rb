@@ -1,4 +1,3 @@
-# The MIT License (MIT)
 #
 # Copyright (c) 2016 ITO SOFT DESIGN Inc.
 #
@@ -24,5 +23,6 @@
 dir = File.expand_path(File.dirname(__FILE__))
 $:.unshift dir unless $:.include? dir
 
-require "plc/plc"
-require "escalator/escalator"
+require 'emu_device'
+require 'emu_plc'
+require 'emu_plc_server'

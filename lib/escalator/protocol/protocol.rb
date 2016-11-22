@@ -21,7 +21,13 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-$:.unshift File.dirname(__FILE__)
+dir = File.expand_path(File.dirname(__FILE__))
+$:.unshift dir unless $:.include? dir
+
+module Escalator
+module Protocol
+end
+end
 
 module Escalator
 module Protocol
@@ -32,7 +38,7 @@ module Protocol
 
     def initialize options={}
       @logger = Logger.new(STDOUT)
-      @logger.level = options[:log_level] || Logger::INFO
+      self.log_level = options[:log_level] || :info
     end
 
     def log_level= level
@@ -70,9 +76,30 @@ module Protocol
 
     def device_by_name name; nil; end
 
+    def get_from_devices device, count = 1
+      d = device_by_name device
+      if d.bit_device?
+        get_bits_from_device count, d
+      else
+        get_words_from_device count, d
+      end
+    end
+
+    def set_to_devices device, values
+      d = device_by_name device
+      if d.bit_device?
+        set_bits_to_device values, d
+      else
+        set_words_to_device values, d
+      end
+    end
+
   end
 
 end
 end
 
+require 'keyence/keyence'
+# Use load instead require, because there are two emulator files.
+load File.join(dir, 'emulator/emulator.rb')
 require 'mitsubishi/mitsubishi'
