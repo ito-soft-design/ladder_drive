@@ -51,4 +51,25 @@ class TestMcProtocol < Test::Unit::TestCase
     assert_equal values, @protocol.get_words_from_device(values.size, d)
   end
 
+  def test_convert_local_device_x0
+    d = EscDevice.new "X0"
+    ld = @protocol.device_by_name d
+    assert_equal QDevice, ld.class
+    assert_equal "X0", ld.name
+  end
+
+  def test_convert_local_device_prg0
+    d = EscDevice.new "PRG0"
+    ld = @protocol.device_by_name d
+    assert_equal QDevice, ld.class
+    assert_equal "D3072", ld.name
+  end
+
+  def test_convert_local_device_sd0
+    d = EscDevice.new "SD0"
+    ld = @protocol.device_by_name d
+    assert_equal QDevice, ld.class
+    assert_equal "D2048", ld.name
+  end
+
 end
