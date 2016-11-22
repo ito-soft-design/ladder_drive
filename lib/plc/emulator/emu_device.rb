@@ -1,4 +1,4 @@
-r#
+#
 # Copyright (c) 2016 ITO SOFT DESIGN Inc.
 #
 # Permission is hereby granted, free of charge, to any person obtaining
@@ -20,7 +20,7 @@ r#
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-equire 'escalator/plc_device'
+require 'escalator/plc_device'
 
 include Escalator
 
