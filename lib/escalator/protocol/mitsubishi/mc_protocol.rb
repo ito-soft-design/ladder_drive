@@ -145,6 +145,7 @@ module Mitsubishi
           end
         end
       rescue Timeout::Error
+        puts "*** ERROR: TIME OUT ***"
       end
       @logger.debug("< #{dump_packet res}")
       res
