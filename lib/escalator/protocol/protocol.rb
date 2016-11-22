@@ -38,7 +38,7 @@ module Protocol
 
     def initialize options={}
       @logger = Logger.new(STDOUT)
-      @logger.level = options[:log_level] || Logger::INFO
+      self.log_level = options[:log_level] || :info
     end
 
     def log_level= level
