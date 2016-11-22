@@ -79,8 +79,9 @@ task :upload => @config.output do
   t.run
   u = t.uploader
   u.source = @config.output
+  puts "uploading #{u.source} ..."
   u.upload
-  puts "upload #{u.source}"
+  puts "done uploading"
 end
 
 desc "Launch emulator."

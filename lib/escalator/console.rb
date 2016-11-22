@@ -45,6 +45,8 @@ module Escalator
       l = true
       trap(:INT) { puts "\n> " }
 
+      display_title
+
       loop do
         begin
           print "> "
@@ -63,6 +65,8 @@ module Escalator
             protocol.set_to_devices d, v
           when /^E\s+/
             puts protocol.execute(line)
+          when /^help/, /^h/
+            display_help
           end
         rescue => e
           puts "*** ERROR: #{e} ***"
@@ -74,6 +78,35 @@ module Escalator
 
       def protocol
         target.protocol
+      end
+
+      def display_title
+        puts <<EOB
+
+  Escalator is an abstract PLC.
+  This is a console to communicate with PLC.
+
+EOB
+      end
+
+      def display_help
+        puts <<EOB
+Commands:
+
+  r: Read values from device.
+     r device [count]
+       e.g.) it reads values from M0 to M7.
+             > r m0 8
+  w: Write values to device.
+     w device value1 value2 ...
+       e.g.) it write values from D0 to D7.
+             > w d0 1 2 3 4 5 6 7 8
+       e.g.) it write values from M0 to M7.
+             > w m0 0 0 0 1 1 0 1 1
+  q: Quit this. You can use quit and exit instead of q.
+  h: Show help. You can use help instead of h.
+
+EOB
       end
 
   end

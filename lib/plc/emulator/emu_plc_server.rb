@@ -49,8 +49,10 @@ module Emulator
       @plc.run
       Thread.new do
         server = TCPServer.open @port
+        puts "launching emulator ... "
         loop do
           socket = server.accept
+          puts "done launching"
           while line = socket.gets
             begin
               r = @plc.execute_console_commands line
