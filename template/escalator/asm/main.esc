@@ -1,7 +1,38 @@
-LD  X0
-OUT Y0
-LD  X1
-OR  M0
-ANI X2
-OUT M0
+LD   X0
+OR   Y0
+ANI  X1
+OUT  Y0
+
+LD   X1
+OR   Y1
+ANI  X0
+OUT  Y1
+
+LD   M0
+OR   M1
+ANB
+LD   M2
+OR   M3
+OUT  M4
+
+LD   M0
+OR   M1
+ORB
+LD   M2
+OR   M3
+OUT  M5
+
+LD   M0
+OR   M1
+ORB
+LD   M2
+OR   M3
+INV
+MPP
+OUT  M6
+MRD
+OUT  Y3
+MPP
+OUTI Y4
+
 END

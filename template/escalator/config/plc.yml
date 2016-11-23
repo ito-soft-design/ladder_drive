@@ -1,7 +1,12 @@
-:plc:
-  :cpu: iq-r
-  :protocol: mc_protocol
-  :host: 192.168.0.1
-  :port: 5007
-  :program_area: d10000
-  :interaction_area: d9998
+# Run rake with target like this.
+#   > rake target=plc
+plc:                      # It's a target name
+  cpu: iq-r               # It's just a comment.
+  protocol: mc_protocol   # It's a protocl to communicate with PLC.
+  host: 192.168.0.10      # It's PLC's IP address.
+  port: 5007              # It's PLC's port no.
+
+# You can describe targets multiply.
+#
+# plc2:
+#   protocl: ...
