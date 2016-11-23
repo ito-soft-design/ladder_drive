@@ -175,7 +175,7 @@ class TestCycleRun < Test::Unit::TestCase
   end
 
   def test_anb
-    @plc.program_data = Escalator::Asm.new("LD X0\nOR X1\nANB\nLD X2\nOR X3\nOUT Y0").codes
+    @plc.program_data = Escalator::Asm.new("LD X0\nOR X1\nLD X2\nOR X3\nANB\nOUT Y0").codes
 
     set_values X0:false, X1:false, X2:false, X3:false
     @plc._run_cycle
