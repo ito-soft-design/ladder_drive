@@ -31,10 +31,9 @@ module Escalator
 
     desc "create", "Create a new project"
     def create(name)
-      template_path = File.join(Escalator_root, "template", "escalator")
+      root_dir = File.expand_path(File.join(File.dirname(__FILE__), "..", ".."))
+      template_path = File.join(root_dir, "template", "escalator")
       cp_r template_path, name
-      temlate_plc_path = File.join(Escalator_root, "plc")
-      cp_r temlate_plc_path, name
     end
 
   end

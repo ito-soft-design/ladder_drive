@@ -23,9 +23,6 @@
 dir = File.expand_path(File.dirname(__FILE__))
 $:.unshift dir unless $:.include? dir
 
-module Escalator
-end
-
 require "version"
 require "cli"
 require "asm"
