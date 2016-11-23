@@ -4,12 +4,12 @@
 
 The escalator is a simple abstract ladder for PLC (Programmable Logic Controller).
 
-We aim to design runnable abstraction ladder which is running on any PLC with same ladder source or binary and prepare full stack tools.
+We aim to design abstraction ladder which is able to run on any PLC with same ladder source or binary and prepare full stack tools.
 
 # Getting started
 
 It's required the Ruby environment.
-To prepare Ruby environment, please find web sites.
+To prepare the Ruby environment, please find web sites.
 
 Install Escalator at the command prompt.
 
@@ -26,7 +26,7 @@ $ escalator create my_project
 $ cd my_project
 ```
 
-Created files are consisted like below the tree.
+Created files are consisted like the tree below.
 
 ```
 .
@@ -51,7 +51,7 @@ Created files are consisted like below the tree.
 
 There is a plc project under the plc directory.
 Launch the one of the plc project which you want to use.
-(Currently we support MITSUBISHI iQ-R R08CUP only.)
+(Currently we support the Emulator and MITSUBISHI iQ-R R08CUP only.)
 
 Configure ethernet connection by the tool which is provided by plc maker.
 Then upload settings and plc program to the plc.
@@ -62,16 +62,14 @@ Then upload settings and plc program to the plc.
 ## Escalator configuration
 
 There is a configuration file at config/plc.yml.
-Though currently we support MITSUBISHI iQ-R R08CUP only, you only change host to an ip address of your plc.
+Though currently we support the Emulator and MITSUBISHI iQ-R R08CUP only, you only change host to an ip address of your plc.
 
 ```
-:plc:
-  :cpu: iq-r
-  :protocol: mc_protocol
-  :host: 192.168.0.1
-  :port: 5007
-  :program_area: d10000
-  :interaction_area: d9998
+plc:
+  cpu: iq-r
+  protocol: mc_protocol
+  host: 192.168.0.10
+  port: 5007
 ```
 
 [![](http://img.youtube.com/vi/m0JaOBFIHqw/0.jpg)](https://youtu.be/m0JaOBFIHqw)
@@ -98,11 +96,40 @@ END
 # Transfer the Escalator program
 
 At the command prompt, use rake command to upload escalator program to the plc.
-The Escalator program is running immediate after uploaded.
+The Escalator program runs immediately after uploaded.
+
+The right hand side of a target is a name of a target which is specified in plc.yml.
+The default target is the Emulator. If you don't specify any target, use the Emulator.
 
 ```
-$ rake plc
+$ rake [target=plc]
+uploading build/main.hex ...
+launching emulator ...
+done launching
+done uploading
+
+  Escalator is an abstract PLC.
+  This is a console to communicate with PLC.
+
+>
 ```
+
+After uploaded the program, it becomes in to console mode.
+You can read and write a device by entering commands.
+
+Use the r command if you want to read devices.
+Below example reads values of devices from M0 to M7.
+
+```
+> r m0 8
+```
+
+Below example writes values to devices from M0 to M7.
+
+```
+> w m0 0 0 0 1 1 0 1 1
+```
+
 
 [![](http://img.youtube.com/vi/qGbicGLB7Gs/0.jpg)](https://youtu.be/qGbicGLB7Gs)
 
