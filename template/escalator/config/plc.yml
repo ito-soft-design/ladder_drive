@@ -5,7 +5,7 @@
 plc:
   iq-r:                     # It's a target name
     cpu: iq-r               # It's just a comment.
-    protocol: mc_protocol   # It's a protocl to communicate with PLC.
+    protocol: mc_protocol   # It's a protocol to communicate with PLC.
     host: 192.168.0.10      # It's PLC's IP address or dns name.
     port: 5007              # It's PLC's port no.
 
