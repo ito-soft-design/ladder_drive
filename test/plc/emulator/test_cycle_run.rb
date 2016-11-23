@@ -206,6 +206,19 @@ class TestCycleRun < Test::Unit::TestCase
     assert_equal true, @plc.bool
   end
 
+  def test_orb_2
+    @plc.program_data = Escalator::Asm.new("LD M0\nOR M1\nAND M2\nLD M3\nOR M4\nORB\nOUT M5").codes
+
+    set_values M0:true, M1:false, M2:true, M3:false, M4:false
+    @plc._run_cycle
+    assert_equal true, @plc.device_by_name("M5").bool
+
+    set_values M0:false, M1:false, M2:false, M3:true, M4:false
+    @plc._run_cycle
+    assert_equal true, @plc.device_by_name("M5").bool
+
+  end
+
   def test_mps
     @plc.program_data = Escalator::Asm.new("LD X0\nMPS\n").codes
     set_values X0:true

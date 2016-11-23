@@ -358,7 +358,7 @@ EOB
       def orb
         b = self.bool
         stack.pop
-        self.bool != b
+        self.bool |= b
         true
       end
 
