@@ -10,17 +10,13 @@ class TestUploader < Test::Unit::TestCase
     hex.write_to @hex_path
 
     @protocol = McProtocol.new host:"localhost", port:5010, log_level: :debug
-    @uploader = Uploader.new protocol:@protocol, program_area:"D10000"
+    @uploader = Uploader.new protocol:@protocol
     @uploader.source = @hex_path
     @running = !!@protocol.open
   end
 
   def teardown
     FileUtils.rm @hex_path if File.exist? @hex_path
-  end
-
-  def test_dump
-    assert_equal "D10000", @uploader.program_area
   end
 
   def test_word_data

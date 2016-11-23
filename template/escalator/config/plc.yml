@@ -1,12 +1,23 @@
 # Run rake with target like this.
-#   > rake target=plc
-plc:                      # It's a target name
-  cpu: iq-r               # It's just a comment.
-  protocol: mc_protocol   # It's a protocl to communicate with PLC.
-  host: 192.168.0.10      # It's PLC's IP address.
-  port: 5007              # It's PLC's port no.
+#   > rake target=iq-r
 
-# You can describe targets multiply.
-#
-# plc2:
-#   protocl: ...
+# plc section
+plc:
+  iq-r:                     # It's a target name
+    cpu: iq-r               # It's just a comment.
+    protocol: mc_protocol   # It's a protocl to communicate with PLC.
+    host: 192.168.0.10      # It's PLC's IP address or dns name.
+    port: 5007              # It's PLC's port no.
+
+  # You can describe targets multiply.
+  #
+  # plc2:
+  #   cpu: kv-5000
+  #   protocl: kv_protocol
+  #   ...
+
+# default section
+default:
+  # default target
+  # If you not set target,
+  # target: iq-r

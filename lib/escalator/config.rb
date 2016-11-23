@@ -65,7 +65,11 @@ module Escalator
       }
 
       @config = default.merge options
-      @config[:emulator] = @config[:emulator] ? emulator_default.merge(@config[:emulator]) : emulator_default
+      @config[:plc] ||= {}
+      @config[:plc][:emulator] = @config[:plc][:emulator] ? emulator_default.merge(@config[:plc][:emulator]) : emulator_default
+
+      @config[:default] ||= {}
+
       @targets = {}
     end
 
@@ -74,11 +78,11 @@ module Escalator
     end
 
     def target name=nil
-      name ||= :emulator
+      name ||= (@config[:default][:target] || :emulator)
       name = name.to_sym if name.is_a? String
       target = @targets[name]
       unless target
-        h = @config[name]
+        h = @config[:plc][name]
         unless h.nil? || h.empty?
           h = {name:name}.merge h
           target = EscalatorConfigTarget.new h
