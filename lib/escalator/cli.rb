@@ -34,6 +34,7 @@ module Escalator
       root_dir = File.expand_path(File.join(File.dirname(__FILE__), "..", ".."))
       template_path = File.join(root_dir, "template", "escalator")
       cp_r template_path, name
+      puts "#{name} was successfully created."
     end
 
   end
