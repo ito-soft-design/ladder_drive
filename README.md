@@ -64,12 +64,13 @@ Then upload settings and plc program to the plc.
 There is a configuration file at config/plc.yml.
 Though currently we support the Emulator and MITSUBISHI iQ-R R08CUP only, you only change host to an ip address of your plc.
 
-```
+```plc.yml
 plc:
-  cpu: iq-r
-  protocol: mc_protocol
-  host: 192.168.0.10
-  port: 5007
+  iq-r:                     # It's a target name
+    cpu: iq-r               # It's just a comment.
+    protocol: mc_protocol   # It's a protocl to communicate with PLC.
+    host: 192.168.0.10      # It's PLC's IP address or dns name.
+    port: 5007              # It's PLC's port no.
 ```
 
 [![](http://img.youtube.com/vi/m0JaOBFIHqw/0.jpg)](https://youtu.be/m0JaOBFIHqw)
@@ -95,14 +96,33 @@ END
 
 # Transfer the Escalator program
 
-At the command prompt, use rake command to upload escalator program to the plc.
+At the command prompt, use ```rake``` command to upload escalator program to the plc.
+By default, the target plc is ```emulator```. Then launch the Emulator.
+
+```sh
+$ rake
+```
+
+If you use with the ```target``` option, the target PLC is it.
+
+```sh
+$ rake target=iq-r
+```
+
+You can describe the default target by the target section in plc.yml.
+
+```plc.yml
+default:
+  target: iq-r
+```
+
+```rake``` is same as ```rake target=iq-r```.
+
+
 The Escalator program runs immediately after uploaded.
 
-The right hand side of a target is a name of a target which is specified in plc.yml.
-The default target is the Emulator. If you don't specify any target, use the Emulator.
-
 ```
-$ rake [target=plc]
+$ rake [target=iq-r]
 uploading build/main.hex ...
 launching emulator ...
 done launching

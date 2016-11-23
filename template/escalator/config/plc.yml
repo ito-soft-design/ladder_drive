@@ -18,6 +18,6 @@ plc:
 
 # default section
 default:
-  # default target
-  # If you not set target,
+  # If you set target iq-r, `rake` is same as `rake target=iq-r`.
+  # default target is emulator.
   # target: iq-r

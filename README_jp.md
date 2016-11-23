@@ -66,14 +66,15 @@ plc以下の各種PLCのプロジェクトファイルを開いてIPアドレス
 
 config/plc.ymlファイルで設定します。
 
-現在はiQ-Rのみの対応なので:host: 192.168.0.10の行でPLCに設定したIPアドレスを指定するのみで接続できます。
+現在はiQ-Rのみの対応なので:host: 192.168.0.10の行でPLCに設定したIPアドレスを指定するだけで接続できます。
 
-```
+```plc.yml
 plc:
-  cpu: iq-r
-  protocol: mc_protocol
-  host: 192.168.0.10
-  port: 5007
+  iq-r:                     # It's a target name
+    cpu: iq-r               # It's just a comment.
+    protocol: mc_protocol   # It's a protocl to communicate with PLC.
+    host: 192.168.0.10      # It's PLC's IP address or dns name.
+    port: 5007              # It's PLC's port no.
 ```
 
 [![](http://img.youtube.com/vi/m0JaOBFIHqw/0.jpg)](https://youtu.be/m0JaOBFIHqw)
@@ -88,7 +89,7 @@ PLC側の実装がまだ進んでいないので実行できるニーモニッ�
 
 ニーモニックについては[Wiki](https://github.com/ito-soft-design/escalator/wiki/mnemonic)の方を参照してください。
 
-```
+```main.esc
 LD  M0
 AND M1
 OUT M2
@@ -99,13 +100,33 @@ END
 
 ### プログラムの転送
 
-エスカレータープログラムをplcに転送するにはrakeコマンドを使用します。
+エスカレータープログラムをplcに転送するには```rake```コマンドを使用します。
+デフォルトではエミュレーターが対象になり、エミュレーターが起動します。
+
+```sh
+$ rake
+```
+
+targetを指定するとplc.ymlのplcセクション内の該当するターゲットが対象になります。
+
+```sh
+$ rake target=iq-r
+```
+
+plc.ymlファイルのdefaultセクションのtargetでデフォルトのターゲトを設定できます。
+
+```plc.yml
+default:
+  target: iq-r
+```
+
+この場合に```rake```を行うと```rake target=iq-r```をしたのと同じになります。
+
+
 転送後プログラムが実行されます。
-target=の右側はplc.ymlファイルに記述したターゲット名を指定します。
-未指定の場合はエミュレーターが起動します。
 
 ```
-$ rake [target=plc]
+$ rake [target=iq-r]
 uploading build/main.hex ...
 launching emulator ...
 done launching
