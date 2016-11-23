@@ -35,7 +35,7 @@ module Escalator
       @endian = endian || BIG_ENDIAN
       @lines = []
       address = 0
-      source.each_line do | line|
+      source.each_line do |line|
         @lines << AsmLine.new(line, address, @endian)
         address = @lines.last.next_address
       end
@@ -106,12 +106,15 @@ module Escalator
       OPERAND_TYPE_TYPE_AND_NUMBER_NUMBER = 2
 
       def parse
-        a = line.split(/\s+/)
+        /([^#]*)/ =~ line
+        a = $1.split(/\s+/)
         mnemonic, operand1, operand2 = a
-        @codes << encode_mnemonic(mnemonic) if mnemonic
-        case operand_type(mnemonic)
-        when OPERAND_TYPE_TYPE_AND_NUMBER
-          @codes += parse_type_and_number(operand1)
+        if mnemonic
+          @codes << encode_mnemonic(mnemonic)
+          case operand_type(mnemonic)
+          when OPERAND_TYPE_TYPE_AND_NUMBER
+            @codes += parse_type_and_number(operand1)
+          end
         end
       end
 
