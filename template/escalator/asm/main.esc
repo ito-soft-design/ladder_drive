@@ -1,7 +1,52 @@
-LD  X0
-OUT Y0
-LD  X1
-OR  M0
-ANI X2
-OUT M0
+# |-|X0|-+-|/X1|-|/Y1|---(Y0)
+# |-|Y0|-+
+LD   X0
+OR   Y0
+ANI  X1
+ANI  Y1
+OUT  Y0
+
+# |X1|-+-|/X0|-|/Y0|---(Y1)
+# |Y1|-+
+LD   X1
+OR   Y1
+ANI  X0
+ANI  Y0
+OUT  Y1
+
+# |M0|-+-|M2|-+---(M4)
+# |M1|-+-|M3|-+
+LD   M0
+OR   M1
+LD   M2
+OR   M3
+ANB
+OUT  M4
+
+# |M5|-+-|M7|-+---(M10)
+# |M6|-+      |
+#             |
+# |M8|-+------+
+# |M9|-+
+LD   M5
+OR   M6
+AND  M7
+LD   M8
+OR   M9
+ORB
+OUT  M10
+
+# |M11|-+-/-+---(M13)
+# |M12|-+   +---(Y2)
+#           +---(/Y3)
+LD   M11
+OR   M12
+INV
+MPS
+OUT  M13
+MRD
+OUT  Y2
+MPP
+OUTI Y3
+
 END

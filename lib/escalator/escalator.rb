@@ -1,6 +1,3 @@
-#!/usr/bin/env ruby
-
-# The MIT License (MIT)
 #
 # Copyright (c) 2016 ITO SOFT DESIGN Inc.
 #
@@ -23,6 +20,17 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-require "escalator"
+dir = File.expand_path(File.dirname(__FILE__))
+$:.unshift dir unless $:.include? dir
 
-Escalator::CLI.start
+require "version"
+require "cli"
+require "asm"
+require "intel_hex"
+require "plc_define"
+require "uploader"
+require "config"
+require "config_target"
+require "plc_device"
+require "protocol/protocol"
+require "console"

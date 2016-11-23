@@ -31,10 +31,19 @@ module Escalator
 
     desc "create", "Create a new project"
     def create(name)
-      template_path = File.join(Escalator_root, "template", "escalator")
+      if File.exist? name
+        puts "ERROR: #{name} already exists."
+        exit -1
+      end
+      root_dir = File.expand_path(File.join(File.dirname(__FILE__), "..", ".."))
+      template_path = File.join(root_dir, "template", "escalator")
       cp_r template_path, name
-      temlate_plc_path = File.join(Escalator_root, "plc")
+      temlate_plc_path = File.join(root_dir, "lib", "plc")
       cp_r temlate_plc_path, name
+      %w(plc.rb emulator).each do |fn|
+        rm_r File.join(name, "plc", fn)
+      end
+      puts "#{name} was successfully created."
     end
 
   end

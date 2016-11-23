@@ -1,5 +1,3 @@
-#!/usr/bin/env ruby
-
 # The MIT License (MIT)
 #
 # Copyright (c) 2016 ITO SOFT DESIGN Inc.
@@ -23,6 +21,29 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-require "escalator"
+module Escalator
+module Protocol
+module Emulator
 
-Escalator::CLI.start
+  class EmuProtocol < Escalator::Protocol::Keyence::KvProtocol
+
+    def initialize options={}
+      options.merge host:"localhost", port:5555
+      super
+    end
+
+    def execute line
+      @socket.puts(line)
+      @socket.gets
+    end
+
+    private
+
+      def device_class
+        EscDevice
+      end
+  end
+
+end
+end
+end

@@ -21,15 +21,12 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Escalator_root = File.expand_path(File.join(File.dirname(__FILE__), "../../../"))
+dir = File.expand_path(File.join(File.dirname(__FILE__), "../../../lib"))
+$:.unshift dir unless $:.include? dir
 
-require "escalator/config"
-require 'escalator/asm'
-require 'escalator/intel_hex'
 require 'rake/loaders/makefile'
 require 'fileutils'
-
-#directory "build"
+require "escalator"
 
 directory "build"
 
@@ -69,23 +66,6 @@ rule %r{^build/.+\.hex} => ['%{^build,asm}X.esc'] do |t|
   File.write(t.name, hex.dump)
 end
 
-desc "GX Works Memory Image"
-rule %r{^build/.+\.gxwm} => ['%{^build,asm}X.esc'] do |t|
-  Rake::Task["build"].invoke
-  begin
-    $stderr = File.open('hb.log', 'w')
-    $stdout = $stderr
-  ensure
-    $stdout = STDOUT
-    $stderr = STDERR
-  end
-  stream = StringIO.new
-  puts "gxwm #{t.source}"
-  asm = Escalator::Asm.new File.read(t.source)
-  hex = Escalator::IntelHex.new asm.codes
-  File.write(t.name, hex.gxworks_memory_image)
-end
-
 desc "Clean all generated files."
 task :clean do
   FileUtils.rm_r "build"
@@ -93,15 +73,29 @@ end
 
 @config = Escalator::EscalatorConfig.default
 
-task :upload => @config.output do
-  u = @config.uploader
-  u.source = @config.output
-  u.upload
-  puts "upload #{u.source}"
-end
-
 desc "Install program to PLCs."
-task :plc => :upload do
+task :upload => @config.output do
+  t = @config.target ENV['target']
+  t.run
+  u = t.uploader
+  u.source = @config.output
+  puts "uploading #{u.source} ..."
+  u.upload
+  puts "done uploading"
 end
 
-task :default => %w(build/main.lst build/main.hex build/main.gxwm)
+desc "Launch emulator."
+task :emulator do
+  t = @config.target :emulator
+  t.run
+  puts "launch emulator"
+  Escalator::Console.instance.run
+end
+
+task :console => :upload do
+  c = Escalator::Console.instance
+  c.target = @config.target ENV['target']
+  c.run
+end
+
+task :default => :console

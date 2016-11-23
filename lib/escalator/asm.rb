@@ -35,7 +35,7 @@ module Escalator
       @endian = endian || BIG_ENDIAN
       @lines = []
       address = 0
-      source.each_line do | line|
+      source.each_line do |line|
         @lines << AsmLine.new(line, address, @endian)
         address = @lines.last.next_address
       end
@@ -106,18 +106,21 @@ module Escalator
       OPERAND_TYPE_TYPE_AND_NUMBER_NUMBER = 2
 
       def parse
-        a = line.split(/\s+/)
+        /([^#]*)/ =~ line
+        a = $1.split(/\s+/)
         mnemonic, operand1, operand2 = a
-        @codes << encode_mnemonic(mnemonic) if mnemonic
-        case operand_type(mnemonic)
-        when OPERAND_TYPE_TYPE_AND_NUMBER
-          @codes += parse_type_and_number(operand1)
+        if mnemonic
+          @codes << encode_mnemonic(mnemonic)
+          case operand_type(mnemonic)
+          when OPERAND_TYPE_TYPE_AND_NUMBER
+            @codes += parse_type_and_number(operand1)
+          end
         end
       end
 
       def operand_type mnemonic
         case mnemonic
-        when /LD/, /AND/, /OR[^B]?$/, /OUT/, "SET", "RST", "PLS", "PLF", "FF", /SF(L|R)/
+        when /LD/, /AND/, /ANI/, /OR[^B]?$/, /OUT/, "SET", "RST", "PLS", "PLF", "FF", /SF(L|R)/
           OPERAND_TYPE_TYPE_AND_NUMBER
         else
           OPERAND_TYPE_NONE
@@ -131,7 +134,7 @@ module Escalator
 |01|LD|LDI|LDP|LDPI|LDF|LDFI|MC|MCR|
 |02|AND|ANI|ANDP|ANPI|ANDF|ANFI|
 |03|OR|ORI|ORP|ORPI|ORF|ORFI|
-|04|OUT|OUTI|MPS|MPD|MPP| |
+|04|OUT|OUTI|MPS|MRD|MPP| |
 |05|SET|RST|PLS| |PLF||
 |06|FF||| |||
 |07|

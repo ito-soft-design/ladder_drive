@@ -1,0 +1,12 @@
+plc:
+  plc:
+    host: 192.168.1.2
+    port: 1234
+
+  iq-r:
+    host: 192.168.0.10
+    port: 5007
+    protocol: mc_protocol
+
+default:
+  target: iq-r

@@ -1,4 +1,3 @@
-# The MIT License (MIT)
 #
 # Copyright (c) 2016 ITO SOFT DESIGN Inc.
 #
@@ -32,73 +31,60 @@ include Escalator::Protocol::Emulator
 
 module Escalator
 
-  class EscalatorConfig
+  class EscalatorConfigTarget
 
     class << self
 
-      def default
-        @config ||= begin
-          load File.join("config", "plc.yml")
-        end
-      end
-
-      def load path
-        h = {}
-        if File.exist?(path)
-          h = YAML.load(File.read(path))
-          h = JSON.parse(h.to_json, symbolize_names: true)
-        end
-        new h || {}
+      def finalize
+        proc {
+          EmuPlcServer.terminate
+        }
       end
 
     end
 
     def initialize options={}
-      default = {
-        input: "asm/main.asm",
-        output: "build/main.hex",
-      }
-      emulator_default = {
-        host: "localhost",
-        port: 5555,
-        protocol: "emu_protocol",
-      }
-
-      @config = default.merge options
-      @config[:plc] ||= {}
-      @config[:plc][:emulator] = @config[:plc][:emulator] ? emulator_default.merge(@config[:plc][:emulator]) : emulator_default
-
-      @config[:default] ||= {}
-
-      @targets = {}
+      @target_info = options
+      ObjectSpace.define_finalizer(self, self.class.finalize)
     end
 
-    def [] key
-      @config[key]
-    end
-
-    def target name=nil
-      name ||= (@config[:default][:target] || :emulator)
-      name = name.to_sym if name.is_a? String
-      target = @targets[name]
-      unless target
-        h = @config[:plc][name]
-        unless h.nil? || h.empty?
-          h = {name:name}.merge h
-          target = EscalatorConfigTarget.new h
-          @targets[name] = target
-        end
+    def protocol
+      @protocol ||= begin
+        p = eval("#{@target_info[:protocol].camelize}.new")
+        p.host = @target_info[:host] if @target_info[:host]
+        p.port = @target_info[:port] if @target_info[:port]
+        p.log_level = @target_info[:log_level] if @target_info[:log_level]
+        p
+      rescue
+        nil
       end
-      target
+    end
+
+    def uploader
+      @uploader ||= begin
+        u = Uploader.new
+        u.protocol = self.protocol
+        u
+      end
     end
 
     def method_missing(name, *args)
       name = name.to_s unless name.is_a? String
       case name.to_s
       when /(.*)=$/
-        @config[$1.to_sym] = args.first
+        @target_info[$1.to_sym] = args.first
       else
-        @config[name.to_sym]
+        @target_info[name.to_sym]
+      end
+    end
+
+    def run
+      case self.name
+      when :emulator
+        Plc::Emulator::EmuPlcServer.launch
+      else
+        # DO NOTHIN
+        # Actual device is running independently.
       end
     end
 

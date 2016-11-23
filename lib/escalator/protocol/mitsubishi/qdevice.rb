@@ -100,11 +100,11 @@ module Mitsubishi
     end
 
     def + value
-      QDevice.new self.suffix, self.number + value
+      self.class.new self.suffix, self.number + value
     end
 
     def - value
-      QDevice.new self.suffix, [self.number - value, 0].max
+      self.class.new self.suffix, [self.number - value, 0].max
     end
 
   end

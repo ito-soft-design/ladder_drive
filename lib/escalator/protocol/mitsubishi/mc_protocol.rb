@@ -29,11 +29,18 @@ module Mitsubishi
 
     def initialize options={}
       super
-      @host = options[:host] || "192.168.0.1"
+      @host = options[:host] || "192.168.0.10"
       @port = options[:port] || 5010
+      prepare_device_map
     end
 
     def open
+      open!
+    rescue
+      nil
+    end
+
+    def open!
       @socket ||= TCPSocket.open(@host, @port)
     end
 
@@ -117,6 +124,8 @@ module Mitsubishi
       case name
       when String
         QDevice.new name
+      when EscDevice
+        local_device_of name
       else
         # it may be already QDevice
         name
@@ -128,17 +137,18 @@ module Mitsubishi
       res = []
       len = 0
       begin
-        Timeout.timeout(0.1) do
-          while  true
+        Timeout.timeout(1.0) do
+          loop do
             c = @socket.read(1)
             next if c.nil? || c == ""
 
             res << c.bytes.first
-            len = res[7] + res[8] << 8 if res.length >= 9
+            len = res[7,2].pack("c*").unpack("v*").first if res.length >= 9
             break if (len + 9 == res.length)
           end
         end
       rescue Timeout::Error
+        puts "*** ERROR: TIME OUT ***"
       end
       @logger.debug("< #{dump_packet res}")
       res
@@ -219,6 +229,36 @@ module Mitsubishi
         a << ("0" + bytes[i].to_s(16))[-2, 2]
       end
       "[" + a.join(", ") + "]"
+    end
+
+    def prepare_device_map
+      @conv_dev_dict ||= begin
+        h = {}
+        [
+          ["X", "X0", 1024],
+          ["Y", "Y0", 1024],
+          ["M", "M0", 1024],
+          ["C", "C0", 256],
+          ["T", "T0", 256],
+          ["L", "L0", 1024],
+          ["SC", "M1024", 1024],
+          ["D", "D0", 1024],
+          ["H", "D1024", 1024],
+          ["SD", "D2048", 1024],
+          ["PRG", "D3072", 1024]    # ..D4095
+        ].each do |s,d,c|
+          h[s] = [QDevice.new(d), c]
+        end
+        h
+      end
+    end
+
+    def local_device_of device
+      return device if device.is_a? QDevice
+      d, c = @conv_dev_dict[device.suffix]
+      return nil unless device.number < c
+      ld = QDevice.new(d.suffix, d.number + device.number)
+      device_by_name ld.name
     end
 
   end

@@ -1,6 +1,3 @@
-#!/usr/bin/env ruby
-
-# The MIT License (MIT)
 #
 # Copyright (c) 2016 ITO SOFT DESIGN Inc.
 #
@@ -23,6 +20,52 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-require "escalator"
+require 'socket'
+require 'escalator/plc_device'
 
-Escalator::CLI.start
+module Plc
+module Emulator
+
+  class EmuPlcServer
+
+    class << self
+
+      def launch
+        @server ||= begin
+          server = new
+          server.run
+          server
+        end
+      end
+
+    end
+
+    def initialize config = {}
+      @port = config[:port] || 5555
+      @plc = EmuPlc.new
+    end
+
+    def run
+      @plc.run
+      Thread.new do
+        server = TCPServer.open @port
+        puts "launching emulator ... "
+        loop do
+          socket = server.accept
+          puts "done launching"
+          while line = socket.gets
+            begin
+              r = @plc.execute_console_commands line
+              socket.puts r
+            rescue => e
+              socket.puts "E0 #{e}\r"
+            end
+          end
+        end
+      end
+    end
+
+  end
+
+end
+end
