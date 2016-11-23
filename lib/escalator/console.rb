@@ -59,6 +59,12 @@ module Escalator
             c = $2 ? $2.to_i : 1
             values = protocol.get_from_devices d, c
             puts values.join(" ")
+          when /^p\s+(\w+)(\s+(\d+))?/
+            d = protocol.device_by_name EscDevice.new($1)
+            t = $2 ? $2.to_f : 0.1
+            protocol.set_to_devices d, 1
+            sleep t
+            protocol.set_to_devices d, 0
           when /^w\s+(\w+)/
             d = protocol.device_by_name EscDevice.new($1)
             v = $'.scan(/\d+/).map{|e| e.to_i}
@@ -103,6 +109,10 @@ Commands:
              > w d0 1 2 3 4 5 6 7 8
        e.g.) it write values from M0 to M7.
              > w m0 0 0 0 1 1 0 1 1
+  p: Pulse out on device. Default duration is 0.1 sec
+     p device [duration]
+       e.g.) it write 1 to m0, then write 0 after 0.5 sec.
+             > w m0 0.5
   q: Quit this. You can use quit and exit instead of q.
   h: Show help. You can use help instead of h.
 
