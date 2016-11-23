@@ -13,7 +13,7 @@ To prepare the Ruby environment, please find web sites.
 
 Install Escalator at the command prompt.
 
-```
+```sh
 $ gem install escalator
 ```
 
@@ -21,7 +21,7 @@ $ gem install escalator
 
 At the command prompt, create a new Escalator project.
 
-```
+```sh
 $ escalator create my_project
 $ cd my_project
 ```
@@ -62,13 +62,15 @@ Then upload settings and plc program to the plc.
 ## Escalator configuration
 
 There is a configuration file at config/plc.yml.
-Though currently we support the Emulator and MITSUBISHI iQ-R R08CUP only, you only change host to an ip address of your plc.
+Currently we support MITSUBISHI iQ-R R08CUP and the Emulator.
+You only change host to an ip address of your plc.
 
-```plc.yml
-plc:
+```
+# plc.yml
+plc:                        # Beginning of PLC section.
   iq-r:                     # It's a target name
     cpu: iq-r               # It's just a comment.
-    protocol: mc_protocol   # It's a protocl to communicate with PLC.
+    protocol: mc_protocol   # It's a protocol to communicate with PLC.
     host: 192.168.0.10      # It's PLC's IP address or dns name.
     port: 5007              # It's PLC's port no.
 ```
@@ -85,6 +87,7 @@ Edit it and programming.
 Refer [Wiki](https://github.com/ito-soft-design/escalator/wiki/mnemonic) to check mnemonic.
 
 ```
+# main.esc
 LD  M0
 AND M1
 OUT M2
@@ -111,7 +114,8 @@ $ rake target=iq-r
 
 You can describe the default target by the target section in plc.yml.
 
-```plc.yml
+```
+# plc.yml
 default:
   target: iq-r
 ```
@@ -121,7 +125,7 @@ default:
 
 The Escalator program runs immediately after uploaded.
 
-```
+```sh
 $ rake [target=iq-r]
 uploading build/main.hex ...
 launching emulator ...
@@ -140,13 +144,13 @@ You can read and write a device by entering commands.
 Use the r command if you want to read devices.
 Below example reads values of devices from M0 to M7.
 
-```
+```sh
 > r m0 8
 ```
 
 Below example writes values to devices from M0 to M7.
 
-```
+```sh
 > w m0 0 0 0 1 1 0 1 1
 ```
 
