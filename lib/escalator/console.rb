@@ -21,7 +21,6 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 require 'singleton'
-require 'curses'
 
 module Escalator
 
@@ -29,17 +28,6 @@ module Escalator
 
   class Console
     include Singleton
-
-    def self.finalize
-      proc {
-        #Curses.close_screen
-      }
-    end
-
-    def initialize
-      #Curses.init_screen
-      ObjectSpace.define_finalizer(self, self.class.finalize)
-    end
 
     def run
       l = true
