@@ -4,6 +4,5 @@ source 'https://rubygems.org'
 gemspec
 
 gem "test-unit"
-gem "activesupport"
-gem "webrick"
-gem "curses"
+
+gem "activesupport", ">=4.2.7"
