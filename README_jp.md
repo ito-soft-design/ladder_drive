@@ -20,6 +20,8 @@ gemでエスカレーターをインストールします。
 $ gem install escalator
 ```
 
+[![https://gyazo.com/6f00d74612def41fb33d836275b74c24](https://i.gyazo.com/6f00d74612def41fb33d836275b74c24.gif)](https://gyazo.com/6f00d74612def41fb33d836275b74c24)
+
 ### プロジェクト作成
 
 エスカレーターをインストールするとescalatorコマンドが使用できる様になります。
@@ -29,6 +31,8 @@ escalatorコマンドでラダーを構成するプロジェクトファイル�
 $ escalator create my_project
 $ cd my_project
 ```
+
+[![https://gyazo.com/c538f66129aa425e2b1da4f478a10f52](https://i.gyazo.com/c538f66129aa425e2b1da4f478a10f52.gif)](https://gyazo.com/c538f66129aa425e2b1da4f478a10f52)
 
 ファイルの構成は下の様になっています。
 plc以下にエスカレーターを実行するPLCプロジェクトの雛形があります。
@@ -50,8 +54,6 @@ plc以下にエスカレーターを実行するPLCプロジェクトの雛形�
                 ├── LICENSE
                 └── r08.gx3
 ```
-
-[![](http://img.youtube.com/vi/aFEtOIgKLvQ/0.jpg)](https://youtu.be/aFEtOIgKLvQ)
 
 ### 通信設定
 
