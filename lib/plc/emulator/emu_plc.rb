@@ -112,6 +112,14 @@ module Emulator
       end
     end
 
+    def bool= value
+      if stack.empty?
+        stack << value
+      else
+        stack[-1] = value
+      end
+    end
+
     def run
       Thread.new do
         loop do
@@ -206,14 +214,6 @@ module Emulator
             d.sync_output
           end
         }
-      end
-
-      def bool= value
-        if stack.empty?
-          stack << value
-        else
-          stack[-1] = value
-        end
       end
 
       def and_join_stack
