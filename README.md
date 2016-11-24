@@ -17,6 +17,8 @@ Install Escalator at the command prompt.
 $ gem install escalator
 ```
 
+[![https://gyazo.com/6f00d74612def41fb33d836275b74c24](https://i.gyazo.com/6f00d74612def41fb33d836275b74c24.gif)](https://gyazo.com/6f00d74612def41fb33d836275b74c24)
+
 # Create an Escalator project
 
 At the command prompt, create a new Escalator project.
@@ -25,6 +27,8 @@ At the command prompt, create a new Escalator project.
 $ escalator create my_project
 $ cd my_project
 ```
+
+[![https://gyazo.com/c538f66129aa425e2b1da4f478a10f52](https://i.gyazo.com/c538f66129aa425e2b1da4f478a10f52.gif)](https://gyazo.com/c538f66129aa425e2b1da4f478a10f52)
 
 Created files are consisted like the tree below.
 
