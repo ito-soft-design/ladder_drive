@@ -47,8 +47,6 @@ Created files are consisted like the tree below.
                 └── r08.gx3
 ```
 
-[![](http://img.youtube.com/vi/aFEtOIgKLvQ/0.jpg)](https://youtu.be/aFEtOIgKLvQ)
-
 # Connection configuration
 
 ## PLC configuration
@@ -92,6 +90,7 @@ Refer [Wiki](https://github.com/ito-soft-design/escalator/wiki/mnemonic) to chec
 
 ```
 # main.esc
+# |M0|-|M1|----(M2)
 LD  M0
 AND M1
 OUT M2
@@ -158,8 +157,27 @@ Below example writes values to devices from M0 to M7.
 > w m0 0 0 0 1 1 0 1 1
 ```
 
+If you want to turn on and off the device like pushing a button, use p command.
 
-[![](http://img.youtube.com/vi/qGbicGLB7Gs/0.jpg)](https://youtu.be/qGbicGLB7Gs)
+```sh
+> p m0
+```
+
+You can describe turn on time duration after a device. The unit is sec.
+
+```sh
+> p m0 1.5
+```
+
+```
+# |M0|---(M1)
+LD  M0
+OUT M1
+```
+
+[![https://gyazo.com/565d24a35887503281a46775f6ccd747](https://i.gyazo.com/565d24a35887503281a46775f6ccd747.gif)](https://gyazo.com/565d24a35887503281a46775f6ccd747)
+
+<!-- [![](http://img.youtube.com/vi/qGbicGLB7Gs/0.jpg)](https://youtu.be/qGbicGLB7Gs) -->
 
 
 # Information related escalator
