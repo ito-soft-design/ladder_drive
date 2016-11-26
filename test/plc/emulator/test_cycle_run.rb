@@ -13,7 +13,6 @@ class TestCycleRun < Test::Unit::TestCase
 
   setup do
     @plc = EmuPlc.new
-    #@plc = Plc::Emulator::EmuPlc.new
   end
 
   def set_values h
@@ -144,9 +143,8 @@ class TestCycleRun < Test::Unit::TestCase
 
     set_values X0:false
     @plc._run_cycle
-    assert_equal false, @plc.bool
     assert_equal false, @plc.device_by_name("Y0").bool
-    assert_equal [[]], @plc._stacks
+    assert_equal 0, @plc.device_by_name("SD4").word
   end
 
   def test_out_is_no_effected_to_input_device
@@ -162,16 +160,16 @@ class TestCycleRun < Test::Unit::TestCase
 
     set_values X0:false
     @plc._run_cycle
-    assert_equal false, @plc.bool
     assert_equal true, @plc.device_by_name("Y0").bool
   end
 
   def test_end
     @plc.program_data = Escalator::Asm.new("END\nLD X0").codes
 
-    set_values X0:true
+    set_values X0:false
     @plc._run_cycle
-    assert_equal false, @plc.bool
+    # default value = true
+    assert_equal true, @plc.bool
   end
 
   def test_anb
@@ -223,8 +221,8 @@ class TestCycleRun < Test::Unit::TestCase
     @plc.program_data = Escalator::Asm.new("LD X0\nMPS\n").codes
     set_values X0:true
     @plc._run_cycle
-    assert_equal 2, @plc._stacks.size
-    assert_equal true, @plc._stacks.last.last
+    assert_equal 1, @plc.device_by_name("SD4").word
+    assert_equal true, @plc.bool
   end
 
   def test_mrd_and_mpp
@@ -245,7 +243,7 @@ class TestCycleRun < Test::Unit::TestCase
     set_values X0:true
     @plc._run_cycle
     assert_equal true, @plc.device_by_name("M0").bool
-    assert_equal [[]], @plc._stacks
+    assert_equal 0, @plc.device_by_name("SD4").word
   end
 
   def test_should_not_set_if_device_is_input
@@ -257,7 +255,7 @@ class TestCycleRun < Test::Unit::TestCase
     set_values X0:true
     @plc._run_cycle
     assert_equal false, @plc.device_by_name("X1").bool
-    assert_equal [[]], @plc._stacks
+    assert_equal 0, @plc.device_by_name("SD4").word
   end
 
   def test_rst
@@ -269,7 +267,7 @@ class TestCycleRun < Test::Unit::TestCase
     set_values X0:true
     @plc._run_cycle
     assert_equal false, @plc.device_by_name("M0").bool
-    assert_equal [[]], @plc._stacks
+    assert_equal 0, @plc.device_by_name("SD4").word
   end
 
   def test_should_not_rst_if_device_is_input
@@ -281,7 +279,7 @@ class TestCycleRun < Test::Unit::TestCase
     set_values X0:true
     @plc._run_cycle
     assert_equal true, @plc.device_by_name("X1").bool
-    assert_equal [[]], @plc._stacks
+    assert_equal 0, @plc.device_by_name("SD4").word
   end
 
 

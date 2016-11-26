@@ -45,6 +45,10 @@ module Emulator
 
     CYCLE_RUN_FLAG        = 2
 
+    INDEX_BIT_STACK_COUNT = 4
+    INDEX_BIT_STACK       = 5
+    SIZE_OF_BIT_STACK     = 3
+
     def initialize
       SUFFIXES.each do |k|
         eval "@#{k}_devices = []"
@@ -95,7 +99,7 @@ module Emulator
       when 0
         status_form_plc.value = CYCLE_RUN_FLAG
         @program_pointer = 0
-        @stacks = [[]]
+        clear_stacks
         while fetch_and_execution; end
         sleep 0.0001
       else
@@ -105,18 +109,14 @@ module Emulator
     end
 
     def bool
-      unless @stacks.empty?
-        !!@stacks.last.last
-      else
-        nil
-      end
+      (stack_device.word & 1) != 0 ? true : false
     end
 
     def bool= value
-      if stack.empty?
-        stack << value
+      if value
+        stack_device.word |= 1
       else
-        stack[-1] = value
+        stack_device.word &= 0xfffe;
       end
     end
 
@@ -196,9 +196,70 @@ module Emulator
 
     private
 
-      def stack
-        @stacks.last
+      # ----------------
+      # stack operations
+      def stack_device index=0
+        device_by_name (device_by_name("SD0") + INDEX_BIT_STACK + index).name
       end
+
+      def stack_count_device
+        device_by_name (device_by_name("SD0") + INDEX_BIT_STACK_COUNT).name
+      end
+
+      def push_stack flag = false
+        stack_device.word <<= 1
+        if flag
+          stack_device.word |= 1
+        else
+          stack_device.word &= 0xfffe
+        end
+        stack_device.word &= 0xffff
+      end
+
+      def pop_stack
+        stack_device.word >>= 1
+        stack_device.word |= 0x8000
+      end
+
+      def clear_stacks
+        stack_device.word = 0xffff
+        stack_count_device.word = 0
+      end
+
+      def push_stacks
+        if stack_count_device.word > SIZE_OF_BIT_STACK
+          puts "ERROR: stacks overflow pc: H#{program_pointer.to_s(16).rjust(4, "0")}"
+          return
+        end
+        values = []
+        (SIZE_OF_BIT_STACK - 1).downto 0 do |i|
+          values << stack_device(i).word
+        end
+        values.shift
+        values << 0xffff
+        SIZE_OF_BIT_STACK.times do |i|
+          stack_device(i).word = values.pop
+        end
+        stack_count_device.word += 1
+      end
+
+      def pop_stacks
+        if stack_count_device.word <= 0
+          puts "ERROR: stacks underflow pc: H#{program_pointer.to_s(16).rjust(4, "0")}"
+          return
+        end
+        values = []
+        (SIZE_OF_BIT_STACK - 1).downto 0 do |i|
+          values << stack_device(i).word
+        end
+        v = values.pop
+        values.each_with_index do |v, i|
+          stack_device(i).word = v
+        end
+        stack_count_device.word -= 1
+        v
+      end
+      # ----------------
 
       def sync_input
         @lock.synchronize {
@@ -217,7 +278,10 @@ module Emulator
       end
 
       def and_join_stack
-        @stacks[-1] = [@stacks.last.inject(true){|r,b| r & b}]
+        d = stack_device
+        b = d.word == 0xffff
+        d.word = 0xffff
+        push_stack b
       end
 
       def mnenonic_table
@@ -324,7 +388,7 @@ EOB
       def ld inverse=false
         b = fetch_bool_value inverse
         return false if b.nil?
-        stack << b
+        push_stack b
         true
       end
       def ldi; ld true; end
@@ -352,12 +416,15 @@ EOB
       def ori; send :or, true; end
 
       def anb
+        b = self.bool
+        pop_stack
+        self.bool &= b
         true
       end
 
       def orb
         b = self.bool
-        stack.pop
+        pop_stack
         self.bool |= b
         true
       end
@@ -366,13 +433,17 @@ EOB
 
       def mps
         and_join_stack
-        @stacks << [self.bool]
+        b = self.bool
+        push_stacks
+        push_stack b
         true
       end
 
       def mrd
-        @stacks.pop
-        @stacks << [self.bool]
+        b = self.bool
+        pop_stacks
+        push_stacks
+        push_stack b
         true
       end
       def mpp; mrd; end
@@ -385,7 +456,7 @@ EOB
           return false
         end
         d.bool = inverse ? !self.bool : self.bool unless d.input?
-        stack.pop
+        pop_stack
         true
       end
       def outi; out true; end
@@ -398,7 +469,7 @@ EOB
           return false
         end
         d.bool = !inverse if self.bool unless d.input?
-        stack.pop
+        pop_stack
         true
       end
       def rst; set true; end

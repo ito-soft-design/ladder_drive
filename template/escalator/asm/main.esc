@@ -1,5 +1,5 @@
-# |-|X0|-+-|/X1|-|/Y1|---(Y0)
-# |-|Y0|-+
+# |X0|-+-|/X1|-|/Y1|---(Y0)
+# |Y0|-+
 LD   X0
 OR   Y0
 ANI  X1
@@ -49,4 +49,22 @@ OUT  Y2
 MPP
 OUTI Y3
 
+# |M14|---[SET M17]
+# SET is not implement completely.
+# If both conditions of set and rst turn on same time, output is not stable.
+LD   M14
+SET  M17
+
+# |M15|---[RST M17]
+# RST is not implement completely.
+# If both conditions of set and rst turn on same time, output is not stable.
+LD   M15
+RST  M17
+
+# |M16|---[FF M17]
+# Currently ff is not supported.
+#LD   M16
+#FF   M17
+
+NOP
 END

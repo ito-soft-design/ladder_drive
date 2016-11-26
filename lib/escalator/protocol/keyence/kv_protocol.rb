@@ -55,7 +55,7 @@ module Keyence
 
     def get_bits_from_device count, device
       values = get_words_from_device count, device
-      values.map{|v| v == 0 ? false : true}
+      values = values.map{|v| v == 0 ? false : true}
       values.each do |v|
         device.bool = v
         device = device_by_name (device+1).name
