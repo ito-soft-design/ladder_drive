@@ -46,13 +46,14 @@ module Escalator
             d = protocol.device_by_name EscDevice.new($1)
             c = $2 ? $2.to_i : 1
             values = protocol.get_from_devices d, c
+            values = values.map{|v| case v;  when true; 1; when false; 0; else; v; end}
             puts values.join(" ")
           when /^p\s+(\w+)(\s+(\d+))?/
             d = protocol.device_by_name EscDevice.new($1)
             t = $2 ? $2.to_f : 0.1
-            protocol.set_to_devices d, 1
+            protocol.set_to_devices d, true
             sleep t
-            protocol.set_to_devices d, 0
+            protocol.set_to_devices d, false
           when /^w\s+(\w+)/
             d = protocol.device_by_name EscDevice.new($1)
             v = $'.scan(/\d+/).map{|e| e.to_i}

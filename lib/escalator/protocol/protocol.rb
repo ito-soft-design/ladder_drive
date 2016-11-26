@@ -86,8 +86,10 @@ module Protocol
     end
 
     def set_to_devices device, values
+      values = [values] unless values.is_a? Array
       d = device_by_name device
       if d.bit_device?
+        values = values.map{|v| case v;  when 1; true; when 0; false; else; v; end}
         set_bits_to_device values, d
       else
         set_words_to_device values, d
