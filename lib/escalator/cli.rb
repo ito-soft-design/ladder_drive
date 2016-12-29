@@ -35,11 +35,16 @@ module Escalator
         puts "ERROR: #{name} already exists."
         exit -1
       end
+
+      # copy from template file
       root_dir = File.expand_path(File.join(File.dirname(__FILE__), "..", ".."))
       template_path = File.join(root_dir, "template", "escalator")
       cp_r template_path, name
+
+      # copy plc directory
       temlate_plc_path = File.join(root_dir, "lib", "plc")
       cp_r temlate_plc_path, name
+      # remove unnecessary file from plc directory
       %w(plc.rb emulator).each do |fn|
         rm_r File.join(name, "plc", fn)
       end
