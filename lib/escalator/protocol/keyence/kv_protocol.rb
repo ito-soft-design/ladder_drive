@@ -31,6 +31,7 @@ module Keyence
       super
       @host = options[:host] || "192.168.0.10"
       @port = options[:port] || 8501
+      prepare_device_map
     end
 
     def open
@@ -91,7 +92,7 @@ module Keyence
     end
 
     def get_words_from_device(count, device)
-      device = device_by_name device
+      device = local_device device
       packet = "RDS #{device.name} #{count}\r"
       @logger.debug("> #{dump_packet packet}")
       open
@@ -145,13 +146,38 @@ module Keyence
 
     private
 
-      def local_device device
-        # TODO:
-        device
-      end
-
       def device_class
         KvDevice
+      end
+
+      def prepare_device_map
+        @conv_dev_dict ||= begin
+          h = {}
+          [
+            ["X", "R0", 1024],
+            ["Y", "R0", 1024],
+            ["M", "MR0", 1024],
+            ["C", "C0", 256],
+            ["T", "T0", 256],
+            ["L", "L0", 1024],
+            ["SC", "MR1024", 1024],
+            ["D", "DM0", 1024],
+            ["H", "DM1024", 1024],
+            ["SD", "DM2048", 1024],
+            ["PRG", "DM3072", 1024]    # ..D4095
+          ].each do |s,d,c|
+            h[s] = [KvDevice.new(d), c]
+          end
+          h
+        end
+      end
+
+      def local_device device
+        return device if device.is_a? KvDevice
+        d, c = @conv_dev_dict[device.suffix]
+        return nil unless device.number < c
+        ld = KvDevice.new(d.suffix, d.number + device.number)
+        device_by_name ld.name
       end
 
   end
