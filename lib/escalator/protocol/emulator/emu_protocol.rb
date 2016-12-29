@@ -42,6 +42,11 @@ module Emulator
       def device_class
         EscDevice
       end
+
+      def local_device device
+        device
+      end
+
   end
 
 end
