@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Katsuyoshi Ito"]
   spec.email         = ["kito@itosoft.com"]
 
-  spec.summary       = %q{The ladder_drive is a simple abstract ladder for PLC (Programmable Logic Controller).}
+  spec.summary       = %q{The ladder_drive is a simple abstract ladder for PLC (Programmable Logic Controller). Formerly known as 'escalator'.}
   spec.description   = %q{We aim to design abstraction ladder which is able to run on any PLC with same ladder source or binary and prepare full stack tools.}
   spec.homepage      = "https://github.com/ito-soft-design/ladder_drive"
   spec.license       = "MIT"
