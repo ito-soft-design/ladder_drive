@@ -21,12 +21,35 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-dir = File.expand_path(File.dirname(__FILE__))
-$:.unshift dir unless $:.include? dir
+require 'thor'
+require 'fileutils'
 
-require "plc/plc"
-require "escalator/escalator"
+include FileUtils
 
-warn ""
-warn "[DEPRECATION] This gem has been renamed to `ladder_drive` and will no longer be supported. Please switch to `ladder_drive` as soon as possible."
-warn ""
+module LadderDrive
+  class CLI < Thor
+
+    desc "create", "Create a new project"
+    def create(name)
+      if File.exist? name
+        puts "ERROR: #{name} already exists."
+        exit -1
+      end
+
+      # copy from template file
+      root_dir = File.expand_path(File.join(File.dirname(__FILE__), "..", ".."))
+      template_path = File.join(root_dir, "template", "ladder_drive")
+      cp_r template_path, name
+
+      # copy plc directory
+      temlate_plc_path = File.join(root_dir, "lib", "plc")
+      cp_r temlate_plc_path, name
+      # remove unnecessary file from plc directory
+      %w(plc.rb emulator).each do |fn|
+        rm_r File.join(name, "plc", fn)
+      end
+      puts "#{name} was successfully created."
+    end
+
+  end
+end

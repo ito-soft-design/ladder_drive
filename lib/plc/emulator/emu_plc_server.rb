@@ -21,7 +21,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 require 'socket'
-require 'escalator/plc_device'
+require 'ladder_drive/plc_device'
 
 module Plc
 module Emulator

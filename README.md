@@ -1,8 +1,8 @@
-[[Japanese description is here.]](https://github.com/ito-soft-design/escalator/blob/master/README_jp.md)
+[[Japanese description is here.]](https://github.com/ito-soft-design/ladder_drive/blob/master/README_jp.md)
 
 # LadderDrive
 
-The escalator is a simple abstract ladder for PLC (Programmable Logic Controller).
+The ladder_drive is a simple abstract ladder for PLC (Programmable Logic Controller).
 
 We aim to design abstraction ladder which is able to run on any PLC with same ladder source or binary and prepare full stack tools.
 
@@ -14,7 +14,7 @@ To prepare the Ruby environment, please find web sites.
 Install LadderDrive at the command prompt.
 
 ```sh
-$ gem install escalator
+$ gem install ladder_drive
 ```
 
 [![https://gyazo.com/6f00d74612def41fb33d836275b74c24](https://i.gyazo.com/6f00d74612def41fb33d836275b74c24.gif)](https://gyazo.com/6f00d74612def41fb33d836275b74c24)
@@ -24,7 +24,7 @@ $ gem install escalator
 At the command prompt, create a new LadderDrive project.
 
 ```sh
-$ escalator create my_project
+$ ladder_drive create my_project
 $ cd my_project
 ```
 
@@ -86,7 +86,7 @@ LadderDrive program file is located under the asm directory.
 By default, use asm/main.esc.
 Edit it and programming.
 
-Refer [Wiki](https://github.com/ito-soft-design/escalator/wiki/mnemonic) to check mnemonic.
+Refer [Wiki](https://github.com/ito-soft-design/ladder_drive/wiki/mnemonic) to check mnemonic.
 
 ```
 # main.esc
@@ -102,7 +102,7 @@ END
 
 # Transfer the LadderDrive program
 
-At the command prompt, use ```rake``` command to upload escalator program to the plc.
+At the command prompt, use ```rake``` command to upload ladder_drive program to the plc.
 By default, the target plc is ```emulator```. Then launch the Emulator.
 
 ```sh
@@ -180,10 +180,10 @@ OUT M1
 <!-- [![](http://img.youtube.com/vi/qGbicGLB7Gs/0.jpg)](https://youtu.be/qGbicGLB7Gs) -->
 
 
-# Information related escalator
+# Information related ladder_drive
 
-- [My japanese diary [escalator]](http://diary.itosoft.com/?category=escalator)
-- [Wiki](https://github.com/ito-soft-design/escalator/wiki/)
+- [My japanese diary [ladder_drive]](http://diary.itosoft.com/?category=ladder_drive)
+- [Wiki](https://github.com/ito-soft-design/ladder_drive/wiki/)
 
 
 ## License

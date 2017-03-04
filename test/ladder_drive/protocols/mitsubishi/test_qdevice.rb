@@ -1,5 +1,5 @@
 require 'test/unit'
-require 'escalator'
+require 'ladder_drive'
 
 class TestQDevice < Test::Unit::TestCase
   include Protocol::Mitsubishi

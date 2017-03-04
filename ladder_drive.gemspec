@@ -1,17 +1,17 @@
 # coding: utf-8
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'escalator/version'
+require 'ladder_drive/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = "escalator"
+  spec.name          = "ladder_drive"
   spec.version       = LadderDrive::VERSION
   spec.authors       = ["Katsuyoshi Ito"]
   spec.email         = ["kito@itosoft.com"]
 
-  spec.summary       = %q{The escalator is a simple abstract ladder for PLC (Programmable Logic Controller).}
+  spec.summary       = %q{The ladder_drive is a simple abstract ladder for PLC (Programmable Logic Controller).}
   spec.description   = %q{We aim to design abstraction ladder which is able to run on any PLC with same ladder source or binary and prepare full stack tools.}
-  spec.homepage      = "https://github.com/ito-soft-design/escalator"
+  spec.homepage      = "https://github.com/ito-soft-design/ladder_drive"
   spec.license       = "MIT"
 
   spec.add_dependency "thor"
@@ -26,7 +26,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rake", "~> 10.0"
 
   spec.post_install_message = <<-MESSAGE
-   ! The 'escalator' gem has been deprecated and has been replaced by 'ladder_drive'.
+   ! The 'ladder_drive' gem has been deprecated and has been replaced by 'ladder_drive'.
    ! See: https://rubygems.org/gems/ladder_drive
    ! And: https://github.com/ito-soft-design/ladder_drive
   MESSAGE

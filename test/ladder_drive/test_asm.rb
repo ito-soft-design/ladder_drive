@@ -1,5 +1,5 @@
 require 'test/unit'
-require 'escalator'
+require 'ladder_drive'
 require 'stringio'
 
 class TestAsm < Test::Unit::TestCase

@@ -1,5 +1,5 @@
 require 'test/unit'
-require 'escalator'
+require 'ladder_drive'
 
 include LadderDrive:: Protocol::Keyence
 

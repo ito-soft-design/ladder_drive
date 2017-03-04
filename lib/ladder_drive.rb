@@ -1,5 +1,3 @@
-#!/usr/bin/env ruby
-
 # The MIT License (MIT)
 #
 # Copyright (c) 2016 ITO SOFT DESIGN Inc.
@@ -23,6 +21,12 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-require "escalator"
+dir = File.expand_path(File.dirname(__FILE__))
+$:.unshift dir unless $:.include? dir
 
-LadderDrive::CLI.start
+require "plc/plc"
+require "ladder_drive/ladder_drive"
+
+warn ""
+warn "[DEPRECATION] This gem has been renamed to `ladder_drive` and will no longer be supported. Please switch to `ladder_drive` as soon as possible."
+warn ""

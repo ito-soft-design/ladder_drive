@@ -26,7 +26,7 @@ $:.unshift dir unless $:.include? dir
 
 require 'rake/loaders/makefile'
 require 'fileutils'
-require "escalator"
+require "ladder_drive"
 
 directory "build"
 
