@@ -138,7 +138,7 @@ launching emulator ...
 done launching
 done uploading
 
-  Escalator is an abstract PLC.
+  LadderDrive is an abstract PLC.
   This is a console to communicate with PLC.
 
 >

@@ -22,7 +22,7 @@
 
 require 'escalator/plc_device'
 
-include Escalator
+include LadderDrive
 
 module Plc
 module Emulator

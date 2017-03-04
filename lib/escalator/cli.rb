@@ -26,7 +26,7 @@ require 'fileutils'
 
 include FileUtils
 
-module Escalator
+module LadderDrive
   class CLI < Thor
 
     desc "create", "Create a new project"

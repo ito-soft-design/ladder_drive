@@ -24,10 +24,10 @@
 require "escalator/plc_define"
 require "escalator/plc_device"
 
-module Escalator
+module LadderDrive
 
   class Uploader
-    include ::Escalator::PlcDefine
+    include ::LadderDrive::PlcDefine
 
     attr_accessor :protocol
     attr_accessor :source

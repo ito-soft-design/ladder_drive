@@ -1,6 +1,6 @@
 [[Japanese description is here.]](https://github.com/ito-soft-design/escalator/blob/master/README_jp.md)
 
-# Escalator
+# LadderDrive
 
 The escalator is a simple abstract ladder for PLC (Programmable Logic Controller).
 
@@ -11,7 +11,7 @@ We aim to design abstraction ladder which is able to run on any PLC with same la
 It's required the Ruby environment.
 To prepare the Ruby environment, please find web sites.
 
-Install Escalator at the command prompt.
+Install LadderDrive at the command prompt.
 
 ```sh
 $ gem install escalator
@@ -19,9 +19,9 @@ $ gem install escalator
 
 [![https://gyazo.com/6f00d74612def41fb33d836275b74c24](https://i.gyazo.com/6f00d74612def41fb33d836275b74c24.gif)](https://gyazo.com/6f00d74612def41fb33d836275b74c24)
 
-# Create an Escalator project
+# Create an LadderDrive project
 
-At the command prompt, create a new Escalator project.
+At the command prompt, create a new LadderDrive project.
 
 ```sh
 $ escalator create my_project
@@ -61,7 +61,7 @@ Then upload settings and plc program to the plc.
 [![](http://img.youtube.com/vi/fGdyIo9AmuE/0.jpg)](https://youtu.be/fGdyIo9AmuE)
 
 
-## Escalator configuration
+## LadderDrive configuration
 
 There is a configuration file at config/plc.yml.
 Currently we support MITSUBISHI iQ-R R08CUP and the Emulator.
@@ -80,9 +80,9 @@ plc:                        # Beginning of PLC section.
 [![](http://img.youtube.com/vi/m0JaOBFIHqw/0.jpg)](https://youtu.be/m0JaOBFIHqw)
 
 
-## Escalator programming
+## LadderDrive programming
 
-Escalator program file is located under the asm directory.
+LadderDrive program file is located under the asm directory.
 By default, use asm/main.esc.
 Edit it and programming.
 
@@ -100,7 +100,7 @@ END
 [![](http://img.youtube.com/vi/OjaSqrkWv8Q/0.jpg)](https://youtu.be/OjaSqrkWv8Q)
 
 
-# Transfer the Escalator program
+# Transfer the LadderDrive program
 
 At the command prompt, use ```rake``` command to upload escalator program to the plc.
 By default, the target plc is ```emulator```. Then launch the Emulator.
@@ -126,7 +126,7 @@ default:
 ```rake``` is same as ```rake target=iq-r```.
 
 
-The Escalator program runs immediately after uploaded.
+The LadderDrive program runs immediately after uploaded.
 
 ```sh
 $ rake [target=iq-r]
@@ -135,7 +135,7 @@ launching emulator ...
 done launching
 done uploading
 
-  Escalator is an abstract PLC.
+  LadderDrive is an abstract PLC.
   This is a console to communicate with PLC.
 
 >

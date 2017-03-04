@@ -21,7 +21,7 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-module Escalator
+module LadderDrive
 
   class Asm
 
@@ -206,6 +206,6 @@ EOB
 end
 
 if $0 == __FILE__
-  asm = Escalator::Asm.new ARGF
+  asm = LadderDrive::Asm.new ARGF
   puts asm.dump_line
 end

@@ -1,7 +1,7 @@
 require 'test/unit'
 require 'escalator'
 
-include Escalator
+include LadderDrive
 
 class TestMcProtocol < Test::Unit::TestCase
   include Protocol::Mitsubishi

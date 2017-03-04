@@ -22,7 +22,7 @@
 
 require 'singleton'
 
-module Escalator
+module LadderDrive
 
   attr_accessor :target
 
@@ -78,7 +78,7 @@ module Escalator
       def display_title
         puts <<EOB
 
-  Escalator is an abstract PLC.
+  LadderDrive is an abstract PLC.
   This is a console to communicate with PLC.
 
 EOB

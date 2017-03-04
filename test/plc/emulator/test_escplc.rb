@@ -27,7 +27,7 @@ class TestEmuPlc < Test::Unit::TestCase
     source = <<EOB
 LD X0
 EOB
-    @plc.program_data = Escalator::Asm.new(source).codes
+    @plc.program_data = LadderDrive::Asm.new(source).codes
     assert_equal [0x10, 0x80, 0x00], @plc.program_data
   end
 

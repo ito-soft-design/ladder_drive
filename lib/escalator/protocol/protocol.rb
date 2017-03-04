@@ -24,12 +24,12 @@
 dir = File.expand_path(File.dirname(__FILE__))
 $:.unshift dir unless $:.include? dir
 
-module Escalator
+module LadderDrive
 module Protocol
 end
 end
 
-module Escalator
+module LadderDrive
 module Protocol
 
   class Protocol

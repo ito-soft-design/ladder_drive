@@ -1,7 +1,7 @@
 require 'test/unit'
 require 'escalator'
 
-include Escalator::Protocol::Keyence
+include LadderDrive::Protocol::Keyence
 
 class TestKvDevice < Test::Unit::TestCase
 

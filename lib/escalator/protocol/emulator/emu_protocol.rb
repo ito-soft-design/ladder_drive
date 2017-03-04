@@ -21,11 +21,11 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-module Escalator
+module LadderDrive
 module Protocol
 module Emulator
 
-  class EmuProtocol < Escalator::Protocol::Keyence::KvProtocol
+  class EmuProtocol < LadderDrive::Protocol::Keyence::KvProtocol
 
     def initialize options={}
       options.merge host:"localhost", port:5555

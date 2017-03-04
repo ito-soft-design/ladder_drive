@@ -25,4 +25,4 @@
 
 require "escalator"
 
-Escalator::CLI.start
+LadderDrive::CLI.start

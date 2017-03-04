@@ -26,13 +26,13 @@ require 'yaml'
 require 'json'
 require 'protocol/protocol'
 
-include Escalator::Protocol::Mitsubishi
-include Escalator::Protocol::Keyence
-include Escalator::Protocol::Emulator
+include LadderDrive::Protocol::Mitsubishi
+include LadderDrive::Protocol::Keyence
+include LadderDrive::Protocol::Emulator
 
-module Escalator
+module LadderDrive
 
-  class EscalatorConfig
+  class LadderDriveConfig
 
     class << self
 
@@ -85,7 +85,7 @@ module Escalator
         h = @config[:plc][name]
         unless h.nil? || h.empty?
           h = {name:name}.merge h
-          target = EscalatorConfigTarget.new h
+          target = LadderDriveConfigTarget.new h
           @targets[name] = target
         end
       end

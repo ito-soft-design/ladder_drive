@@ -5,7 +5,7 @@ require 'escalator/version'
 
 Gem::Specification.new do |spec|
   spec.name          = "escalator"
-  spec.version       = Escalator::VERSION
+  spec.version       = LadderDrive::VERSION
   spec.authors       = ["Katsuyoshi Ito"]
   spec.email         = ["kito@itosoft.com"]
 

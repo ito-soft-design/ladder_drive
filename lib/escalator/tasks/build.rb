@@ -44,7 +44,7 @@ rule %r{^build/.+\.lst} => ['%{^build,asm}X.esc'] do |t|
   stream = StringIO.new
   #filename = "asm/#{t.source}"
   puts "asm #{t.source}"
-  asm = Escalator::Asm.new File.read(t.source)
+  asm = LadderDrive::Asm.new File.read(t.source)
   #dst = File.join("build", t.name)
   File.write(t.name, asm.dump_line)
 end
@@ -61,8 +61,8 @@ rule %r{^build/.+\.hex} => ['%{^build,asm}X.esc'] do |t|
   end
   stream = StringIO.new
   puts "hex #{t.source}"
-  asm = Escalator::Asm.new File.read(t.source)
-  hex = Escalator::IntelHex.new asm.codes
+  asm = LadderDrive::Asm.new File.read(t.source)
+  hex = LadderDrive::IntelHex.new asm.codes
   File.write(t.name, hex.dump)
 end
 
@@ -71,7 +71,7 @@ task :clean do
   FileUtils.rm_r "build"
 end
 
-@config = Escalator::EscalatorConfig.default
+@config = LadderDrive::LadderDriveConfig.default
 
 desc "Install program to PLCs."
 task :upload => @config.output do
@@ -89,11 +89,11 @@ task :emulator do
   t = @config.target :emulator
   t.run
   puts "launch emulator"
-  Escalator::Console.instance.run
+  LadderDrive::Console.instance.run
 end
 
 task :console => :upload do
-  c = Escalator::Console.instance
+  c = LadderDrive::Console.instance
   c.target = @config.target ENV['target']
   c.run
 end
