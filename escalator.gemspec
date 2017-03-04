@@ -24,4 +24,10 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency "bundler", "~> 1.11"
   spec.add_development_dependency "rake", "~> 10.0"
+
+  spec.post_install_message = <<-MESSAGE
+   ! The 'escalator' gem has been deprecated and has been replaced by 'ladder_drive'.
+   ! See: https://rubygems.org/gems/ladder_drive
+   ! And: https://github.com/ito-soft-design/ladder_drive
+  MESSAGE
 end

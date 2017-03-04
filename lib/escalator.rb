@@ -26,3 +26,7 @@ $:.unshift dir unless $:.include? dir
 
 require "plc/plc"
 require "escalator/escalator"
+
+warn ""
+warn "[DEPRECATION] This gem has been renamed to `ladder_drive` and will no longer be supported. Please switch to `ladder_drive` as soon as possible."
+warn ""
