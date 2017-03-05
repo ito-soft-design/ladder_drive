@@ -1,3 +1,4 @@
+# The MIT License (MIT)
 #
 # Copyright (c) 2016 ITO SOFT DESIGN Inc.
 #
@@ -20,52 +21,31 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-require 'socket'
-require 'ladder_drive/plc_device'
+module LadderDrive
+module Protocol
+module Keyence
 
-module Plc
-module Emulator
+  class KvDevice < PlcDevice
 
-  class EmuPlcServer
-
-    class << self
-
-      def launch
-        @server ||= begin
-          server = new
-          server.run
-          server
-        end
-      end
-
+    def initialize a, b = nil
+      super
+      @suffix = "R" if @suffix.nil? || @suffix.length == 0
     end
 
-    def initialize config = {}
-      @port = config[:port] || 5555
-      @plc = EmuPlc.new
-    end
+    private
 
-    def run
-      @plc.run
-      Thread.new do
-        server = TCPServer.open @port
-        puts "launching emulator ... "
-        loop do
-          socket = server.accept
-          puts "done launching"
-          while line = socket.gets
-            begin
-              r = @plc.execute_console_commands line
-              socket.puts r
-            rescue => e
-              socket.puts "E0 #{e}\r"
-            end
-          end
-        end
-      end
-    end
+      SUFFIXES_FOR_DEC      = %w(DM EM FM ZF TM Z T TC TS C CC CS CTH CTC AT CM VM)
+      SUFFIXES_FOR_DEC_HEX  = %w(R MR LR CR)
+      SUFFIXES_FOR_HEX      = %w(B VB W)
+      SUFFIXES_FOR_BIT      = %w(R B MR LR CR VB)
+
+      def suffixes_for_dec; SUFFIXES_FOR_DEC; end
+      def suffixes_for_dec_hex; SUFFIXES_FOR_DEC_HEX; end
+      def suffixeds_for_hex; SUFFIXES_FOR_HEX; end
+      def suffixes_for_bit; SUFFIXES_FOR_BIT; end
 
   end
 
+end
 end
 end

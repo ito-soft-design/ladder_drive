@@ -1,3 +1,4 @@
+# The MIT License (MIT)
 #
 # Copyright (c) 2016 ITO SOFT DESIGN Inc.
 #
@@ -20,52 +21,34 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-require 'socket'
-require 'ladder_drive/plc_device'
-
-module Plc
+module LadderDrive
+module Protocol
 module Emulator
 
-  class EmuPlcServer
+  class EmuProtocol < LadderDrive::Protocol::Keyence::KvProtocol
 
-    class << self
+    def initialize options={}
+      options.merge host:"localhost", port:5555
+      super
+    end
 
-      def launch
-        @server ||= begin
-          server = new
-          server.run
-          server
-        end
+    def execute line
+      @socket.puts(line)
+      @socket.gets
+    end
+
+    private
+
+      def device_class
+        EscDevice
       end
 
-    end
-
-    def initialize config = {}
-      @port = config[:port] || 5555
-      @plc = EmuPlc.new
-    end
-
-    def run
-      @plc.run
-      Thread.new do
-        server = TCPServer.open @port
-        puts "launching emulator ... "
-        loop do
-          socket = server.accept
-          puts "done launching"
-          while line = socket.gets
-            begin
-              r = @plc.execute_console_commands line
-              socket.puts r
-            rescue => e
-              socket.puts "E0 #{e}\r"
-            end
-          end
-        end
+      def local_device device
+        device
       end
-    end
 
   end
 
+end
 end
 end

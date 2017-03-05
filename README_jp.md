@@ -17,18 +17,18 @@ Rubyの実行環境の構築はWebサイト等を検索して構築してくだ�
 gemでエスカレーターをインストールします。
 
 ```sh
-$ gem install escalator
+$ gem install ladder_drive
 ```
 
 [![https://gyazo.com/6f00d74612def41fb33d836275b74c24](https://i.gyazo.com/6f00d74612def41fb33d836275b74c24.gif)](https://gyazo.com/6f00d74612def41fb33d836275b74c24)
 
 ### プロジェクト作成
 
-エスカレーターをインストールするとescalatorコマンドが使用できる様になります。
-escalatorコマンドでラダーを構成するプロジェクトファイルを作ります。
+エスカレーターをインストールするとladder_driveコマンドが使用できる様になります。
+ladder_driveコマンドでラダーを構成するプロジェクトファイルを作ります。
 
 ```sh
-$ escalator create my_project
+$ ladder_drive create my_project
 $ cd my_project
 ```
 
@@ -90,7 +90,7 @@ plc:                        # Beginning of PLC section.
 main.escを編集しプログラムを作成します。
 PLC側の実装がまだ進んでいないので実行できるニーモニックはLD、OUT、AND、ORとその反転程度です。
 
-ニーモニックについては[Wiki](https://github.com/ito-soft-design/escalator/wiki/mnemonic)の方を参照してください。
+ニーモニックについては[Wiki](https://github.com/ito-soft-design/ladder_drive/wiki/mnemonic)の方を参照してください。
 
 ```
 # main.esc
@@ -138,7 +138,7 @@ launching emulator ...
 done launching
 done uploading
 
-  Escalator is an abstract PLC.
+  LadderDrive is an abstract PLC.
   This is a console to communicate with PLC.
 
 >
@@ -185,8 +185,8 @@ OUT M1
 
 ## エスカレーターに関する情報
 
-- [一往確認日記 [escalator]](http://diary.itosoft.com/?category=escalator)
-- [Wiki](https://github.com/ito-soft-design/escalator/wiki/)
+- [一往確認日記 [ladder_drive]](http://diary.itosoft.com/?category=ladder_drive)
+- [Wiki](https://github.com/ito-soft-design/ladder_drive/wiki/)
 
 ## ライセンス
 

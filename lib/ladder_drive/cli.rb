@@ -1,3 +1,4 @@
+# The MIT License (MIT)
 #
 # Copyright (c) 2016 ITO SOFT DESIGN Inc.
 #
@@ -20,52 +21,35 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-require 'socket'
-require 'ladder_drive/plc_device'
+require 'thor'
+require 'fileutils'
 
-module Plc
-module Emulator
+include FileUtils
 
-  class EmuPlcServer
+module LadderDrive
+  class CLI < Thor
 
-    class << self
-
-      def launch
-        @server ||= begin
-          server = new
-          server.run
-          server
-        end
+    desc "create", "Create a new project"
+    def create(name)
+      if File.exist? name
+        puts "ERROR: #{name} already exists."
+        exit -1
       end
 
-    end
+      # copy from template file
+      root_dir = File.expand_path(File.join(File.dirname(__FILE__), "..", ".."))
+      template_path = File.join(root_dir, "template", "ladder_drive")
+      cp_r template_path, name
 
-    def initialize config = {}
-      @port = config[:port] || 5555
-      @plc = EmuPlc.new
-    end
-
-    def run
-      @plc.run
-      Thread.new do
-        server = TCPServer.open @port
-        puts "launching emulator ... "
-        loop do
-          socket = server.accept
-          puts "done launching"
-          while line = socket.gets
-            begin
-              r = @plc.execute_console_commands line
-              socket.puts r
-            rescue => e
-              socket.puts "E0 #{e}\r"
-            end
-          end
-        end
+      # copy plc directory
+      temlate_plc_path = File.join(root_dir, "lib", "plc")
+      cp_r temlate_plc_path, name
+      # remove unnecessary file from plc directory
+      %w(plc.rb emulator).each do |fn|
+        rm_r File.join(name, "plc", fn)
       end
+      puts "#{name} was successfully created."
     end
 
   end
-
-end
 end

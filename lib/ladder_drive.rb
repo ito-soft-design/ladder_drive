@@ -1,3 +1,4 @@
+# The MIT License (MIT)
 #
 # Copyright (c) 2016 ITO SOFT DESIGN Inc.
 #
@@ -20,52 +21,12 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-require 'socket'
-require 'ladder_drive/plc_device'
+dir = File.expand_path(File.dirname(__FILE__))
+$:.unshift dir unless $:.include? dir
 
-module Plc
-module Emulator
+require "plc/plc"
+require "ladder_drive/ladder_drive"
 
-  class EmuPlcServer
-
-    class << self
-
-      def launch
-        @server ||= begin
-          server = new
-          server.run
-          server
-        end
-      end
-
-    end
-
-    def initialize config = {}
-      @port = config[:port] || 5555
-      @plc = EmuPlc.new
-    end
-
-    def run
-      @plc.run
-      Thread.new do
-        server = TCPServer.open @port
-        puts "launching emulator ... "
-        loop do
-          socket = server.accept
-          puts "done launching"
-          while line = socket.gets
-            begin
-              r = @plc.execute_console_commands line
-              socket.puts r
-            rescue => e
-              socket.puts "E0 #{e}\r"
-            end
-          end
-        end
-      end
-    end
-
-  end
-
-end
-end
+warn ""
+warn "[DEPRECATION] This gem has been renamed to `ladder_drive` and will no longer be supported. Please switch to `ladder_drive` as soon as possible."
+warn ""

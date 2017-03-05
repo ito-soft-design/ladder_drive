@@ -20,52 +20,16 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-require 'socket'
-require 'ladder_drive/plc_device'
+module LadderDrive
+  module PlcDefine
 
-module Plc
-module Emulator
-
-  class EmuPlcServer
-
-    class << self
-
-      def launch
-        @server ||= begin
-          server = new
-          server.run
-          server
-        end
-      end
-
-    end
-
-    def initialize config = {}
-      @port = config[:port] || 5555
-      @plc = EmuPlc.new
-    end
-
-    def run
-      @plc.run
-      Thread.new do
-        server = TCPServer.open @port
-        puts "launching emulator ... "
-        loop do
-          socket = server.accept
-          puts "done launching"
-          while line = socket.gets
-            begin
-              r = @plc.execute_console_commands line
-              socket.puts r
-            rescue => e
-              socket.puts "E0 #{e}\r"
-            end
-          end
-        end
-      end
-    end
+    # status flags
+    # SD0
+    ESC_STATUS_TO_PLC_STOP_PLC_FLAG       = 2     # bit 1
+    ESC_STATUS_TO_PLC_CLEAR_PROGRAM       = 4     # bit 2  require bit 1 on
+    # SD1
+    ESC_STATUS_FROM_PLC_CYCLE_RUN         = 2
+    ESC_STATUS_FROM_PLC_ACK_CLEAR_PROGRAM = 4
 
   end
-
-end
 end
