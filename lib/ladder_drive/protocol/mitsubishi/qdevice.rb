@@ -46,7 +46,7 @@ module Mitsubishi
           @number = b
         else
           if a.length == 12
-            @suffix = [a[0,2].to_i(16), a[2,2].to_i(16)].pack "c*"
+            @suffix = [a[0,2].to_i(16), a[2,2].to_i(16)].pack "C*"
             @suffix.strip!
             @number = a[4,8].to_i(16)
           elsif /(X|Y)(.+)/i =~ a

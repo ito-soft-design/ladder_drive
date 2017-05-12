@@ -152,7 +152,7 @@ module Emulator
           case d.suffix
           when "PRG"
             c.times do
-              r << program_data[d.number * 2, 2].pack("c*").unpack("n").first
+              r << program_data[d.number * 2, 2].pack("C*").unpack("n").first
               d = device_by_name (d+1).name
             end
           else
@@ -169,7 +169,7 @@ module Emulator
         case d.suffix
         when "PRG"
           a[3, c].each do |v|
-            program_data[d.number * 2, 2] = [v.to_i].pack("n").unpack("c*")
+            program_data[d.number * 2, 2] = [v.to_i].pack("n").unpack("C*")
             d = device_by_name (d+1).name
           end
         else
