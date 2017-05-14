@@ -53,7 +53,7 @@ module Mitsubishi
             @suffix = $1.upcase
             @number = $2.to_i(p_adic_number)
           else
-            /(M|L|S|B|F|T|C|D|W|R)(.+)/i =~ a
+            /(M|L|S|B|F|T|C|D|W|R|ZR)(.+)/i =~ a
             @suffix = $1.upcase
             @number = $2.to_i(p_adic_number)
           end
@@ -63,7 +63,7 @@ module Mitsubishi
 
     def p_adic_number
       case @suffix
-      when "X", "Y", "B", "W", "SB", "SW", "DX", "DY", "ZR"
+      when "X", "Y", "B", "W", "SB", "SW", "DX", "DY"
         16
       else
         10
