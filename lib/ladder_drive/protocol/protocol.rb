@@ -72,7 +72,7 @@ module Protocol
     def get_word_from_device device; end
     def get_words_from_device(count, device); end
     def set_words_to_device words, device; end
-    def set_word_to_device word, device; set_words_to_device word, device; end
+    def set_word_to_device word, device; set_words_to_device [word], device; end
 
     def device_by_name name; nil; end
 
