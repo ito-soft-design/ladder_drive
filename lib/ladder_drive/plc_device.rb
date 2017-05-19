@@ -104,7 +104,7 @@ module LadderDrive
     end
 
     def bit_device?
-      SUFFIXES_FOR_BIT.include? @suffix
+      suffixes_for_bit.include? @suffix
     end
 
     def + value
