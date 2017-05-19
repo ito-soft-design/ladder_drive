@@ -183,6 +183,26 @@ OUT M1
 
 <!-- [![](http://img.youtube.com/vi/qGbicGLB7Gs/0.jpg)](https://youtu.be/qGbicGLB7Gs) -->
 
+## PLCデバイスへのアクセスツールとしての利用
+
+LadderDriveはPLCデバイスの読み書きツールとしての利用もできます。
+下の様にとても簡単に読み書きできます。
+
+```
+require 'ladder_drive'
+
+plc = LadderDrive::Protocol::Mitsubishi::McProtocol.new host:"192.168.0.10"
+
+plc["M0"] = true
+plc["M0"]         # => true
+plc["M0", 10]     # => [true, false, ..., false]
+
+plc["D0"] = 123
+plc["D0"]       # => 123
+plc["D0", 10] = [0, 1, 2, ..., 9]
+plc["D0".."D9"]   => [0, 1, 2, ..., 9]
+```
+
 ## エスカレーターに関する情報
 
 - [一往確認日記 [ladder_drive]](http://diary.itosoft.com/?category=ladder_drive)
