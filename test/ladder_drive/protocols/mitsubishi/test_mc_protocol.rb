@@ -7,7 +7,7 @@ class TestMcProtocol < Test::Unit::TestCase
   include Protocol::Mitsubishi
 
   def setup
-    @protocol = McProtocol.new host:"localhost", port:5010, log_level: :debug
+    @protocol = McProtocol.new host:"10.0.1.201", port:5010, log_level: :debug
     @running = !!@protocol.open
   end
 
@@ -47,7 +47,7 @@ class TestMcProtocol < Test::Unit::TestCase
     omit_if(!@running)
     d = QDevice.new "D0"
     values = (256..265).to_a
-    @protocol.set_word_to_device(values, d)
+    @protocol.set_words_to_device(values, d)
     assert_equal values, @protocol.get_words_from_device(values.size, d)
   end
 
@@ -70,6 +70,54 @@ class TestMcProtocol < Test::Unit::TestCase
     ld = @protocol.device_by_name d
     assert_equal QDevice, ld.class
     assert_equal "D2048", ld.name
+  end
+
+  # array attr_accessor
+  def test_set_and_get_bit_as_array
+    omit_if(!@running)
+    d = QDevice.new "M0"
+    bits = "10010001".each_char.map{|c| c == "1"}
+    @protocol[d, bits.size] = bits
+    assert_equal bits, @protocol[d, bits.size]
+  end
+
+  def test_set_and_get_bit_as_array_with_range
+    omit_if(!@running)
+    d = QDevice.new "M0"
+    bits = "10010001".each_char.map{|c| c == "1"}
+    @protocol["M0".."M7"] = bits
+    assert_equal bits, @protocol["M0".."M7"]
+  end
+
+  def test_set_and_get_bit_as_array_with_one
+    omit_if(!@running)
+    d = QDevice.new "M0"
+    bits = "10010001".each_char.map{|c| c == "1"}
+    @protocol["M0"] = true
+    assert_equal true, @protocol["M0"]
+  end
+
+  def test_set_and_get_words_as_array
+    omit_if(!@running)
+    d = QDevice.new "D0"
+    values = (256..265).to_a
+    @protocol[d, values.size] = values
+    assert_equal values, @protocol[d, values.size]
+  end
+
+  def test_set_and_get_words_as_array_with_range
+    omit_if(!@running)
+    d = QDevice.new "D0"
+    values = (256..265).to_a
+    @protocol["D0".."D9"] = values
+    assert_equal values, @protocol["D0".."D9"]
+  end
+
+  def test_set_and_get_words_as_array_with_one
+    omit_if(!@running)
+    d = QDevice.new "D0"
+    @protocol["D0"] = 123
+    assert_equal 123, @protocol["D0"]
   end
 
 end

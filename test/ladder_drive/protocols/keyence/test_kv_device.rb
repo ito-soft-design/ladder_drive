@@ -45,4 +45,9 @@ class TestKvDevice < Test::Unit::TestCase
     assert_equal "MR00", (d - 101).name
   end
 
+  def test_mr_device_is_bit_device
+    d = KvDevice.new "MR0"
+    assert_equal true, d.bit_device?
+  end
+
 end

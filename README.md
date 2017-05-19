@@ -180,6 +180,25 @@ OUT M1
 <!-- [![](http://img.youtube.com/vi/qGbicGLB7Gs/0.jpg)](https://youtu.be/qGbicGLB7Gs) -->
 
 
+# Accessing a device values
+
+You can use LadderDrive as a accessing tool for the PLC device.
+
+You can read/write device like this.
+
+```
+require 'ladder_drive'
+
+plc = LadderDrive::Protocol::Mitsubishi::McProtocol.new host:"192.168.0.10"
+
+plc["M0"]       # => true or false
+plc["M0", 20]   # => [true, false, ..., false]
+plc["M0"] = true
+
+plc["D0"] = 123
+plc["D0", 10] = [0, 1, 2, ..., 9]
+```
+
 # Information related ladder_drive
 
 - [My japanese diary [ladder_drive]](http://diary.itosoft.com/?category=ladder_drive)
