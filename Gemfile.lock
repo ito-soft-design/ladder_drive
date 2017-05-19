@@ -1,9 +1,9 @@
 PATH
   remote: .
   specs:
-    ladder_drive (0.3.1)
-      activesupport (>= 4.2.7)
-      thor
+    ladder_drive (0.4.0)
+      activesupport (~> 4.2, >= 4.2.7)
+      thor (~> 0)
 
 GEM
   remote: https://rubygems.org/
