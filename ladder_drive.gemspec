@@ -14,8 +14,8 @@ Gem::Specification.new do |spec|
   spec.homepage      = "https://github.com/ito-soft-design/ladder_drive"
   spec.license       = "MIT"
 
-  spec.add_dependency "thor"
-  spec.add_runtime_dependency "activesupport", ">=4.2.7"
+  spec.add_runtime_dependency 'thor', '~> 0'
+  spec.add_runtime_dependency 'activesupport', '~> 4.2', '>= 4.2.7'
 
   spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
   spec.bindir        = "exe"

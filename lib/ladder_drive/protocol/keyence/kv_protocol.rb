@@ -59,7 +59,7 @@ module Keyence
       values = values.map{|v| v == 0 ? false : true}
       values.each do |v|
         device.bool = v
-        device = device_by_name (device+1).name
+        device += 1
       end
       values
     end
@@ -80,7 +80,7 @@ module Keyence
         @socket.puts(packet)
         res = receive
         raise res unless /OK/i =~ res
-        device = device_by_name (device+1).name
+        device += 1
       end
     end
     alias :set_bit_to_device :set_bits_to_device
@@ -143,6 +143,46 @@ module Keyence
     def dump_packet packet
       packet.dup.chomp
     end
+
+    def available_bits_range suffix=nil
+      case suffix
+      when "TM"
+        1..512
+      when "TM"
+        1..12
+      when "T", "TC", "TS", "C", "CC", "CS"
+        1..120
+      when "CTH"
+        1..2
+      when "CTC"
+        1..4
+      when "AT"
+        1..8
+      else
+        1..1000
+      end
+    end
+
+    def available_words_range suffix=nil
+      case suffix
+      when "TM"
+        1..256
+      when "TM"
+        1..12
+      when "T", "TC", "TS", "C", "CC", "CS"
+        1..120
+        1..120
+      when "CTH"
+        1..2
+      when "CTC"
+        1..4
+      when "AT"
+        1..8
+      else
+        1..500
+      end
+    end
+
 
     private
 

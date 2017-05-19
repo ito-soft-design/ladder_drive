@@ -55,7 +55,7 @@ module LadderDrive
     def word_data
       data.each_slice(2).map do |pair|
         pair << 0 if pair.size == 1
-        pair.pack("c*").unpack("n*")
+        pair.pack("C*").unpack("n*")
       end.flatten
     end
 

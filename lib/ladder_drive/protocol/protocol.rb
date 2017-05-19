@@ -26,11 +26,6 @@ $:.unshift dir unless $:.include? dir
 
 module LadderDrive
 module Protocol
-end
-end
-
-module LadderDrive
-module Protocol
 
   class Protocol
 
@@ -67,12 +62,12 @@ module Protocol
     def get_bit_from_device device; end
     def get_bits_from_device count, device; end
     def set_bits_to_device bits, device; end
-    def set_bit_to_device bit, device; set_bits_to_device bit, device; end
+    def set_bit_to_device bit, device; set_bits_to_device [bit], device; end
 
     def get_word_from_device device; end
     def get_words_from_device(count, device); end
     def set_words_to_device words, device; end
-    def set_word_to_device word, device; set_words_to_device word, device; end
+    def set_word_to_device word, device; set_words_to_device [word], device; end
 
     def device_by_name name; nil; end
 
@@ -93,6 +88,99 @@ module Protocol
         set_bits_to_device values, d
       else
         set_words_to_device values, d
+      end
+    end
+
+    def available_bits_range device=nil
+      -Float::INFINITY..Float::INFINITY
+    end
+
+    def available_words_range device=nil
+      -Float::INFINITY..Float::INFINITY
+    end
+
+    def [] *args
+      case args.size
+      when 1
+        # protocol["DM0"]
+        # protocol["DM0".."DM9"]
+        case args[0]
+        when String
+          self[args[0], 1].first
+        when Range
+          self[args[0].first, args[0].count]
+        else
+          raise ArgumentError.new("#{args[0]} must be String or Range.")
+        end
+      when 2
+        # protocol["DM0", 10]
+        d = device_by_name args[0]
+        c = args[1]
+        if d.bit_device?
+          a = []
+          b = available_bits_range(d).last
+          until c == 0
+            n_c = [b, c].min
+            a += get_bits_from_device(n_c, d)
+            d += n_c
+            c -= n_c
+          end
+          a
+        else
+          a = []
+          b = available_words_range(d).last
+          until c == 0
+            n_c = [b, c].min
+            a += get_words_from_device(n_c, d)
+            d += n_c
+            c -= n_c
+          end
+          a
+        end
+      else
+        raise ArgumentError.new("wrong number of arguments (given #{args.size}, expected 1 or 2)")
+      end
+    end
+
+    def []= *args
+      case args.size
+      when 2
+        # protocol["DM0"] = 0
+        # protocol["DM0".."DM9"] = [0, 1, .., 9]
+        v = args[1]
+        v = [v] unless v.is_a? Array
+        case args[0]
+        when String
+          self[args[0], 1] = v
+        when Range
+          self[args[0].first, args[0].count] = v
+        else
+          raise ArgumentError.new("#{args[1]} must be String or Array.")
+        end
+      when 3
+        # protocol["DM0", 10] = [0, 1, .., 9]
+        d = device_by_name args[0]
+        c = args[1]
+        values = args[2]
+        values = [values] unless values.is_a? Array
+        raise ArgumentError.new("Count #{c} is not match #{args[2].size}.") unless c == values.size
+        if d.bit_device?
+          a = []
+          values.each_slice(available_bits_range(d).last) do |sv|
+            set_bits_to_device(values, d)
+            d += sv.size
+          end
+          a
+        else
+          a = []
+          values.each_slice(available_words_range(d).last) do |sv|
+            set_words_to_device(values, d)
+            d += sv.size
+          end
+          a
+        end
+      else
+        raise ArgumentError.new("wrong number of arguments (given #{args.size}, expected 2 or 3)")
       end
     end
 

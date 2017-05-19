@@ -49,4 +49,14 @@ class TestQDevice < Test::Unit::TestCase
     assert_equal "M0", (d - 101).name
   end
 
+  def test_zr_device
+    d = QDevice.new "ZR0"
+    assert_equal "ZR0", d.name
+  end
+
+  def test_zr_device_s_number_is_decimal
+    d = QDevice.new "ZR100"
+    assert_equal 100, d.number
+  end
+
 end

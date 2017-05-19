@@ -6,7 +6,7 @@ class TestUploader < Test::Unit::TestCase
 
   def setup
     @hex_path = "/tmp/test.hex"
-    hex = IntelHex.new (256..265).map{|v| [v].pack("n").unpack("c*")}.flatten
+    hex = IntelHex.new (256..265).map{|v| [v].pack("n").unpack("C*")}.flatten
     hex.write_to @hex_path
 
     @protocol = McProtocol.new host:"localhost", port:5010, log_level: :debug

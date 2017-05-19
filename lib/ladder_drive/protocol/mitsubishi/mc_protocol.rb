@@ -55,13 +55,24 @@ module Mitsubishi
     end
 
     def get_bits_from_device count, device
+      raise ArgumentError.new("A count #{count} must be between #{available_bits_range.first} and #{available_bits_range.last} for #{__method__}") unless available_bits_range.include? count
+
       device = device_by_name device
       packet = make_packet(body_for_get_bits_from_deivce(count, device))
       @logger.debug("> #{dump_packet packet}")
       open
-      @socket.write(packet.pack("c*"))
+      @socket.write(packet.pack("C*"))
       @socket.flush
       res = receive
+
+      # error checking
+      end_code = res[9,2].pack("C*").unpack("v").first
+      unless end_code == 0
+        error = res[11,2].pack("C*").unpack("v").first
+        raise "return end code 0x#{end_code.to_s(16)} error code 0x#{error.to_s(16)} for get_bits_from_device(#{count}, #{device.name})"
+      end
+
+      # get results
       bits = []
       count.times do |i|
         v = res[11 + i / 2]
@@ -76,14 +87,23 @@ module Mitsubishi
     end
 
     def set_bits_to_device bits, device
+      raise ArgumentError.new("A count #{count} must be between #{available_bits_range.first} and #{available_bits_range.last} for #{__method__}") unless available_bits_range.include? bits.size
+
       device = device_by_name device
       packet = make_packet(body_for_set_bits_to_device(bits, device))
       @logger.debug("> #{dump_packet packet}")
       open
-      @socket.write(packet.pack("c*"))
+      @socket.write(packet.pack("C*"))
       @socket.flush
       res = receive
       @logger.debug("set #{bits} to:#{device.name}")
+
+      # error checking
+      end_code = res[9,2].pack("C*").unpack("v").first
+      unless end_code == 0
+        error = res[11,2].pack("C*").unpack("v").first
+        raise "return end code 0x#{end_code.to_s(16)} error code 0x#{error.to_s(16)} for set_bits_to_device(#{bits}, #{device.name})"
+      end
     end
 
 
@@ -93,30 +113,50 @@ module Mitsubishi
     end
 
     def get_words_from_device(count, device)
+      raise ArgumentError.new("A count #{count} must be between #{available_words_range.first} and #{available_words_range.last} for #{__method__}") unless available_bits_range.include? count
+
       device = device_by_name device
       packet = make_packet(body_for_get_words_from_deivce(count, device))
       @logger.debug("> #{dump_packet packet}")
       open
-      @socket.write(packet.pack("c*"))
+      @socket.write(packet.pack("C*"))
       @socket.flush
       res = receive
+
+      # error checking
+      end_code = res[9,2].pack("C*").unpack("v").first
+      unless end_code == 0
+        error = res[11,2].pack("C*").unpack("v").first
+        raise "return end code 0x#{end_code.to_s(16)} error code 0x#{error.to_s(16)} for get_words_from_device(#{count}, #{device.name})"
+      end
+
+      # get result
       words = []
       res[11, 2 * count].each_slice(2) do |pair|
-        words << pair.pack("c*").unpack("v").first
+        words << pair.pack("C*").unpack("v").first
       end
       @logger.debug("get from: #{device.name} => #{words}")
       words
     end
 
     def set_words_to_device words, device
+      raise ArgumentError.new("A count #{count} must be between #{available_words_range.first} and #{available_words_range.last} for #{__method__}") unless available_bits_range.include? words.size
+
       device = device_by_name device
       packet = make_packet(body_for_set_words_to_device(words, device))
       @logger.debug("> #{dump_packet packet}")
       open
-      @socket.write(packet.pack("c*"))
+      @socket.write(packet.pack("C*"))
       @socket.flush
       res = receive
       @logger.debug("set #{words} to: #{device.name}")
+
+      # error checking
+      end_code = res[9,2].pack("C*").unpack("v").first
+      unless end_code == 0
+        error = res[11,2].pack("C*").unpack("v").first
+        raise "return end code 0x#{end_code.to_s(16)} error code 0x#{error.to_s(16)} for set_words_to_device(#{words}, #{device.name})"
+      end
     end
 
 
@@ -143,7 +183,7 @@ module Mitsubishi
             next if c.nil? || c == ""
 
             res << c.bytes.first
-            len = res[7,2].pack("c*").unpack("v*").first if res.length >= 9
+            len = res[7,2].pack("C*").unpack("v*").first if res.length >= 9
             break if (len + 9 == res.length)
           end
         end
@@ -152,6 +192,14 @@ module Mitsubishi
       end
       @logger.debug("< #{dump_packet res}")
       res
+    end
+
+    def available_bits_range device=nil
+      1..(960 * 16)
+    end
+
+    def available_words_range device=nil
+      1..960
     end
 
   private
@@ -214,11 +262,11 @@ module Mitsubishi
     end
 
     def data_for_short value
-      [value].pack("v").unpack("c*")
+      [value].pack("v").unpack("C*")
     end
 
     def data_for_int value
-      [value].pack("V").unpack("c*")
+      [value].pack("V").unpack("C*")
     end
 
     def dump_packet packet
