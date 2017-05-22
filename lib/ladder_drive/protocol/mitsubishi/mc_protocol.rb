@@ -140,7 +140,7 @@ module Mitsubishi
     end
 
     def set_words_to_device words, device
-      raise ArgumentError.new("A count #{count} must be between #{available_words_range.first} and #{available_words_range.last} for #{__method__}") unless available_bits_range.include? words.size
+      raise ArgumentError.new("A count of words #{words.size} must be between #{available_words_range.first} and #{available_words_range.last} for #{__method__}") unless available_bits_range.include? words.size
 
       device = device_by_name device
       packet = make_packet(body_for_set_words_to_device(words, device))
