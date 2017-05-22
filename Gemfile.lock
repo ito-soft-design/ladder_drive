@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    ladder_drive (0.4.0)
+    ladder_drive (0.4.1)
       activesupport (~> 4.2, >= 4.2.7)
       thor (~> 0)
 
