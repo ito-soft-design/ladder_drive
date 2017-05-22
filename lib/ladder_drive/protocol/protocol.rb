@@ -167,14 +167,14 @@ module Protocol
         if d.bit_device?
           a = []
           values.each_slice(available_bits_range(d).last) do |sv|
-            set_bits_to_device(values, d)
+            set_bits_to_device(sv, d)
             d += sv.size
           end
           a
         else
           a = []
           values.each_slice(available_words_range(d).last) do |sv|
-            set_words_to_device(values, d)
+            set_words_to_device(sv, d)
             d += sv.size
           end
           a
