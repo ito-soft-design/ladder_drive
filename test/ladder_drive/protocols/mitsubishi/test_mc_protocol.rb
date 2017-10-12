@@ -8,7 +8,10 @@ class TestMcProtocol < Test::Unit::TestCase
 
   def setup
     @protocol = McProtocol.new host:"10.0.1.201", port:5010, log_level: :debug
-    @running = !!@protocol.open
+    timeout(0.5) do
+      @running = !!@protocol.open
+    end
+  rescue Timeout::Error
   end
 
   def teardown
