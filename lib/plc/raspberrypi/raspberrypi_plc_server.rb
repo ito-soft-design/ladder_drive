@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016 ITO SOFT DESIGN Inc.
+# Copyright (c) 2017 ITO SOFT DESIGN Inc.
 #
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation files (the
@@ -20,9 +20,55 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-dir = File.expand_path(File.dirname(__FILE__))
-$:.unshift dir unless $:.include? dir
+require 'socket'
+require 'ladder_drive/plc_device'
 
-# Use load instead require, because there are two emulator files.
-load File.join(dir, 'emulator/emulator.rb')
-load File.join(dir, 'raspberrypi/raspberrypi.rb')
+module Plc
+module Raspberrypi
+
+  class RaspberrypiPlcServer
+
+    class << self
+
+      def launch
+        @server ||= begin
+          server = new
+          server.run
+          server
+        end
+      end
+
+    end
+
+    def initialize config = {}
+      @port = config[:port] || 5555
+      @plc = RaspberrypiPlc.new
+    end
+
+    def run
+      puts "launching respberrypi plc ... "
+      @plc.run
+      puts "done launching"
+
+      Thread.new do
+        server = TCPServer.open @port
+        loop do
+          Thread.start(server.accept) do |socket|
+            while line = socket.gets
+              begin
+                r = @plc.execute_console_commands line
+                socket.puts r
+              rescue => e
+                socket.puts "E0 #{e}\r"
+              end
+            end
+          end
+        end
+      end
+
+    end
+
+  end
+
+end
+end

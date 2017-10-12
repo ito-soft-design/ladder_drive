@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016 ITO SOFT DESIGN Inc.
+# Copyright (c) 2017 ITO SOFT DESIGN Inc.
 #
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation files (the
@@ -23,6 +23,5 @@
 dir = File.expand_path(File.dirname(__FILE__))
 $:.unshift dir unless $:.include? dir
 
-# Use load instead require, because there are two emulator files.
-load File.join(dir, 'emulator/emulator.rb')
-load File.join(dir, 'raspberrypi/raspberrypi.rb')
+require 'raspberrypi_plc'
+require 'raspberrypi_plc_server'

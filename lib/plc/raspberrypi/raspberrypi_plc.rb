@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016 ITO SOFT DESIGN Inc.
+# Copyright (c) 2017 ITO SOFT DESIGN Inc.
 #
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation files (the
@@ -20,9 +20,17 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-dir = File.expand_path(File.dirname(__FILE__))
-$:.unshift dir unless $:.include? dir
+require 'ladder_drive/plc_device'
+require 'plc/emulator/emulator'
 
-# Use load instead require, because there are two emulator files.
-load File.join(dir, 'emulator/emulator.rb')
-load File.join(dir, 'raspberrypi/raspberrypi.rb')
+include LadderDrive
+
+module Plc
+module Raspberrypi
+
+  class RaspberrypiPlc < Plc::Emulator::EmuPlc
+
+  end
+
+end
+end

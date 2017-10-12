@@ -38,6 +38,7 @@ module LadderDrive
       def finalize
         proc {
           EmuPlcServer.terminate
+          RaspberrypiPlcServer.terminate
         }
       end
 
@@ -82,6 +83,8 @@ module LadderDrive
       case self.name
       when :emulator
         Plc::Emulator::EmuPlcServer.launch
+      when :raspberrypi
+        Plc::Raspberrypi::RaspberrypiPlcServer.launch
       else
         # DO NOTHIN
         # Actual device is running independently.
