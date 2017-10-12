@@ -4,8 +4,6 @@ require 'plc'
 
 include Plc::Emulator
 
-include Plc::Emulator
-
 class EmuPlc
   def _run_cycle; run_cycle; end
   def _stacks; @stacks; end
