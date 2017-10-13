@@ -163,9 +163,12 @@ module Emulator
           end
         end
         r.map{|e| e.to_s(16)}.join(" ") + "\r\n"
-      when /^WRS/i
+
+      # LadderDrive is only use WRS command.
+      # WR command is sent from irBoard.
+      when /^WR/i, /^WRS/i
         d = device_by_name a[1]
-        c = a[2].to_i
+        c = /^WR/i =~ a.first ? 1 : a[2].to_i
         case d.suffix
         when "PRG"
           a[3, c].each do |v|
