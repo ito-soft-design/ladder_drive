@@ -58,7 +58,7 @@ module Emulator
               r = @plc.execute_console_commands line
               socket.puts r
             rescue => e
-              socket.puts "E0 #{e}\r"
+              socket.puts "E0 #{e}\r\n"
             end
           end
         end

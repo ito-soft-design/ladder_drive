@@ -74,7 +74,7 @@ module Keyence
         when false, 0
           cmd = "RS"
         end
-        packet = "#{cmd} #{device.name}\r"
+        packet = "#{cmd} #{device.name}\r\n"
         @logger.debug("> #{dump_packet packet}")
         open
         @socket.puts(packet)
@@ -93,12 +93,12 @@ module Keyence
 
     def get_words_from_device(count, device)
       device = local_device device
-      packet = "RDS #{device.name} #{count}\r"
+      packet = "RDS #{device.name}.H #{count}\r\n"
       @logger.debug("> #{dump_packet packet}")
       open
       @socket.puts(packet)
       res = receive
-      values = res.split(/\s+/).map{|v| v.to_i}
+      values = res.split(/\s+/).map{|v| v.to_i(16)}
       @logger.debug("#{device.name}[#{count}] => #{values}")
       values
     end
@@ -106,7 +106,7 @@ module Keyence
     def set_words_to_device words, device
       device = local_device device
       words = [words] unless words.is_a? Array
-      packet = "WRS #{device.name} #{words.size} #{words.map{|w| w.to_s}.join(" ")}\r"
+      packet = "WRS #{device.name}.H #{words.size} #{words.map{|w| w.to_s(16)}.join(" ")}\r\n"
       @logger.debug("> #{dump_packet packet}")
       open
       @socket.puts(packet)

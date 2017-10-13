@@ -134,11 +134,11 @@ module Emulator
       when /^ST/i
         d = device_by_name a[1]
         d.set_value true, :in
-        "OK\r"
+        "OK\r\n"
       when /^RS/i
         d = device_by_name a[1]
         d.set_value false, :in
-        "OK\r"
+        "OK\r\n"
       when /^RDS/i
         d = device_by_name a[1]
         c = a[2].to_i
@@ -162,14 +162,14 @@ module Emulator
             end
           end
         end
-        r.map{|e| e.to_s}.join(" ") + "\r"
+        r.map{|e| e.to_s(16)}.join(" ") + "\r\n"
       when /^WRS/i
         d = device_by_name a[1]
         c = a[2].to_i
         case d.suffix
         when "PRG"
           a[3, c].each do |v|
-            program_data[d.number * 2, 2] = [v.to_i].pack("n").unpack("C*")
+            program_data[d.number * 2, 2] = [v.to_i(16)].pack("n").unpack("C*")
             d = device_by_name (d+1).name
           end
         else
@@ -180,13 +180,14 @@ module Emulator
             end
           else
             a[3, c].each do |v|
-              d.word = v.to_i
-              d.set_value v.to_i, :in
+              v = v.to_i(16)
+              d.word = v
+              d.set_value v, :in
               d = device_by_name (d+1).name
             end
           end
         end
-        "OK\r"
+        "OK\r\n"
       when /E/
         eval(a[1..-1].join(" ")).inspect
       else
