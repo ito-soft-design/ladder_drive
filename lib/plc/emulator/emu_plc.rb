@@ -62,6 +62,7 @@ module Emulator
         d = device_dict[name]
         unless d
           d = EmuDevice.new name
+          d.plc = self
           device_dict[name] = d
         end
         d
@@ -140,10 +141,11 @@ module Emulator
         d.set_value false, :in
         "OK\r\n"
       when /^RDS/i
+        word = /.H/ =~ a[1]
         d = device_by_name a[1]
         c = a[2].to_i
         r = []
-        if d.bit_device?
+        if !word && d.bit_device?
           c.times do
             r << (d.bool(:out) ? 1 : 0)
             d = device_by_name (d+1).name
@@ -164,9 +166,12 @@ module Emulator
         end
         r.map{|e| e.to_s(16)}.join(" ") + "\r\n"
 
-      # LadderDrive is only use WRS command.
-      # WR command is sent from irBoard.
+      # LadderDrive communication is bases KV protocol.
+      # LadderDrive console is use WRS command only. (Not use WR command)
+      # WR command is for irBoard. (http://irboard.itosoft.com)
+      # A word value is communicated with hex format only in this product. (hard coding)
       when /^WRS?/i
+        word = /.H/ =~ a[1]
         d = device_by_name a[1]
         a.insert 2, "1" if /^WR$/i =~ a.first
         c = a[2].to_i
@@ -177,17 +182,17 @@ module Emulator
             d = device_by_name (d+1).name
           end
         else
-          if d.bit_device?
+          if !word && d.bit_device?
             a[3, c].each do |v|
               d.set_value v == "0" ? false : true, :in
-              d = device_by_name (d+1).name
+              d = d + 1#device_by_name (d+1).name
             end
           else
             a[3, c].each do |v|
               v = v.to_i(16)
-              d.word = v
-              d.set_value v, :in
-              d = device_by_name (d+1).name
+              d.set_word v, :in
+              #d.set_value v, :in
+              d = d + 1#device_by_name (d+1).name
             end
           end
         end
