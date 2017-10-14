@@ -166,9 +166,10 @@ module Emulator
 
       # LadderDrive is only use WRS command.
       # WR command is sent from irBoard.
-      when /^WR/i, /^WRS/i
+      when /^WRS?/i
         d = device_by_name a[1]
-        c = /^WR/i =~ a.first ? 1 : a[2].to_i
+        a.insert 2, "1" if /^WR$/i =~ a.first
+        c = a[2].to_i
         case d.suffix
         when "PRG"
           a[3, c].each do |v|
