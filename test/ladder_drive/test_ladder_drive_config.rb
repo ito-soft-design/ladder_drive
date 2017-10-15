@@ -39,7 +39,7 @@ class TestLadderDriveConfig < Test::Unit::TestCase
 
   def test_emulator
     config = LadderDriveConfig.new
-    expected = { host:"localhost", port:5555, :protocol=>"emu_protocol" }
+    expected = {:host=>"localhost", :keep=>[["L0", "L1023"], ["H0", "H1023"]], :port=>5555, :protocol=>"emu_protocol"}
     assert_equal expected, config[:plc][:emulator]
   end
 

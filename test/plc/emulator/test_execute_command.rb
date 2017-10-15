@@ -27,8 +27,9 @@ class TestCycleRun < Test::Unit::TestCase
   def test_it_should_receive_rds_with_bit
     @plc.execute_console_commands "ST M1"
     @plc._run_cycle
-    r = @plc.execute_console_commands "RDS M0 2"
-    assert_equal "0 1\r\n", r
+    r = @plc.execute_console_commands "RDS M0 1"
+    # it returns word value.
+    assert_equal "2\r\n", r
   end
 
   def test_it_should_receive_rds_with_word

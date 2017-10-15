@@ -21,6 +21,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 require 'ladder_drive/plc_device'
+require 'yaml'
 
 include LadderDrive
 
@@ -31,6 +32,7 @@ module Emulator
 
     attr_accessor :program_data
     attr_reader :program_pointer
+    attr_reader :config
     attr_reader :device_dict
     attr_reader :errors
 
@@ -49,11 +51,14 @@ module Emulator
     INDEX_BIT_STACK       = 5
     SIZE_OF_BIT_STACK     = 3
 
-    def initialize
+    SAVE_INTERVAL = 1.0 #60.0
+
+    def initialize config={}
       SUFFIXES.each do |k|
         eval "@#{k}_devices = []"
       end
       @lock = Mutex.new
+      @config = config
       reset
     end
 
@@ -95,6 +100,7 @@ module Emulator
         sleep 0.1
       when STOP_PLC_FLAG | CLEAR_PROGRAM_FLAG
         reset
+        load
         status_form_plc.value = CLEAR_PROGRAM_FLAG
         sleep 0.1
       when 0
@@ -106,6 +112,8 @@ module Emulator
       else
         sleep 0.1
       end
+      # Save must be executed berofe sync_output, because changed flag was clear after sync_output
+      save
       sync_output
     end
 
@@ -131,7 +139,14 @@ module Emulator
 
     def execute_console_commands line
       a = line.chomp.split(/\s+/)
-      case a.first
+
+      # separate data type except eval command.
+      unless a[0] == "E"
+        word = /([A-Z0-9]+)(\.H)?/ =~ a[1]
+        a[1] = $1
+      end
+
+      case a[0]
       when /^ST/i
         d = device_by_name a[1]
         d.set_value true, :in
@@ -141,7 +156,6 @@ module Emulator
         d.set_value false, :in
         "OK\r\n"
       when /^RDS/i
-        word = /.H/ =~ a[1]
         d = device_by_name a[1]
         c = a[2].to_i
         r = []
@@ -171,7 +185,6 @@ module Emulator
       # WR command is for irBoard. (http://irboard.itosoft.com)
       # A word value is communicated with hex format only in this product. (hard coding)
       when /^WRS?/i
-        word = /.H/ =~ a[1]
         d = device_by_name a[1]
         a.insert 2, "1" if /^WR$/i =~ a.first
         c = a[2].to_i
@@ -204,7 +217,62 @@ module Emulator
       end
     end
 
+    # --- queries
+    def keep_device? device
+      @keep_ranges ||= begin
+        if config[:keep]
+          config[:keep].map do |a|
+            [device_by_name(a.first), device_by_name(a.last)]
+          end
+        else
+          []
+        end
+      end
+      @keep_ranges.each do |a|
+        f = a.first
+        e = a.last
+        next unless f.suffix == device.suffix
+        return true if (f.number..e.number).include? device.number
+      end
+      false
+    end
+
     private
+
+      # ----------------
+      # Load / Save keep devices
+
+      def dump_memory_path
+        @dump_memory_paty ||= File.join("cache", "dump_memory.yml").tap do |path|
+          FileUtils.mkdir_p( File.dirname(path))
+        end
+      end
+
+      def load
+        path = dump_memory_path
+        return unless File.exist? path
+
+        YAML.load(File.read(path)).each do |a|
+          d = device_by_name(a.first)
+          d.value = a.last
+        end
+      end
+
+      def save
+        devices = @device_dict.values.select{|d| self.keep_device?(d)}
+        needs_save = @pending_save || !(devices.select{|d| d.changed?}).empty?
+        return unless needs_save
+        now = Time.now
+        if @saved_at && ((now - @saved_at) < SAVE_INTERVAL)
+          @pending_save ||= true
+          return
+        end
+
+        File.write dump_memory_path, YAML.dump(devices.map{|d| [d.name, d.value]})
+        @saved_at = now
+        @pending_save = false
+      end
+
 
       # ----------------
       # stack operations

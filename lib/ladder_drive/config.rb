@@ -62,17 +62,16 @@ module LadderDrive
         host: "localhost",
         port: 5555,
         protocol: "emu_protocol",
-      }
-      raspberrypi_default = {
-        host: "localhost",
-        port: 5555,
-        protocol: "emu_protocol",
+        keep: [
+          ["L0", "L1023"],
+          ["H0", "H1023"],
+        ],
       }
 
       @config = default.merge options
       @config[:plc] ||= {}
       @config[:plc][:emulator] = @config[:plc][:emulator] ? emulator_default.merge(@config[:plc][:emulator]) : emulator_default
-      @config[:plc][:raspberrypi] = @config[:plc][:raspberrypi] ? emulator_default.merge(@config[:plc][:raspberrypi]) : raspberrypi_default
+      @config[:plc][:raspberrypi] = @config[:plc][:raspberrypi] ? emulator_default.merge(@config[:plc][:raspberrypi]) : emulator_default
 
       @config[:default] ||= {}
 

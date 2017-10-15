@@ -38,6 +38,7 @@ module Emulator
       @lock = Mutex.new
       @in_value = 0
       @out_value = 0
+      @changed = false
     end
 
     def reset
@@ -50,6 +51,10 @@ module Emulator
 
     def plc= plc
       @plc = WeakRef.new plc
+    end
+
+    def changed?
+      @changed
     end
 
     def value= value
@@ -67,7 +72,7 @@ module Emulator
     end
 
     def bool= value
-      @lock.synchronize { super }
+      set_value value
     end
 
     def word kind=nil
@@ -125,7 +130,8 @@ module Emulator
         when :out
           @out_value = value
         else
-          @value = value
+          @changed = true unless @value == value
+          @value = value if @changed
         end
       }
     end
@@ -133,7 +139,8 @@ module Emulator
     def sync_input
       @lock.synchronize {
         unless @in_value.nil?
-          @value = @in_value
+          @changed = true unless @value == @in_value
+          @value = @in_value if @changed
           @in_value = nil
         end
       }
@@ -142,6 +149,7 @@ module Emulator
     def sync_output
       @lock.synchronize {
         @out_value = @value
+        @changed = false
       }
     end
 

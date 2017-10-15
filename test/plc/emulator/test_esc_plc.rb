@@ -5,7 +5,7 @@ require 'emulator/emulator'
 class TestEmuPlc < Test::Unit::TestCase
 
   setup do
-    @plc = EmuPlc.new
+    @plc = EmuPlc.new keep:[["L0", "L99"], ["H0", "H199"]]
   end
 
   def test_program_data
@@ -29,6 +29,18 @@ LD X0
 EOB
     @plc.program_data = LadderDrive::Asm.new(source).codes
     assert_equal [0x10, 0x80, 0x00], @plc.program_data
+  end
+
+  def test_keep_device?
+    assert_equal false, @plc.keep_device?(@plc.device_by_name("M0"))
+    assert_equal true, @plc.keep_device?(@plc.device_by_name("L0"))
+    assert_equal true, @plc.keep_device?(@plc.device_by_name("L99"))
+    assert_equal false, @plc.keep_device?(@plc.device_by_name("L100"))
+    assert_equal true, @plc.keep_device?(@plc.device_by_name("H0"))
+    assert_equal true, @plc.keep_device?(@plc.device_by_name("H99"))
+    assert_equal true, @plc.keep_device?(@plc.device_by_name("H100"))
+    assert_equal true, @plc.keep_device?(@plc.device_by_name("H199"))
+    assert_equal false, @plc.keep_device?(@plc.device_by_name("H200"))
   end
 
 end

@@ -82,9 +82,9 @@ module LadderDrive
     def run
       case self.name
       when :emulator
-        Plc::Emulator::EmuPlcServer.launch
+        Plc::Emulator::EmuPlcServer.launch @target_info
       when :raspberrypi
-        Plc::Raspberrypi::RaspberrypiPlcServer.launch
+        Plc::Raspberrypi::RaspberrypiPlcServer.launch @target_info
       else
         # DO NOTHIN
         # Actual device is running independently.

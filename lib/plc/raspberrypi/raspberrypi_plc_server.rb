@@ -30,9 +30,9 @@ module Raspberrypi
 
     class << self
 
-      def launch
+      def launch config={}
         @server ||= begin
-          server = new
+          server = new config
           server.run
           server
         end
@@ -42,7 +42,7 @@ module Raspberrypi
 
     def initialize config = {}
       @port = config[:port] || 5555
-      @plc = RaspberrypiPlc.new
+      @plc = RaspberrypiPlc.new config
     end
 
     def run

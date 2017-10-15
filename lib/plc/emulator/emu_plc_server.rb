@@ -28,11 +28,13 @@ module Emulator
 
   class EmuPlcServer
 
+    attr_reader :config
+
     class << self
 
-      def launch
+      def launch config={}
         @server ||= begin
-          server = new
+          server = new config
           server.run
           server
         end
@@ -42,7 +44,7 @@ module Emulator
 
     def initialize config = {}
       @port = config[:port] || 5555
-      @plc = EmuPlc.new
+      @plc = EmuPlc.new config
     end
 
     def run

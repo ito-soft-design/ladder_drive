@@ -39,4 +39,13 @@ class TestEmuDevice < Test::Unit::TestCase
     assert_equal false, (@device + 0).bool
   end
 
+  def test_changed
+    assert_equal false, @device.changed?
+    @device.value = 1
+    assert_equal true, @device.changed?
+    # after sync_output, it should be reset.
+    @device.sync_output
+    assert_equal false, @device.changed?
+  end
+
 end
