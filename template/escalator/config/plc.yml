@@ -19,6 +19,18 @@ plc:
     host: 192.168.0.11
     # port: 8501
 
+  # Raspberry Pi
+  raspberrypi:
+    cpu: Raspberry Pi
+    io: # assign gpio to x and y
+      inputs:
+      - x0: 4
+      - x1: 17
+      - x2: 27
+      outputs:
+      - y0: 18
+      - y1: 23
+      - y2: 24
 
 # default section
 default:
