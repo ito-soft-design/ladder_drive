@@ -66,9 +66,14 @@ module Emulator
       @lock.synchronize {
         d = device_dict[name]
         unless d
-          d = EmuDevice.new name
-          d.plc = self
-          device_dict[name] = d
+          # try normalized name again
+          new_d = EmuDevice.new(name)
+          d = device_dict[new_d.name]
+          unless d
+            d = new_d
+            d.plc = self
+            device_dict[d.name] = d
+          end
         end
         d
       }

@@ -57,7 +57,8 @@ module LadderDrive
       when Fixnum
         @suffix = ESC_SUFFIXES[a]
         @number = b
-      when String
+      when String, Symbol
+        a = a.to_s # convert to string if it's a symbol
         if b
           @suffix = a.upcase
           @number = b

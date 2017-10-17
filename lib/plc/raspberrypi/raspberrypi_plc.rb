@@ -55,8 +55,9 @@ module Raspberrypi
 
       def sync_input
         if @available_pi_piper
-          @io_dict[:inputs].each do |a|
-            a.first.set_value a.last.on?, :in
+          @io_dict[:inputs].each do |device, pin|
+            pin.read
+            device.set_value pin.on?, :in
           end
         end
         super
@@ -66,8 +67,12 @@ module Raspberrypi
         super
         return unless @available_pi_piper
 
-        @io_dict[:inputs].each do |a|
-          a.last.on? ? a.first.on : a.first.off
+        @io_dict[:outputs].each do |device, pin|
+          if device.bool
+            pin.on
+          else
+            pin.off
+          end
         end
       end
 
