@@ -41,6 +41,7 @@ module Raspberrypi
     private
 
       def setup_io
+        @available_pi_piper = false
         @io_dict = { inputs:[], outputs:[] }
         config[:io][:inputs].each do |dev, info|
           @io_dict[:inputs] << [device_by_name(dev), Pin.new(pin:info[:pin], direction: :in, pull:(info[:pull].to_sym || :off))]
@@ -48,22 +49,27 @@ module Raspberrypi
         config[:io][:outputs].each do |dev, info|
           @io_dict[:outputs] << [device_by_name(dev), Pin.new(pin:info[:pin], direction: :out)]
         end
+        @available_pi_piper = true
+      rescue LoadError
       end
 
-    def sync_input
-      super
-      @io_dict[:inputs].each do |a|
-        a.first.set_value a.last.on?, :in
+      def sync_input
+        if @available_pi_piper
+          @io_dict[:inputs].each do |a|
+            a.first.set_value a.last.on?, :in
+          end
+        end
+        super
       end
-      super
-    end
 
-    def sync_output
-      super
-      @io_dict[:inputs].each do |a|
-        a.last.on? ? a.first.on : a.first.off
+      def sync_output
+        super
+        return unless @available_pi_piper
+
+        @io_dict[:inputs].each do |a|
+          a.last.on? ? a.first.on : a.first.off
+        end
       end
-    end
 
 
   end
