@@ -180,6 +180,62 @@ OUT M1
 <!-- [![](http://img.youtube.com/vi/qGbicGLB7Gs/0.jpg)](https://youtu.be/qGbicGLB7Gs) -->
 
 
+## Raspberry Pi
+
+You can run it on the Raspberry Pi.
+X or Y devices are assigned to GPIOs.
+
+### Installation
+
+```sh
+$ sudo apt-get install ruby-dev
+$ sudo apt-get install libssl-dev
+$ sudo gem install ladder_drive
+```
+
+### Execution
+
+```sh
+$ ladder_drive create project
+$ cd project
+$ rake target=raspberrypi
+```
+
+### I/O settings
+
+You can describe io configuration by confing/plc.yml file.
+Define inputs pins by inputs section.
+Devine outputs pins by outptus section.
+You can specify pull up or pull down and invert options for input.
+
+```
+  # Raspberry Pi
+  raspberrypi:
+    cpu: Raspberry Pi
+    io: # assign gpio to x and y
+      inputs:
+        x0:
+          pin: 4        # gpio no
+          pull: up      # up | down | off
+          invert: true
+        x1:
+          pin: 17
+          pull: up
+          invert: true
+        x2:
+          pin: 27
+          pull: up
+          invert: true
+      outputs:
+        y0:
+          pin: 18
+        y1:
+          pin: 23
+        y2:
+          pin: 42
+```
+
+
 # Accessing a device values
 
 You can use LadderDrive as a accessing tool for the PLC device.
