@@ -55,11 +55,13 @@ module Keyence
     end
 
     def get_bits_from_device count, device
-      values = get_words_from_device count, device
-      values = values.map{|v| v == 0 ? false : true}
-      values.each do |v|
-        device.bool = v
-        device += 1
+      c = (count + 15) / 16
+      words = get_words_from_device c, device
+      values = []
+      count.times do |i|
+        index = i / 16
+        bit = i % 16
+        values << ((words[index] & (1 << bit)) != 0)
       end
       values
     end
