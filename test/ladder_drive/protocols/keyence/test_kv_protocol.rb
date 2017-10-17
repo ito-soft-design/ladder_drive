@@ -7,7 +7,10 @@ class TestKvProtocol < Test::Unit::TestCase
 
   def setup
     @protocol = KvProtocol.new host:"10.0.1.200", log_level: :debug
-    @running = !!@protocol.open
+    Timeout.timeout(0.5) do
+      @running = !!@protocol.open
+    end
+  rescue Timeout::Error
   end
 
   def teardown

@@ -21,6 +21,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 require 'ladder_drive/plc_device'
+require 'weakref'
 
 include LadderDrive
 
@@ -30,12 +31,14 @@ module Emulator
   class EmuDevice < PlcDevice
 
     attr_reader :in_value, :out_value
+    attr_accessor :plc
 
     def initialize a, b = nil
       super
       @lock = Mutex.new
       @in_value = 0
       @out_value = 0
+      @changed = false
     end
 
     def reset
@@ -44,6 +47,14 @@ module Emulator
         @in_value = nil
         @out_value = 0
       }
+    end
+
+    def plc= plc
+      @plc = WeakRef.new plc
+    end
+
+    def changed?
+      @changed
     end
 
     def value= value
@@ -61,17 +72,41 @@ module Emulator
     end
 
     def bool= value
-      @lock.synchronize { super }
+      set_value value
     end
 
     def word kind=nil
-      value kind
+      if bit_device?
+        v = 0
+        d = self
+        f = 1
+        16.times do
+          v |= f if d.bool(kind)
+          d = d + 1
+          f <<= 1
+        end
+        v
+      else
+        value kind
+      end
     end
 
     def word= value
-      @lock.synchronize {
-        super
-      }
+      set_word value
+    end
+
+    def set_word value, kind=nil
+      if bit_device?
+        f = 1
+        d = self
+        16.times do
+          d.set_value (value & f) != 0, kind
+          d = d + 1
+          f <<= 1
+        end
+      else
+        set_value value, kind
+      end
     end
 
     def value kind=nil
@@ -95,7 +130,8 @@ module Emulator
         when :out
           @out_value = value
         else
-          @value = value
+          @changed = true unless @value == value
+          @value = value if @changed
         end
       }
     end
@@ -103,7 +139,8 @@ module Emulator
     def sync_input
       @lock.synchronize {
         unless @in_value.nil?
-          @value = @in_value
+          @changed = true unless @value == @in_value
+          @value = @in_value if @changed
           @in_value = nil
         end
       }
@@ -112,7 +149,18 @@ module Emulator
     def sync_output
       @lock.synchronize {
         @out_value = @value
+        @changed = false
       }
+    end
+
+    def + value
+      d = super
+      plc ? plc.device_by_name(d.name) : d
+    end
+
+    def - value
+      d = super
+      plc ? plc.device_by_name(d.name) : d
     end
 
   end

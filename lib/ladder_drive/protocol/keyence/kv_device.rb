@@ -32,6 +32,14 @@ module Keyence
       @suffix = "R" if @suffix.nil? || @suffix.length == 0
     end
 
+    def + value
+      self.class.new self.suffix, self.number + value
+    end
+
+    def - value
+      self.class.new self.suffix, [self.number - value, 0].max
+    end
+
     private
 
       SUFFIXES_FOR_DEC      = %w(DM EM FM ZF TM Z T TC TS C CC CS CTH CTC AT CM VM)

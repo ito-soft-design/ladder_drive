@@ -59,8 +59,8 @@ plc以下にLadderDriveを実行するPLCプロジェクトの雛形がありま
 
 #### PLCの通信設定
 
-plc以下の使用したいPLCのプロジェクトファイルを開きます。
-IPアドレスなど必要な箇所変更し、PLCに転送します。
+plcディレクトリ以下の使用したいPLCのプロジェクトファイルを開きます。
+IPアドレスなど必要な箇所を変更し、PLCに転送します。
 
 [![](http://img.youtube.com/vi/fGdyIo9AmuE/0.jpg)](https://youtu.be/fGdyIo9AmuE)
 
@@ -118,7 +118,7 @@ targetを指定するとplc.ymlのplcセクション内の該当するターゲ�
 $ rake target=iq-r
 ```
 
-plc.ymlファイルのdefaultセクションのtargetでデフォルトのターゲトを設定できます。
+plc.ymlファイルのdefaultセクションのtargetでデフォルトのターゲットを設定できます。
 
 ```
 # plc.yml
@@ -148,7 +148,7 @@ done uploading
 コンソールモードではコマンドを打つ事でデバイスの読み書きができます。
 
 デバイスの値を読み取るにはrコマンドを使用します。
-下の例ではm0から8子分のデバイスを読み出します。
+下の例ではm0から8個分のデバイスを読み出します。
 
 ```sh
 > r m0 8
@@ -182,6 +182,72 @@ OUT M1
 [![https://gyazo.com/565d24a35887503281a46775f6ccd747](https://i.gyazo.com/565d24a35887503281a46775f6ccd747.gif)](https://gyazo.com/565d24a35887503281a46775f6ccd747)
 
 <!-- [![](http://img.youtube.com/vi/qGbicGLB7Gs/0.jpg)](https://youtu.be/qGbicGLB7Gs) -->
+
+## Raspberry Pi
+
+Raspberry Pi上で動作させることもできます。
+XとYデバイスはGPIOに割り付けます。
+
+### インストール
+
+OSとしてRaspbianを使用した場合は次の手順でインストールできます。
+
+```sh
+$ sudo apt-get install ruby-dev
+$ sudo apt-get install libssl-dev
+$ sudo gem install ladder_drive
+```
+
+この時の環境は下の通りです。
+
+```
+$ uname -a
+Linux raspberrypi 4.9.41+ #1023 Tue Aug 8 15:47:12 BST 2017 armv6l GNU/Linux
+```
+
+
+### 実行
+
+```sh
+$ ladder_drive create project
+$ cd project
+$ rake target=raspberrypi
+```
+
+### I/O設定
+
+Project下のconfig/plc.ymlファイルで変更できます。
+inputsで入力ピンを定義します。outputsで出力ピンを定義します。
+pinにGPIO番号を指定します。
+入力の場合は pull up, pull downの指定や invertで反転させることができます。
+
+```
+  # Raspberry Pi
+  raspberrypi:
+    cpu: Raspberry Pi
+    io: # assign gpio to x and y
+      inputs:
+        x0:
+          pin: 4        # gpio no
+          pull: up      # up | down | off　で指定します。
+          invert: true
+        x1:
+          pin: 17
+          pull: up
+          invert: true
+        x2:
+          pin: 27
+          pull: up
+          invert: true
+      outputs:
+        y0:
+          pin: 18
+        y1:
+          pin: 23
+        y2:
+          pin: 42
+```
+
 
 ## PLCデバイスへのアクセスツールとしての利用
 

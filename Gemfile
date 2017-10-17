@@ -6,3 +6,6 @@ gemspec
 gem "test-unit"
 
 gem "activesupport", ">=4.2.7"
+
+gem 'pi_piper'
+

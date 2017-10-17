@@ -1,11 +1,13 @@
 require 'test/unit'
 require File.expand_path(File.join(File.dirname(__FILE__), "../../helper"))
-require 'emulator/emulator'
+require 'raspberrypi/raspberrypi'
 
-class TestEmuPlc < Test::Unit::TestCase
+include Plc::Raspberrypi
+
+class TestRaspberrypiPlc < Test::Unit::TestCase
 
   setup do
-    @plc = EmuPlc.new
+    @plc = RaspberrypiPlc.new
   end
 
   def test_program_data
