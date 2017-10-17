@@ -50,7 +50,10 @@ module Raspberrypi
           @io_dict[:outputs] << [device_by_name(dev), Pin.new(pin:info[:pin], direction: :out)]
         end
         @available_pi_piper = true
+      rescue NoMethodError
+        puts "WARN: defention of io is missing!"
       rescue LoadError
+        puts "WARN: pi_piper is not available this system!"
       end
 
       def sync_input

@@ -62,7 +62,7 @@ module LadderDrive
           @suffix = a.upcase
           @number = b
         else
-          /([A-Z]+)?(\d+)/i =~ a
+          /([A-Z]+)?([0-9A-F]+)/i =~ a
           @suffix = ($1 || "").upcase
           case number_type
           when NUMBER_TYPE_DEC_HEX
@@ -90,7 +90,7 @@ module LadderDrive
         end
         "#{@suffix}#{ns}"
       when NUMBER_TYPE_HEX
-        ns = @number.to_s(16)
+        ns = @number.to_s(16).upcase
         ns = "0" + ns unless /^[0-9]/ =~ ns
         "#{@suffix}#{ns}"
       else
