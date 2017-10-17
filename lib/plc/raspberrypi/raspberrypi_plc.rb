@@ -53,7 +53,7 @@ module Raspberrypi
       rescue NoMethodError
         puts "WARN: defention of io is missing!"
       rescue LoadError
-        puts "WARN: pi_piper is not available this system!"
+        puts "WARN: pi_piper is not available in this system!"
       end
 
       def sync_input
