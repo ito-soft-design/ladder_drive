@@ -25,8 +25,8 @@ plc:
     io: # assign gpio to x and y
       inputs:
         x0:
-          pin: 4
-          pull: up
+          pin: 4        # gpio no
+          pull: up      # up | down | off
           invert: true
         x1:
           pin: 17
