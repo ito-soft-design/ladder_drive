@@ -25,3 +25,4 @@ $:.unshift dir unless $:.include? dir
 
 # Use load instead require, because there are two emulator files.
 load File.join(dir, 'emulator/emulator.rb')
+load File.join(dir, 'raspberrypi/raspberrypi.rb')

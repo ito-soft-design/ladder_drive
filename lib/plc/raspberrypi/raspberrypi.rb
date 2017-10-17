@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2016 ITO SOFT DESIGN Inc.
+# Copyright (c) 2017 ITO SOFT DESIGN Inc.
 #
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation files (the
@@ -20,54 +20,8 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-require 'socket'
-require 'ladder_drive/plc_device'
+dir = File.expand_path(File.dirname(__FILE__))
+$:.unshift dir unless $:.include? dir
 
-module Plc
-module Emulator
-
-  class EmuPlcServer
-
-    attr_reader :config
-
-    class << self
-
-      def launch config={}
-        @server ||= begin
-          server = new config
-          server.run
-          server
-        end
-      end
-
-    end
-
-    def initialize config = {}
-      @port = config[:port] || 5555
-      @plc = EmuPlc.new config
-    end
-
-    def run
-      @plc.run
-      Thread.new do
-        server = TCPServer.open @port
-        puts "launching emulator ... "
-        loop do
-          socket = server.accept
-          puts "done launching"
-          while line = socket.gets
-            begin
-              r = @plc.execute_console_commands line
-              socket.puts r
-            rescue => e
-              socket.puts "E0 #{e}\r\n"
-            end
-          end
-        end
-      end
-    end
-
-  end
-
-end
-end
+require 'raspberrypi_plc'
+require 'raspberrypi_plc_server'
