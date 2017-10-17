@@ -24,13 +24,22 @@ plc:
     cpu: Raspberry Pi
     io: # assign gpio to x and y
       inputs:
-      - x0: 4
-      - x1: 17
-      - x2: 27
+        x0:
+          pin: 4
+          pull: :up
+        x1:
+          pin: 17
+          pull: :up
+        x2:
+          pin: 27
+          pull: :up
       outputs:
-      - y0: 18
-      - y1: 23
-      - y2: 24
+        y0:
+          pull: :up
+        y1:
+          pin: 23
+        y2:
+          pin: 42
 
 # default section
 default:

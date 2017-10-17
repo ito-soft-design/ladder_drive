@@ -22,13 +22,49 @@
 
 require 'ladder_drive/plc_device'
 require 'plc/emulator/emulator'
+require 'pi_piper'
 
 include LadderDrive
+include PiPiper
+
 
 module Plc
 module Raspberrypi
 
   class RaspberrypiPlc < Plc::Emulator::EmuPlc
+
+    def initialize config={}
+      super
+      setup_io
+    end
+
+    private
+
+      def setup_io
+        @io_dict = { inputs:[], outputs:[] }
+        config[:io][:inputs].each do |dev, info|
+          @io_dict[:inputs] << [device_by_name(dev), Pin.new(pin:info[:pin], direction: :in, pull:(info[:pull].to_sym || :off))]
+        end
+        config[:io][:outputs].each do |dev, info|
+          @io_dict[:outputs] << [device_by_name(dev), Pin.new(pin:info[:pin], direction: :out)]
+        end
+      end
+
+    def sync_input
+      super
+      @io_dict[:inputs].each do |a|
+        a.first.set_value a.last.on?, :in
+      end
+      super
+    end
+
+    def sync_output
+      super
+      @io_dict[:inputs].each do |a|
+        a.last.on? ? a.first.on : a.first.off
+      end
+    end
+
 
   end
 
