@@ -55,12 +55,14 @@ module Keyence
     end
 
     def get_bits_from_device count, device
-      values = get_words_from_device count, device
-      values = values.map{|v| v == 0 ? false : true}
-      values.each do |v|
-        device.bool = v
-        device += 1
-      end
+      device = local_device device
+      packet = "RDS #{device.name} #{count}\r\n"
+      @logger.debug("> #{dump_packet packet}")
+      open
+      @socket.puts(packet)
+      res = receive
+      values = res.split(/\s+/).map{|v| v.to_i}
+      @logger.debug("#{device.name}[#{count}] => #{values}")
       values
     end
 
