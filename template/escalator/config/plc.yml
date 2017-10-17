@@ -26,16 +26,19 @@ plc:
       inputs:
         x0:
           pin: 4
-          pull: :up
+          pull: up
+          invert: true
         x1:
           pin: 17
-          pull: :up
+          pull: up
+          invert: true
         x2:
           pin: 27
-          pull: :up
+          pull: up
+          invert: true
       outputs:
         y0:
-          pull: :up
+          pin: 18
         y1:
           pin: 23
         y2:
