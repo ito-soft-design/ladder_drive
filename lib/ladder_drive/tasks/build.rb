@@ -98,4 +98,40 @@ task :console => :upload do
   c.run
 end
 
+namespace :service do
+
+  desc "Install as a service."
+  task :install do
+    # copy lddrive to current directory.
+    dir = Dir.pwd
+    root_dir = File.expand_path(File.join(File.dirname(__FILE__), "..", "..", ".."))
+    template_dir = File.join(root_dir, "template", "raspberrypi")
+    fname = "lddrive"
+    cp_r File.join(template_dir, fname), fname
+
+    # copy lddrive.serive file to /etc/systemd/system
+    fname = "lddrive.service"
+    s = File.read(File.join(template_dir, fname))
+    s.gsub!("<%= exec_start %>", "/home/pi/project/lddrive")
+    File.write File.join("/etc", "systemd", "system", fname), s
+  end
+
+  desc "Uninstall as a service."
+  task :uninstall do
+    path = File.join("/etc", "systemd", "system", "lddrive.service")
+    rm path if File.exist? path
+  end
+
+  desc "Start a service"
+  task :start do
+    system "systemctl start lddrive.service"
+  end
+
+  desc "Stop a service"
+  task :stop do
+    system "systemctl stop lddrive.service"
+  end
+
+end
+
 task :default => :console
