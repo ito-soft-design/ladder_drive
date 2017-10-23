@@ -128,6 +128,16 @@ namespace :service do
     puts "Successfuly uninstalled lddrive serivice."
   end
 
+  desc "Enable a service"
+  task :enable do
+    system "systemctl enable lddrive.service"
+  end
+
+  desc "Disable a service"
+  task :disable do
+    system "systemctl disable lddrive.service"
+  end
+
   desc "Start a service"
   task :start do
     system "systemctl start lddrive.service"
