@@ -244,7 +244,7 @@ $ sudo rake service:install
 $ sudo rake service:enable
 $ sudo rake service:start
 ```
-<iframe width="560" height="315" src="https://www.youtube.com/embed/UBhSaRNp_gM?rel=0" frameborder="0" allowfullscreen></iframe>
+[![LadderDrive on Raspberry Pi](http://img.youtube.com/vi/UBhSaRNp_gM/0.jpg)](http://www.youtube.com/watch?v=UBhSaRNp_gM)
 
 
 # Accessing a device values
