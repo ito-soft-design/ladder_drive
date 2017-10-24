@@ -41,7 +41,7 @@ module Raspberrypi
     private
 
       def setup_io
-        @available_pi_piper = false
+        @available_pi_piper = true
         @io_dict = { inputs:[], outputs:[] }
         config[:io][:inputs].each do |dev, info|
           @io_dict[:inputs] << [device_by_name(dev), Pin.new(pin:info[:pin], direction: :in, pull:(info[:pull].to_sym || :off), invert:info[:invert])]
@@ -49,10 +49,10 @@ module Raspberrypi
         config[:io][:outputs].each do |dev, info|
           @io_dict[:outputs] << [device_by_name(dev), Pin.new(pin:info[:pin], direction: :out)]
         end
-        @available_pi_piper = true
       rescue NoMethodError
         puts "WARN: defention of io is missing!"
       rescue LoadError
+        @available_pi_piper = false
         puts "WARN: pi_piper is not available in this system!"
       end
 
