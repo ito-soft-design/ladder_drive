@@ -248,6 +248,18 @@ pinにGPIO番号を指定します。
           pin: 42
 ```
 
+### サービスとして Ladder Drive を起動
+
+電源投入でLadder Driveが起動する様にサービスとして立ち上げることができます。
+Ladder Driveプロジェクのディレクトリで以下のコマンドを実行することでサービスを立ち上げることができます。
+
+```
+$ sudo rake service:install
+$ sudo rake service:enable
+$ sudo rake service:start
+```
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/UBhSaRNp_gM?rel=0" frameborder="0" allowfullscreen></iframe>
 
 ## PLCデバイスへのアクセスツールとしての利用
 

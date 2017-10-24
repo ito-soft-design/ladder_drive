@@ -235,6 +235,17 @@ You can specify pull up or pull down and invert options for input.
           pin: 42
 ```
 
+### Run Ladder Drive as a service
+
+Follow these steps to run ladder drive as a service at your project directory.
+
+```
+$ sudo rake service:install
+$ sudo rake service:enable
+$ sudo rake service:start
+```
+<iframe width="560" height="315" src="https://www.youtube.com/embed/UBhSaRNp_gM?rel=0" frameborder="0" allowfullscreen></iframe>
+
 
 # Accessing a device values
 

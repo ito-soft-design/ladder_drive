@@ -1,0 +1,7 @@
+= LadderDrive 0.5.2 =
+
+  * [Raspberry Pi] Launchable as a service.
+    Follow these steps to run ladder drive as a service at your project directory.
+      $ sudo rake service:install
+      $ sudo rake service:enable
+      $ sudo rake service:start
