@@ -211,7 +211,7 @@ Linux raspberrypi 4.9.41+ #1023 Tue Aug 8 15:47:12 BST 2017 armv6l GNU/Linux
 ```sh
 $ ladder_drive create project
 $ cd project
-$ rake target=raspberrypi
+$ sudo rake target=raspberrypi
 ```
 
 ### I/O設定
