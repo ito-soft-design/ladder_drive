@@ -198,7 +198,7 @@ $ sudo gem install ladder_drive
 ```sh
 $ ladder_drive create project
 $ cd project
-$ rake target=raspberrypi
+$ sudo rake target=raspberrypi
 ```
 
 ### I/O settings
