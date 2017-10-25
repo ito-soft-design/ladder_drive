@@ -188,9 +188,10 @@ X or Y devices are assigned to GPIOs.
 ### Installation
 
 ```sh
+$ sudo apt-get update
 $ sudo apt-get install ruby-dev
 $ sudo apt-get install libssl-dev
-$ sudo gem install ladder_drive
+$ sudo gem install ladder_drive --no-ri --no-rdoc
 ```
 
 ### Execution
