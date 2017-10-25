@@ -193,9 +193,10 @@ XとYデバイスはGPIOに割り付けます。
 OSとしてRaspbianを使用した場合は次の手順でインストールできます。
 
 ```sh
+$ sudo apt-get update
 $ sudo apt-get install ruby-dev
 $ sudo apt-get install libssl-dev
-$ sudo gem install ladder_drive
+$ sudo gem install ladder_drive --no-ri --no-rdoc
 ```
 
 この時の環境は下の通りです。
