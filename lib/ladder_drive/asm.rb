@@ -113,7 +113,7 @@ module LadderDrive
           @codes << encode_mnemonic(mnemonic)
           case operand_type(mnemonic)
           when OPERAND_TYPE_TYPE_AND_NUMBER
-            @codes += parse_type_and_number(operand1)
+            @codes += parse_type_and_number(mnemonic, operand1, operand2)
           end
         end
       end
@@ -166,7 +166,7 @@ EOB
         mnemonic_dict[mnemonic]
       end
 
-      def parse_type_and_number operand
+      def parse_type_and_number mnemonic, operand, value
         /([[:alpha:]]*)(\d+[0-9A-Fa-f]*)\.?(\d*)?/ =~ operand
         suffix = $1
         number = $2
@@ -189,14 +189,58 @@ EOB
         end
 
         if number < 256
-          [type_code, number]
+          codes = [type_code, number]
         else
           case endian
           when Asm::LITTLE_ENDIAN
-            [type_code | 0x10, number & 0xff, (number & 0xff00) >> 8]
+            codes = [type_code | 0x10, number & 0xff, (number & 0xff00) >> 8]
           when Asm::BIG_ENDIAN
-            [type_code | 0x10, (number & 0xff00) >> 8, number & 0xff]
+            codes = [type_code | 0x10, (number & 0xff00) >> 8, number & 0xff]
           end
+        end
+
+        # If mnemonic is out/outi and device type is timer or counter, append time or count.
+        case mnemonic
+        when /OUT/
+          case suffix
+          when 'T'
+            codes += time_value(value)
+          when 'C'
+            codes += counter_value(value)
+          end
+        end
+
+        codes
+      end
+
+      def time_value value
+        t = value.to_f
+        g = 0
+        codes = []
+        while t < 16384 && g <= 3
+          t *= 10.0
+          g += 1
+        end
+        t /= 10.0
+        g -= 1
+        v = (g << 14) | t.to_i
+
+        case endian
+        when Asm::LITTLE_ENDIAN
+          codes = [v & 0xff, (v & 0xff00) >> 8]
+        when Asm::BIG_ENDIAN
+          codes = [(v & 0xff00) >> 8, v & 0xff]
+        end
+        codes #rdlsf@de
+      end
+
+      def counter_value value
+        v = value.to_i
+        case endian
+        when Asm::LITTLE_ENDIAN
+          codes = [v & 0xff, (v & 0xff00) >> 8]
+        when Asm::BIG_ENDIAN
+          codes = [(v & 0xff00) >> 8, v & 0xff]
         end
       end
 
