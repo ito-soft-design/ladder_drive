@@ -34,10 +34,17 @@ module LadderDrive
     def initialize source, endian = nil
       @endian = endian || BIG_ENDIAN
       @lines = []
+      line_no = 1
       address = 0
       source.each_line do |line|
-        @lines << AsmLine.new(line, address, @endian)
-        address = @lines.last.next_address
+        begin
+          @lines << AsmLine.new(line, address, @endian)
+          address = @lines.last.next_address
+          line_no += 1
+        rescue SyntaxError => e
+          puts "#{e.class}: line:#{line_no}; #{line.chomp}; #{e.to_s} "
+          throw
+        end
       end
     end
 
@@ -214,6 +221,8 @@ EOB
       end
 
       def time_value value
+        raise SyntaxError.new "It must be required time value." unless /^\d*\.?\d*$/ =~ value
+
         t = value.to_f
         g = 0
         codes = []
@@ -235,6 +244,8 @@ EOB
       end
 
       def counter_value value
+        raise SyntaxError.new "It must be required count value." unless /^\d+$/ =~ value
+
         v = value.to_i
         case endian
         when Asm::LITTLE_ENDIAN
