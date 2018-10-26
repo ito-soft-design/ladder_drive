@@ -26,5 +26,9 @@ $:.unshift File.dirname(__FILE__)
 require 'socket'
 require 'logger'
 require 'timeout'
+
 require 'qdevice'
 require 'mc_protocol'
+
+require 'fx_device'
+require 'fx_protocol'
