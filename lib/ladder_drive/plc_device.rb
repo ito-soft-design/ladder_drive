@@ -99,9 +99,14 @@ module LadderDrive
       end
     end
 
+    # NOTE: override at subclass
+    #       It should get from plc
+    def device_by_suffix_number suffix, number
+      self.class.new suffix, number
+    end
+
     def next_device
-      d = self.class.new @suffix, @number + 1
-      d
+      device_by_suffix_number @suffix, @number + 1
     end
 
     def bit_device?
@@ -109,11 +114,11 @@ module LadderDrive
     end
 
     def + value
-      self.class.new self.suffix, self.number + value
+      device_by_suffix_number self.suffix, self.number + value
     end
 
     def - value
-      self.class.new self.suffix, [self.number - value, 0].max
+      device_by_suffix_number self.suffix, [self.number - value, 0].max
     end
 
     def input?
@@ -131,6 +136,30 @@ module LadderDrive
     def bool= v; @value = v; end
     alias :word :value
     alias :word= :value=
+
+    def text len=8
+      n = (len + 1) / 2
+      d = self
+      a = []
+      n.times{ a << d.value; d = d.next_device}
+      s = a.pack("s*").split("\x00").first
+      s ? s[0,len] : ""
+    end
+
+    def set_text value, len=8
+      value = value[0, len]
+      value << "\00" unless value.length % 2 == 0
+      a = value.unpack("s*")
+      d = self
+      a.each do |v|
+        d.value = v
+        d = d.next_device
+      end
+    end
+
+    def text= value
+      set_text value
+    end
 
     def device_code
       ESC_SUFFIXES.index @suffix
