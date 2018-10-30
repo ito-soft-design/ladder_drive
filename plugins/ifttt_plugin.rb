@@ -60,6 +60,7 @@ require 'net/https'
 def plugin_ifttt_init plc
   @plugin_ifttt_config = load_plugin_config 'ifttt'
   @plugin_ifttt_values = {}
+  @plugin_ifttt_times = {}
   @plugin_ifttt_worker_queue = Queue.new
   Thread.start {
     plugin_ifttt_worker_loop
@@ -74,12 +75,19 @@ def plugin_ifttt_exec plc
       d = plc.device_by_name event[:trigger][:device]
       v = d.send event[:trigger][:value_type], event[:trigger][:text_length] || 8
       triggered = false
-      case event[:trigger]
+      case event[:trigger][:type]
       when "interval"
+        now = Time.now
+        t = @plugin_ifttt_times[d.name] || now
+        triggered = t <= now
+        if triggered
+          t += event[:trigger][:interval] || 300
+          @plugin_ifttt_times[d.name] = t
+        end
       else
         unless @plugin_ifttt_values[d.name] == v
           @plugin_ifttt_values[d.name] = v
-          case event[:trigger]
+          case event[:trigger][:type]
           when "raise"
             triggered = !!v
           when "fall"
