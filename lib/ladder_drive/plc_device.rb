@@ -142,14 +142,14 @@ module LadderDrive
       d = self
       a = []
       n.times{ a << d.value; d = d.next_device}
-      s = a.pack("s*").split("\x00").first
+      s = a.pack("n*").split("\x00").first
       s ? s[0,len] : ""
     end
 
     def set_text value, len=8
       value = value[0, len]
       value << "\00" unless value.length % 2 == 0
-      a = value.unpack("s*")
+      a = value.unpack("n*")
       d = self
       a.each do |v|
         d.value = v
