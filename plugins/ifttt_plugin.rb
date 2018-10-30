@@ -59,8 +59,11 @@ require 'net/https'
 
 def plugin_ifttt_init plc
   @plugin_ifttt_config = load_plugin_config 'ifttt'
-p @plugin_ifttt_config
   @plugin_ifttt_values = {}
+  @plugin_ifttt_worker_queue = Queue.new
+  Thread.start {
+    plugin_ifttt_worker_loop
+  }
 end
 
 def plugin_ifttt_exec plc
@@ -69,8 +72,7 @@ def plugin_ifttt_exec plc
   @plugin_ifttt_config[:events].each do |event|
     begin
       d = plc.device_by_name event[:trigger][:device]
-      v = d.send event[:trigger][:value_type]
-
+      v = d.send event[:trigger][:value_type], event[:trigger][:text_length] || 8
       triggered = false
       case event[:trigger]
       when "interval"
@@ -90,21 +92,32 @@ def plugin_ifttt_exec plc
 
       next unless triggered
 
-      uri = URI.parse("https://maker.ifttt.com/trigger/#{event[:name]}/with/key/#{@plugin_ifttt_config[:web_hook_key]}")
+      @plugin_ifttt_worker_queue.push event:event[:name], payload:event[:params].dup || {}, value:v
+    rescue => e
+      p e
+    end
+  end if @plugin_ifttt_config[:events]
+end
+
+def plugin_ifttt_worker_loop
+  while arg = @plugin_ifttt_worker_queue.pop
+    begin
+      uri = URI.parse("https://maker.ifttt.com/trigger/#{arg[:event]}/with/key/#{@plugin_ifttt_config[:web_hook_key]}")
       http = Net::HTTP.new(uri.host, uri.port)
       http.use_ssl = true
       http.verify_mode = OpenSSL::SSL::VERIFY_NONE
 
       req = Net::HTTP::Post.new(uri.path)
-      payload = event[:params].dup || {}
+      payload = arg[:payload]
       payload.keys.each do |key|
-        payload[key] = v if payload[key] == "self"
+        payload[key] = arg[:value] if payload[key] == "__value__"
       end
       req.set_form_data(payload)
 
       http.request(req)
     rescue => e
+      # TODO: Resend if it fails.
       p e
     end
-  end if @plugin_ifttt_config[:events]
+  end
 end
