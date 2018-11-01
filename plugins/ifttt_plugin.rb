@@ -75,21 +75,21 @@ def plugin_ifttt_exec plc
 
   @plugin_ifttt_config[:events].each do |event|
     begin
-      d = plc.device_by_name event[:trigger][:device]
-      v = d.send event[:trigger][:value_type], event[:trigger][:text_length] || 8
       triggered = false
       case event[:trigger][:type]
       when "interval"
         now = Time.now
-        t = @plugin_ifttt_times[d.name] || now
+        t = @plugin_ifttt_times[event.object_id] || now
         triggered = t <= now
         if triggered
           t += event[:trigger][:interval] || 300
-          @plugin_ifttt_times[d.name] = t
+          @plugin_ifttt_times[event.object_id] = t
         end
       else
-        unless @plugin_ifttt_values[d.name] == v
-          @plugin_ifttt_values[d.name] = v
+        d = plc.device_by_name event[:trigger][:device]
+        v = d.send event[:trigger][:value_type], event[:trigger][:text_length] || 8
+        unless @plugin_ifttt_values[event.object_id] == v
+          @plugin_ifttt_values[event.object_id] = v
           case event[:trigger][:type]
           when "raise"
             triggered = !!v
