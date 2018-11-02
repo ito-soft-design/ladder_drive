@@ -109,14 +109,13 @@ def plugin_slack_exec plc
           end
         end
 
+        next unless triggered || interval_triggered
+
         @plugin_slack_worker_queue.push event:event,
                                         device_name:device.name,
                                         value:v,
-                                        time: now if triggered || interval_triggered
+                                        time: now
       end
-
-      next unless triggered
-
     rescue => e
       p e
     end

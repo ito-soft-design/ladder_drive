@@ -10,3 +10,4 @@ gem "activesupport", ">=4.2.7"
 gem 'pi_piper'
 
 gem 'google_drive'
+gem "ruby-trello"
