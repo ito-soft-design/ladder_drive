@@ -183,6 +183,13 @@ OUT M1
 
 <!-- [![](http://img.youtube.com/vi/qGbicGLB7Gs/0.jpg)](https://youtu.be/qGbicGLB7Gs) -->
 
+
+```warning: constant ::Fixnum is deprecated``` の表示が出る場合は次の様にしてみてください。
+
+```sh
+$ RUBYOPT="-W0" rake
+```
+
 ## Raspberry Pi
 
 Raspberry Pi上で動作させることもできます。
