@@ -79,10 +79,10 @@ def plugin_slack_exec plc
         [d2.number - d1.number + 1, 1].max.times.inject([]){|a, i| a << d1; d1 += 1; a}
       end.flatten
 
-      triggered = false
       interval_triggered = false
       now = Time.now
       devices.each do |device|
+        triggered = false
         v = nil
         case event[:trigger][:type]
         when "interval"
