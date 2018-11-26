@@ -51,5 +51,16 @@ module LadderDrive
       puts "#{name} was successfully created."
     end
 
+    desc "plugin", "Install the specified plugin."
+    def plugin(name)
+      root_dir = File.expand_path(File.join(File.dirname(__FILE__), "..", ".."))
+      plugins_path = File.join(root_dir, "plugins")
+      path = File.join(plugins_path, "#{name}_plugin.rb")
+      if File.exist? path
+        mkdir_p "plugins"
+        cp path, "plugins/#{name}_plugins.rb"
+      end
+    end
+
   end
 end
