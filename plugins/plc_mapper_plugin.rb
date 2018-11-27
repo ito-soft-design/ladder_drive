@@ -29,6 +29,7 @@ plcs:
     protocol: mc_protocol
     host: 192.168.0.1
     port: 5010
+    interval: 60
     mapping:
       read:
         - plc: M1000-M1099
