@@ -89,4 +89,44 @@ EOB
     assert_equal [0x10, 0x80, 0x00, 0x21, 0x80, 0x01], asm.codes
   end
 
+  def test_out_time
+    source = StringIO.new <<EOB
+LD X0
+OUT T0 0.1
+EOB
+    asm = LadderDrive::Asm.new source, LadderDrive::Asm::BIG_ENDIAN
+    assert_equal [0x10, 0x80, 0x00, 0x40, 0x85, 0x00, 0xc0, 0x64], asm.codes
+  end
+
+  def test_parse_error_with_out_time
+    source = StringIO.new <<EOB
+LD X0
+OUT T0
+EOB
+    assert_raise {
+      asm = LadderDrive::Asm.new source, LadderDrive::Asm::BIG_ENDIAN
+    }
+  end
+
+  def test_out_counter
+    source = StringIO.new <<EOB
+LD X0
+OUT C0 12345
+EOB
+    asm = LadderDrive::Asm.new source, LadderDrive::Asm::BIG_ENDIAN
+    assert_equal [0x10, 0x80, 0x00, 0x40, 0x84, 0x00, 0x30, 0x39], asm.codes
+  end
+
+  def test_parse_error_with_out_counter
+    source = StringIO.new <<EOB
+LD X0
+OUT C0
+EOB
+    assert_raise {
+      asm = LadderDrive::Asm.new source, LadderDrive::Asm::BIG_ENDIAN
+    }
+  end
+
+
+
 end

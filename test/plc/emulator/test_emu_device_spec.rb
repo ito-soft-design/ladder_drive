@@ -7,6 +7,7 @@ class TestEmuDevice < Test::Unit::TestCase
   setup do
     @plc = EmuPlc.new
     @device = @plc.device_by_name "M16"
+    @w_device = @plc.device_by_name "D0"
   end
 
   def test_bool
@@ -47,5 +48,53 @@ class TestEmuDevice < Test::Unit::TestCase
     @device.sync_output
     assert_equal false, @device.changed?
   end
+
+  def test_text
+    d = @w_device
+    d.value = 0x3031
+    d = d.next_device
+    d.value = 0x3233
+    assert_equal "0123", @w_device.text(4)
+  end
+
+  def test_text_with_len
+    d = @w_device
+    d.value = 0x3031
+    d = d.next_device
+    d.value = 0x3233
+    assert_equal "0", @w_device.text(1)
+  end
+
+  def test_text_with_null
+    d = @w_device
+    d.value = 0x0000
+    d = d.next_device
+    d.value = 0x0000
+    assert_equal "", @w_device.text(4)
+  end
+
+  def test_text_2
+    d = @w_device
+    d.value = 0x3132
+    d = d.next_device
+    d.value = 0x3334
+    assert_equal "1234", @w_device.text(10)
+  end
+
+
+  def test_set_text
+    @w_device.text = "0123"
+    assert_equal 0x3031, @w_device.value
+    assert_equal 0x3233, @w_device.next_device.value
+  end
+
+  def test_set_text_with_len
+    @w_device.set_text "0123", 1
+    assert_equal 0x3000, @w_device.value
+    assert_equal 0x00, @w_device.next_device.value
+  end
+
+
+
 
 end

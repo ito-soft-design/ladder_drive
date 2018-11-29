@@ -53,14 +53,15 @@ module Emulator
         server = TCPServer.open @port
         puts "launching emulator ... "
         loop do
-          socket = server.accept
-          puts "done launching"
-          while line = socket.gets
-            begin
-              r = @plc.execute_console_commands line
-              socket.puts r
-            rescue => e
-              socket.puts "E0 #{e}\r\n"
+          Thread.start(server.accept) do |socket|
+            puts "done launching"
+            while line = socket.gets
+              begin
+                r = @plc.execute_console_commands line
+                socket.puts r
+              rescue => e
+                socket.puts "E0 #{e}\r\n"
+              end
             end
           end
         end

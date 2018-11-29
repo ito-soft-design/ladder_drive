@@ -22,13 +22,17 @@
 
 require 'ladder_drive/plc_device'
 require 'yaml'
+require 'plc_plugins'
 
 include LadderDrive
 
 module Plc
 module Emulator
 
+
   class EmuPlc
+
+    include PlcPlugins
 
     attr_accessor :program_data
     attr_reader :program_pointer
@@ -60,6 +64,7 @@ module Emulator
       @lock = Mutex.new
       @config = config
       reset
+      load_plugins
     end
 
     def device_by_name name
@@ -120,6 +125,7 @@ module Emulator
       # Save must be executed berofe sync_output, because changed flag was clear after sync_output
       save
       sync_output
+      exec_plugins
     end
 
     def bool
@@ -556,8 +562,6 @@ EOB
         true
       end
       def rst; set true; end
-
-
 
   end
 

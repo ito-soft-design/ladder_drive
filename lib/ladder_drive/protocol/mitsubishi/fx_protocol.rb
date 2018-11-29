@@ -25,13 +25,33 @@ module LadderDrive
 module Protocol
 module Mitsubishi
 
-  class McProtocol < Protocol
+  class FxProtocol < Protocol
+
+    attr_accessor :pc_no
+    attr_accessor :baudrate
+    attr_accessor :station_no
+    attr_accessor :wait_time
+
+    STX = "\u0002"
+    ETX = "\u0003"
+    EOT = "\u0004"
+    ENQ = "\u0005"
+    ACK = "\u0006"
+    LF  = "\u000a"
+    CR  = "\u000d"
+    NAK = "\u0015"
+
+    DELIMITER = "\r\n"
+    TIMEOUT = 1.0
 
     def initialize options={}
       super
-      @host = options[:host] || "192.168.0.10"
-      @port = options[:port] || 5010
-      prepare_device_map
+      @port = options[:port] || `ls /dev/tty.usb*`.split("\n").map{|l| l.chomp}.first
+      @pc_no = 0xff
+      @baudrate = 19200
+      @station_no = 0
+      @wait_time = 0
+      #prepare_device_map
     end
 
     def open
@@ -41,12 +61,21 @@ module Mitsubishi
     end
 
     def open!
-      @socket ||= TCPSocket.open(@host, @port)
+      return false unless @port
+      begin
+        # port, baudrate, bits, stop bits, parity(0:none, 1:even, 2:odd)
+        @comm ||= SerialPort.new(@port, @baudrate, 7, 1, 2).tap do |s|
+          s.read_timeout = (TIMEOUT * 1000.0).to_i
+        end
+      rescue => e
+        p e
+        nil
+      end
     end
 
     def close
-      @socket.close if @socket
-      @socket = nil
+      @comm.close if @comm
+      @comm = nil
     end
 
     def get_bit_from_device device
@@ -58,31 +87,27 @@ module Mitsubishi
       raise ArgumentError.new("A count #{count} must be between #{available_bits_range.first} and #{available_bits_range.last} for #{__method__}") unless available_bits_range.include? count
 
       device = device_by_name device
-      packet = make_packet(body_for_get_bits_from_device(count, device))
+      packet = body_for_get_bits_from_device(count, device) + DELIMITER
       @logger.debug("> #{dump_packet packet}")
       open
-      @socket.write(packet.pack("C*"))
-      @socket.flush
+      @comm.write(packet)
+      @comm.flush
       res = receive
-
-      # error checking
-      end_code = res[9,2].pack("C*").unpack("v").first
-      unless end_code == 0
-        error = res[11,2].pack("C*").unpack("v").first
-        raise "return end code 0x#{end_code.to_s(16)} error code 0x#{error.to_s(16)} for get_bits_from_device(#{count}, #{device.name})"
-      end
-
-      # get results
       bits = []
-      count.times do |i|
-        v = res[11 + i / 2]
-        if i % 2 == 0
-          bits << ((v >> 4) != 0)
+
+      if res
+        if check_sum(res[0..-5]) == res[-4,2]
+          bits =
+            res[5..-6].each_char.map do |c|
+              c == "1" ? true : false
+            end
         else
-          bits << ((v & 0xf) != 0)
         end
       end
+      @logger.debug("> #{dump_packet ack_packet}")
+      @comm.write(ack_packet)
       @logger.debug("get #{device.name} => #{bits}")
+
       bits
     end
 
@@ -90,22 +115,19 @@ module Mitsubishi
       raise ArgumentError.new("A count #{count} must be between #{available_bits_range.first} and #{available_bits_range.last} for #{__method__}") unless available_bits_range.include? bits.size
 
       device = device_by_name device
-      packet = make_packet(body_for_set_bits_to_device(bits, device))
+      packet = body_for_set_bits_to_device(bits, device)
       @logger.debug("> #{dump_packet packet}")
       open
-      @socket.write(packet.pack("C*"))
-      @socket.flush
+      @comm.write(packet)
+      @comm.flush
       res = receive
       @logger.debug("set #{bits} to:#{device.name}")
 
       # error checking
-      end_code = res[9,2].pack("C*").unpack("v").first
-      unless end_code == 0
-        error = res[11,2].pack("C*").unpack("v").first
-        raise "return end code 0x#{end_code.to_s(16)} error code 0x#{error.to_s(16)} for set_bits_to_device(#{bits}, #{device.name})"
+      unless res == ack_packet
+        raise "ERROR: return #{res} for set_bits_to_device(#{bits}, #{device.name})"
       end
     end
-
 
     def get_word_from_device device
       device = device_by_name device
@@ -113,29 +135,30 @@ module Mitsubishi
     end
 
     def get_words_from_device(count, device)
-      raise ArgumentError.new("A count #{count} must be between #{available_words_range.first} and #{available_words_range.last} for #{__method__}") unless available_bits_range.include? count
+      raise ArgumentError.new("A count #{count} must be between #{available_words_range.first} and #{available_words_range.last} for #{__method__}") unless available_words_range.include? count
 
       device = device_by_name device
-      packet = make_packet(body_for_get_words_from_device(count, device))
+      packet = body_for_get_words_from_device(count, device) + DELIMITER
       @logger.debug("> #{dump_packet packet}")
       open
-      @socket.write(packet.pack("C*"))
-      @socket.flush
+      @comm.write(packet)
+      @comm.flush
       res = receive
-
-      # error checking
-      end_code = res[9,2].pack("C*").unpack("v").first
-      unless end_code == 0
-        error = res[11,2].pack("C*").unpack("v").first
-        raise "return end code 0x#{end_code.to_s(16)} error code 0x#{error.to_s(16)} for get_words_from_device(#{count}, #{device.name})"
-      end
-
-      # get result
       words = []
-      res[11, 2 * count].each_slice(2) do |pair|
-        words << pair.pack("C*").unpack("v").first
+
+      if res
+        if check_sum(res[0..-5]) == res[-4,2]
+          words =
+            res[5..-6].scan(/.{4}/).map do |v|
+              v.to_i(16)
+            end
+        else
+        end
       end
-      @logger.debug("get from: #{device.name} => #{words}")
+      @logger.debug("> #{dump_packet ack_packet}")
+      @comm.write(ack_packet)
+      @logger.debug("get #{device.name} => #{words}")
+
       words
     end
 
@@ -143,27 +166,24 @@ module Mitsubishi
       raise ArgumentError.new("A count of words #{words.size} must be between #{available_words_range.first} and #{available_words_range.last} for #{__method__}") unless available_bits_range.include? words.size
 
       device = device_by_name device
-      packet = make_packet(body_for_set_words_to_device(words, device))
+      packet = body_for_set_words_to_device(words, device)
       @logger.debug("> #{dump_packet packet}")
       open
-      @socket.write(packet.pack("C*"))
-      @socket.flush
+      @comm.write(packet)
+      @comm.flush
       res = receive
       @logger.debug("set #{words} to: #{device.name}")
 
       # error checking
-      end_code = res[9,2].pack("C*").unpack("v").first
-      unless end_code == 0
-        error = res[11,2].pack("C*").unpack("v").first
-        raise "return end code 0x#{end_code.to_s(16)} error code 0x#{error.to_s(16)} for set_words_to_device(#{words}, #{device.name})"
+      unless res == ack_packet
+        raise "ERROR: return #{res} for set_bits_to_device(#{words}, #{device.name})"
       end
     end
-
 
     def device_by_name name
       case name
       when String
-        QDevice.new name
+        FxDevice.new name
       when EscDevice
         local_device_of name
       else
@@ -174,40 +194,25 @@ module Mitsubishi
 
 
     def receive
-      res = []
-      len = 0
+      res = ""
       begin
-        Timeout.timeout(1.0) do
-          loop do
-            c = @socket.read(1)
-            next if c.nil? || c == ""
-
-            res << c.bytes.first
-            len = res[7,2].pack("C*").unpack("v*").first if res.length >= 9
-            break if (len + 9 == res.length)
-          end
+        Timeout.timeout(TIMEOUT) do
+          res = @comm.gets
         end
+        res
       rescue Timeout::Error
-        puts "*** ERROR: TIME OUT ***"
+        puts "*** ERROR: TIME OUT : #{res} ***"
       end
       @logger.debug("< #{dump_packet res}")
       res
     end
 
     def available_bits_range device=nil
-      1..(960 * 16)
+      1..256
     end
 
     def available_words_range device=nil
-      1..960
-    end
-
-  private
-
-    def make_packet body
-      header = [0x50, 0x00,  0x00,  0xff,  0xff, 0x03,  0x00,  0x00, 0x00,  0x10,  0x00]
-      header[7..8] = data_for_short(body.length + 2)
-      header + body
+      1..64
     end
 
     def body_for_get_bit_from_deivce device
@@ -215,46 +220,42 @@ module Mitsubishi
     end
 
     def body_for_get_bits_from_device count, device
-      body_for_get_words_from_device count, device, false
+      body = header_with_command "BR"
+      body += "#{device.name}#{count.to_s(16).rjust(2, '0')}"
+      body += check_sum(body)
+      body += DELIMITER
+      body.upcase
     end
 
-    def body_for_get_words_from_device count, device, word = true
-      body = [0x01, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x90, 0x01, 0x00]
-      body[2] = 1 unless word
-      body[4..7] = data_for_device(device)
-      body[8..9] = data_for_short count
-      body
+    def body_for_get_words_from_device count, device
+      body = header_with_command "WR"
+      body += "#{device.name}#{count.to_s(16).rjust(2, '0')}"
+      body += check_sum(body)
+      body += DELIMITER
+      body.upcase
     end
-
 
     def body_for_set_bits_to_device bits, device
-      body = [0x01, 0x14, 0x01, 0x00, 0x00, 0x00, 0x00, 0x90, 0x01, 0x00]
-      d = device
-      bits = [bits] unless bits.is_a? Array
-      bits.each_slice(2) do |pair|
-        body << (pair.first ? 0x10 : 0x00)
-        body[-1] |= (pair.last ? 0x1 : 0x00) if pair.size == 2
-        d = d.next_device
-      end
-      body[4..7] = data_for_device(device)
-      body[8..9] = data_for_short bits.size
-      body
+      body = header_with_command "BW"
+      body += "#{device.name}#{bits.count.to_s(16).rjust(2, '0')}"
+      body += bits.map{|b| b ? "1" : "0"}.join("")
+      body += check_sum(body)
+      body += DELIMITER
+      body.upcase
     end
     alias :body_for_set_bit_to_device :body_for_set_bits_to_device
 
     def body_for_set_words_to_device words, device
-      body = [0x01, 0x14, 0x00, 0x00, 0x00, 0x00, 0x00, 0x90, 0x01, 0x00]
-      d = device
-      words = [words] unless words.is_a? Array
-      words.each do |v|
-        body += data_for_short v
-        d = d.next_device
-      end
-      body[4..7] = data_for_device(device)
-      body[8..9] = data_for_short words.size
-      body
+      body = header_with_command "WW"
+      body += "#{device.name}#{words.count.to_s(16).rjust(2, '0')}"
+      body += words.map{|w| w.to_s(16).rjust(4, "0")}.join("")
+      body += check_sum(body)
+      body += DELIMITER
+      body.upcase
     end
 
+
+=begin
     def data_for_device device
       a = data_for_int device.number
       a[3] = device.suffix_code
@@ -268,17 +269,13 @@ module Mitsubishi
     def data_for_int value
       [value].pack("V").unpack("C*")
     end
+=end
 
     def dump_packet packet
-      a = []
-      len = packet.length
-      bytes = packet.dup
-      len.times do |i|
-        a << ("0" + bytes[i].to_s(16))[-2, 2]
-      end
-      "[" + a.join(", ") + "]"
+      packet.inspect
     end
 
+=begin
     def prepare_device_map
       @conv_dev_dict ||= begin
         h = {}
@@ -300,7 +297,9 @@ module Mitsubishi
         h
       end
     end
+=end
 
+=begin
     def local_device_of device
       return device if device.is_a? QDevice
       d, c = @conv_dev_dict[device.suffix]
@@ -308,6 +307,21 @@ module Mitsubishi
       ld = QDevice.new(d.suffix, d.number + device.number)
       device_by_name ld.name
     end
+=end
+
+    private
+
+      def check_sum packet
+        packet[1..-1].upcase.unpack("C*").inject(0){|s,c| s + c}.to_s(16).rjust(2, "0")[-2, 2].upcase
+      end
+
+      def header_with_command command
+        "#{ENQ}#{station_no.to_s.rjust(2,'0')}#{pc_no.to_s(16).rjust(2, '0')}#{command}#{wait_time.to_s}".upcase
+      end
+
+      def ack_packet
+        "#{ACK}#{station_no.to_s.rjust(2,'0')}#{pc_no.to_s(16).rjust(2, '0')}#{DELIMITER}".upcase
+      end
 
   end
 

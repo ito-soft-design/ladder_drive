@@ -57,6 +57,13 @@ module Emulator
       @changed
     end
 
+    # NOTE: override at subclass
+    #       It should get from plc
+    def device_by_suffix_number suffix, number
+      d = super
+      plc.device_by_name d.name
+    end
+
     def value= value
       set_value value
     end
