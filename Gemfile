@@ -5,10 +5,10 @@ gemspec
 
 gem "test-unit"
 
-gem "activesupport", ">=4.2.7"
+gem "activesupport", '~> 4.2', '>= 4.2.7'
 
-gem 'pi_piper'
-gem "ffi", ">= 1.9.24"
+gem 'pi_piper', ">=  2.0.0"
+gem "ffi", "~> 1.9.24"
 
 gem 'serialport'
 gem 'google_drive'
