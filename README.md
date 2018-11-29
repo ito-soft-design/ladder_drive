@@ -4,12 +4,12 @@
 
 The ladder_drive is a simple abstract ladder for PLC (Programmable Logic Controller).
 
-We aim to design abstraction ladder which is able to run on any PLC with same ladder source or binary and prepare full stack tools.
+We aim to design the abstraction ladder which can run on any PLC with same ladder source or binary and prepare full stack tools.
 
 # Getting started
 
 It's required the Ruby environment.
-To prepare the Ruby environment, please find web sites.
+To prepare the Ruby environment, please find websites.
 
 Install LadderDrive at the command prompt.
 
@@ -19,7 +19,7 @@ $ gem install ladder_drive
 
 [![https://gyazo.com/6f00d74612def41fb33d836275b74c24](https://i.gyazo.com/6f00d74612def41fb33d836275b74c24.gif)](https://gyazo.com/6f00d74612def41fb33d836275b74c24)
 
-# Create an LadderDrive project
+# Create a LadderDrive project
 
 At the command prompt, create a new LadderDrive project.
 
@@ -30,7 +30,7 @@ $ cd my_project
 
 [![https://gyazo.com/c538f66129aa425e2b1da4f478a10f52](https://i.gyazo.com/c538f66129aa425e2b1da4f478a10f52.gif)](https://gyazo.com/c538f66129aa425e2b1da4f478a10f52)
 
-Created files are consisted like the tree below.
+Created files have consisted like the tree below.
 
 ```
 .
@@ -52,8 +52,8 @@ Created files are consisted like the tree below.
 ## PLC configuration
 
 There is a plc project under the plc directory.
-Launch the one of the plc project which you want to use.
-(Currently we support the Emulator and MITSUBISHI iQ-R R08CUP only.)
+Launch one of the plc projects which you want to use.
+(Currently, we support the Emulator and MITSUBISHI iQ-R R08CUP only.)
 
 Configure ethernet connection by the tool which is provided by plc maker.
 Then upload settings and plc program to the plc.
@@ -64,8 +64,8 @@ Then upload settings and plc program to the plc.
 ## LadderDrive configuration
 
 There is a configuration file at config/plc.yml.
-Currently we support MITSUBISHI iQ-R R08CUP and the Emulator.
-You only change host to an ip address of your plc.
+Currently, we support MITSUBISHI iQ-R R08CUP and the Emulator.
+You only change host to an IP address of your plc.
 
 ```
 # plc.yml
@@ -82,9 +82,9 @@ plc:                        # Beginning of PLC section.
 
 ## LadderDrive programming
 
-LadderDrive program file is located under the asm directory.
+The Ladderdrive program file is located under the asm directory.
 By default, use asm/main.esc.
-Edit it and programming.
+Edit it and programming.  
 
 Refer [Wiki](https://github.com/ito-soft-design/ladder_drive/wiki/mnemonic) to check mnemonic.
 
@@ -126,7 +126,7 @@ default:
 ```rake``` is same as ```rake target=iq-r```.
 
 
-The LadderDrive program runs immediately after uploaded.
+The LadderDrive program runs immediately after upload.
 
 ```sh
 $ rake [target=iq-r]
@@ -141,7 +141,7 @@ done uploading
 >
 ```
 
-After uploaded the program, it becomes in to console mode.
+After uploading the program, it becomes in to console mode.
 You can read and write a device by entering commands.
 
 Use the r command if you want to read devices.
