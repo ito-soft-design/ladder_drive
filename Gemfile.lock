@@ -111,6 +111,7 @@ PLATFORMS
 DEPENDENCIES
   activesupport (>= 4.2.7)
   bundler (~> 1.11)
+  ffi (>= 1.9.24)
   google_drive
   ladder_drive!
   pi_piper
