@@ -289,6 +289,47 @@ plc["D0", 10] = [0, 1, 2, ..., 9]
 plc["D0".."D9"]   => [0, 1, 2, ..., 9]
 ```
 
+## プラグイン
+
+UnixベースのマシンでLadder Driveを実行した場合にプラグインで機能を拡張できます。  
+例えば各種センサーを読み込みLadder Driveのデバイスにセットしたり、Webサービスと連動させたりという事ができます。  
+
+プラグインを作成する場合はプロジェクにpluginsディレクトリを作成し、xxx_plugin.rbというファイル名のRubyスクリプトを作成します。xxxはプラグインの名称を示しbarプラグインならbar_plugin.rbになります。
+
+### プラグインのコールバック
+
+起動時にプラグインの初期化をするために```plugin_xxx_init```が呼び出されます。(xxxはプラグインの名称が入り、sample_plugin.rbならxxxにsampleが入ります)  
+初期が必要な場合はここで行なってください。  
+
+Ladder Driveが1サイクル実行後に```plugin_xxx_exec```を呼び出します。(xxxについては上記の通りです)  
+ここでLadder Driveデバイスへの読み書きなどを行います。  
+
+### あらかじめ用意されているプラグイン
+
+Ladder Driveでは次のプラグインがあらかじめ用意されています。  
+Ladder DriveをIoT Gateway として機能させるプラグインになります。  
+
+|名称|内容|
+|:--|:--|
+|ifttt|IFTTTのWebhooksを起動します。|
+|google_drive|Google spreadsheetにデータを書き込みます。|
+|plc_mapper|複数のPLCのデータをLadder Driveのメモリーに展開します。|
+|slack|Slackにデータの変化を記録します。|
+|trello|trelloのカードを指定のリストに移動します。|
+
+これらの用意されているプラグインをインストールするには
+
+```
+$ ladder_drive plugin plugin_name
+```
+
+plugin_nameには上記プラグインの名称を入れます。  
+指定されたプラグインがpluginsディレクトリーに作成されます。  
+
+
+それぞれのプラグインの使い方はWikiの方に記載する予定です。
+
+
 ## LadderDriveに関する情報
 
 - [一往確認日記 [ladder_drive]](http://diary.itosoft.com/?category=ladder_drive)

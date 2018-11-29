@@ -269,6 +269,38 @@ plc["D0", 10] = [0, 1, 2, ..., 9]
 plc["D0".."D9"]   => [0, 1, 2, ..., 9]
 ```
 
+## Plugin
+
+If you want to an enhancement function Ladder drive running on Unix based machine, use a plugin.
+
+Put xxx_plugin.rb into your project's plugins directory.
+xxx is the name of the plugin. i.e.) If your plugin name is 'bar' then xxx is 'bar' . -> bar_plugin.rb  
+
+### Callbacks
+
+Ladder drive calls ```plugin_xxx_init``` function for the initialization. If you need to initialize it, to do here.  
+
+It also calls ```plugin_xxx_exec``` for execution of your plugin.
+
+### plugins
+
+Ladder drive has several plugins by default.
+If you want to use a plugin, execute below command.
+
+```
+$ ladder_drive plugin plugin_name
+```
+
+|Plugin name|description|
+|:--|:--|
+|ifttt|Launch IFTTT's Webhooks trigger service.|
+|google_drive|Writing data to Google spreadsheet.|
+|plc_mapper|Share other PLCs data with Ladder drive device.|
+|slack|Cast the data to the Slack.|
+|trello|Move the card of Trello to specified list.|
+
+
+
 # Information related ladder_drive
 
 - [My japanese diary [ladder_drive]](http://diary.itosoft.com/?category=ladder_drive)
