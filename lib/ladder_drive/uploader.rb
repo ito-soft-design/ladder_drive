@@ -31,7 +31,6 @@ module LadderDrive
 
     attr_accessor :protocol
     attr_accessor :source
-    attr_accessor :data
 
     def initialize options={}
       @protocol = options[:protocol] if options[:protocol]

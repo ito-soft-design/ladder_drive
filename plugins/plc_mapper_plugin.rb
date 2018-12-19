@@ -82,8 +82,8 @@ class PlcMapperPlugin < Plugin
 
     def setup
       config[:plcs].each do |plc_config|
-        Thread.start(plc_config) {|plc_config|
-          mapping_thread_proc plc_config
+        Thread.start(plc_config) {|config|
+          mapping_thread_proc config
         }
       end
     end
@@ -138,7 +138,7 @@ class PlcMapperPlugin < Plugin
           end
           sleep next_time - Time.now
           alerted = false
-        rescue => e
+        rescue
           puts "#{config[:description]} is not reachable." unless alerted
           alerted = true
         end

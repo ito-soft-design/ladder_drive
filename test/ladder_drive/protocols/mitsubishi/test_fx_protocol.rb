@@ -6,6 +6,8 @@ include LadderDrive
 class TestFxProtocol < Test::Unit::TestCase
   include Protocol::Mitsubishi
 
+  attr_reader :running
+
   def setup
     @protocol = FxProtocol.new log_level: :debug
     Timeout.timeout(0.5) do
@@ -26,21 +28,21 @@ class TestFxProtocol < Test::Unit::TestCase
 =end
 
   def test_set_and_read_bool_value
-    omit_if(!@running)
+    omit_if(!running)
     d = FxDevice.new "M3000"
     @protocol.set_bit_to_device(true, d)
     assert_equal true, @protocol.get_bit_from_device(d)
   end
 
   def test_set_and_read_word_value
-    omit_if(!@running)
+    omit_if(!running)
     d = FxDevice.new "D3000"
     @protocol.set_word_to_device(0x1234, d)
     assert_equal 0x1234, @protocol.get_word_from_device(d)
   end
 
   def test_set_and_read_bits
-    omit_if(!@running)
+    omit_if(!running)
     d = FxDevice.new "M3000"
     bits = "10010001".each_char.map{|c| c == "1"}
     @protocol.set_bits_to_device(bits, d)
@@ -49,7 +51,7 @@ class TestFxProtocol < Test::Unit::TestCase
   end
 
   def test_set_and_read_words
-    omit_if(!@running)
+    omit_if(!running)
     d = FxDevice.new "D0"
     values = (256..265).to_a
     @protocol.set_words_to_device(values, d)
@@ -80,7 +82,7 @@ class TestFxProtocol < Test::Unit::TestCase
 
   # array attr_accessor
   def test_set_and_get_bit_as_array
-    omit_if(!@running)
+    omit_if(!running)
     d = QDevice.new "M0"
     bits = "10010001".each_char.map{|c| c == "1"}
     @protocol[d, bits.size] = bits
@@ -88,7 +90,7 @@ class TestFxProtocol < Test::Unit::TestCase
   end
 
   def test_set_and_get_bit_as_array_with_range
-    omit_if(!@running)
+    omit_if(!running)
     d = QDevice.new "M0"
     bits = "10010001".each_char.map{|c| c == "1"}
     @protocol["M0".."M7"] = bits
@@ -96,7 +98,7 @@ class TestFxProtocol < Test::Unit::TestCase
   end
 
   def test_set_and_get_bit_as_array_with_one
-    omit_if(!@running)
+    omit_if(!running)
     d = QDevice.new "M0"
     bits = "10010001".each_char.map{|c| c == "1"}
     @protocol["M0"] = true
@@ -104,7 +106,7 @@ class TestFxProtocol < Test::Unit::TestCase
   end
 
   def test_set_and_get_words_as_array
-    omit_if(!@running)
+    omit_if(!running)
     d = QDevice.new "D0"
     values = (256..265).to_a
     @protocol[d, values.size] = values
@@ -112,7 +114,7 @@ class TestFxProtocol < Test::Unit::TestCase
   end
 
   def test_set_and_get_words_as_array_with_range
-    omit_if(!@running)
+    omit_if(!running)
     d = QDevice.new "D0"
     values = (256..265).to_a
     @protocol["D0".."D9"] = values
@@ -120,7 +122,7 @@ class TestFxProtocol < Test::Unit::TestCase
   end
 
   def test_set_and_get_words_as_array_with_one
-    omit_if(!@running)
+    omit_if(!running)
     d = QDevice.new "D0"
     @protocol["D0"] = 123
     assert_equal 123, @protocol["D0"]

@@ -31,7 +31,7 @@ module Emulator
   class EmuDevice < PlcDevice
 
     attr_reader :in_value, :out_value
-    attr_accessor :plc
+    attr_reader :plc
 
     def initialize a, b = nil
       super

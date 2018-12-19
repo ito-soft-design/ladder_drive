@@ -75,7 +75,6 @@ def plugin_slack_exec plc
         devs = devs.map{|d| plc.device_by_name d.strip}
         d1 = devs.first
         d2 = devs.last
-        d = d1
         [d2.number - d1.number + 1, 1].max.times.inject([]){|a, i| a << d1; d1 += 1; a}
       end.flatten
 

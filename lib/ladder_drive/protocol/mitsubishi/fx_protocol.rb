@@ -51,6 +51,7 @@ module Mitsubishi
       @baudrate = 19200
       @station_no = 0
       @wait_time = 0
+      @comm = nil
       #prepare_device_map
     end
 

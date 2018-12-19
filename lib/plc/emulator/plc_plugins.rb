@@ -85,11 +85,10 @@ class Plugin
   class << self
 
     def devices_with_plc_from_str plc, dev_str
-      devices = dev_str.split(",").map{|e| e.split("-")}.map do |devs|
+      dev_str.split(",").map{|e| e.split("-")}.map do |devs|
         devs = devs.map{|d| plc.device_by_name d.strip}
         d1 = devs.first
         d2 = devs.last
-        d = d1
         [d2.number - d1.number + 1, 1].max.times.inject([]){|a, i| a << d1; d1 += 1; a}
       end.flatten
     end

@@ -94,7 +94,7 @@ def plugin_trello_exec plc
         t = @plugin_trello_times[event.object_id] || now
         triggered = t <= now
         if triggered
-          interval_triggered = true
+          triggered = true
           t += event[:trigger][:interval] || 300
           @plugin_trello_times[event.object_id] = t
         end

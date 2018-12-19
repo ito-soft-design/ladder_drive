@@ -141,8 +141,8 @@ def plugin_google_drive_exec plc
         d1, d2 = config[:device].split("-").map{|d| plc.device_by_name d}
         devices = [d1]
         if d2
-          d = d1 + 1
-          devices += [d2.number - d1.number, 0].max.times.inject([]){|a, i| a << d; d += 1; a}
+          d3 = d1 + 1
+          devices += [d2.number - d1.number, 0].max.times.inject([]){|a, i| a << d3; d3 += 1; a}
         end
         devices.map{|d| d.send config[:type], config[:length] || 8}
       end.flatten

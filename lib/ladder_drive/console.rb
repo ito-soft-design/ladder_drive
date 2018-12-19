@@ -30,7 +30,6 @@ module LadderDrive
     include Singleton
 
     def run
-      l = true
       trap(:INT) { puts "\n> " }
 
       display_title

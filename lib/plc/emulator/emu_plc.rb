@@ -63,6 +63,7 @@ module Emulator
       end
       @lock = Mutex.new
       @config = config
+      @pending_save = nil
       reset
       load_plugins
     end
@@ -341,12 +342,12 @@ module Emulator
         (SIZE_OF_BIT_STACK - 1).downto 0 do |i|
           values << stack_device(i).word
         end
-        v = values.pop
+        value = values.pop
         values.each_with_index do |v, i|
           stack_device(i).word = v
         end
         stack_count_device.word -= 1
-        v
+        value
       end
       # ----------------
 

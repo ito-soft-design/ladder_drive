@@ -33,7 +33,7 @@ module LadderDrive
     def create(name)
       if File.exist? name
         puts "ERROR: #{name} already exists."
-        exit -1
+        exit(-1)
       end
 
       # copy from template file
