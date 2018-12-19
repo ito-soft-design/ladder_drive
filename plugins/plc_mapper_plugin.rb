@@ -57,7 +57,7 @@ class PlcMapperPlugin < Plugin
     @lock = Mutex.new
     @values_for_reading = {}
     @values_for_writing = {}
-    setup
+    setup unless config[:disable]
   end
 
   def run_cycle plc
@@ -102,7 +102,9 @@ class PlcMapperPlugin < Plugin
       mappings.map do |h|
         a = []
         h.each do |k, v|
-          devs = v.split("-").map{|d| protocol.device_by_name d.strip}
+          devs = v.split("-").map{|d|
+            protocol.device_by_name d.strip
+          }
           d1 = devs.first
           d2 = devs.last
           a << k
@@ -125,6 +127,7 @@ class PlcMapperPlugin < Plugin
         Time.at t
       end
 
+      alerted = false
       loop do
         begin
           now = Time.now
@@ -133,8 +136,10 @@ class PlcMapperPlugin < Plugin
             next_time += interval
           end
           sleep next_time - Time.now
+          alerted = false
         rescue => e
-          puts e, caller
+          puts "#{config[:description]} is not reachable." unless alerted
+          alerted = true
         end
       end
     end
