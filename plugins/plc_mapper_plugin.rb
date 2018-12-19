@@ -57,10 +57,11 @@ class PlcMapperPlugin < Plugin
     @lock = Mutex.new
     @values_for_reading = {}
     @values_for_writing = {}
-    setup unless config[:disable]
+    setup unless config.empty? || config[:disable]
   end
 
   def run_cycle plc
+    return if config.empty? || config[:disable]
     return false unless super
     @lock.synchronize {
       # set values from plcs to ladder drive.

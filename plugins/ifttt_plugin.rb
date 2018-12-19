@@ -59,7 +59,7 @@ require 'net/https'
 
 def plugin_ifttt_init plc
   @plugin_ifttt_config = load_plugin_config 'ifttt'
-  return if @plugin_ifttt_config[:disable]
+  return if @plugin_ifttt_config.empty? || @plugin_ifttt_config[:disable]
 
   @plugin_ifttt_values = {}
   @plugin_ifttt_times = {}
@@ -70,7 +70,7 @@ def plugin_ifttt_init plc
 end
 
 def plugin_ifttt_exec plc
-  return if @plugin_ifttt_config[:disable]
+  return if @plugin_ifttt_config.empty? || @plugin_ifttt_config[:disable]
   return unless @plugin_ifttt_config[:web_hook_key]
 
   @plugin_ifttt_config[:events].each do |event|

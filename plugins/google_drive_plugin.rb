@@ -67,7 +67,7 @@ require 'google_drive'
 
 def plugin_google_drive_init plc
   @plugin_google_drive_config = load_plugin_config 'google_drive'
-  return if @plugin_google_drive_config[:disable]
+  return if @plugin_google_drive_config.empty? || @plugin_google_drive_config[:disable]
 
   @plugin_google_drive_values = {}
   @plugin_google_drive_times = {}
@@ -102,7 +102,7 @@ def plugin_google_drive_init plc
 end
 
 def plugin_google_drive_exec plc
-  return if @plugin_google_drive_config[:disable]
+  return if @plugin_google_drive_config.empty? || @plugin_google_drive_config[:disable]
   return unless @plugin_google_drive_session
 
   @plugin_google_drive_config[:loggings].each do |logging|

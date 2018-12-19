@@ -15,7 +15,7 @@ class TestFxProtocol < Test::Unit::TestCase
   end
 
   def teardown
-    @protocol.set_bits_to_device([false] * 8, FxDevice.new("M3000"))
+    @protocol.set_bits_to_device([false] * 8, FxDevice.new("M3000")) if @running
     @protocol.close
   end
 

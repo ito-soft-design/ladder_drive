@@ -63,7 +63,7 @@ def plugin_slack_init plc
 end
 
 def plugin_slack_exec plc
-  return if @plugin_slack_config[:disable]
+  return if @plugin_slack_config.empty? || @plugin_slack_config[:disable]
 
   @plugin_slack_config[:events].each do |event|
     next unless event[:devices]

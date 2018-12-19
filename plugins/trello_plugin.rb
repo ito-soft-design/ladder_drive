@@ -79,7 +79,7 @@ def plugin_trello_init plc
 end
 
 def plugin_trello_exec plc
-  return if @plugin_trello_config[:disable]
+  return if @plugin_trello_config.empty? || @plugin_trello_config[:disable]
 #  return unless @plugin_trello_configured
 
   @plugin_trello_config[:events].each do |event|
