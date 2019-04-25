@@ -9,3 +9,4 @@
 *.gem
 /work/
 cache
+.ruby-version
