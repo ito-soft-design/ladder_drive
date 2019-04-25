@@ -4,7 +4,7 @@ PATH
     ladder_drive (0.6.0)
       activesupport (~> 4.2, >= 4.2.7)
       ffi (~> 1.9.24, >= 1.9.24)
-      pi_piper (>= 2.0.0)
+      pi_piper (~> 2.0, >= 2.0.0)
       thor (~> 0)
 
 GEM
@@ -110,16 +110,16 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  activesupport
+  activesupport (~> 4.2, >= 4.2.7)
   bundler (~> 1.11)
-  ffi
+  ffi (~> 1.9.24)
   google_drive
   ladder_drive!
-  pi_piper
+  pi_piper (>= 2.0.0)
   rake (~> 10.0)
   ruby-trello
   serialport
   test-unit
 
 BUNDLED WITH
-   1.16.6
+   1.17.2

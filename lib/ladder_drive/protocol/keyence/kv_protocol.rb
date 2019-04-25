@@ -29,6 +29,7 @@ module Keyence
 
     def initialize options={}
       super
+      @socket = nil
       @host = options[:host] || "192.168.0.10"
       @port = options[:port] || 8501
       prepare_device_map
@@ -148,6 +149,7 @@ module Keyence
 
     def available_bits_range suffix=nil
       case suffix
+      # FIXME: duplicated
       when "TM"
         1..512
       when "TM"
@@ -167,12 +169,12 @@ module Keyence
 
     def available_words_range suffix=nil
       case suffix
+      # FIXME: duplicated
       when "TM"
         1..256
       when "TM"
         1..12
       when "T", "TC", "TS", "C", "CC", "CS"
-        1..120
         1..120
       when "CTH"
         1..2

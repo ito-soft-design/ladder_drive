@@ -65,127 +65,154 @@ DOC
 require 'net/https'
 require 'google_drive'
 
-def plugin_google_drive_init plc
-  @plugin_google_drive_config = load_plugin_config 'google_drive'
-  return if @plugin_google_drive_config[:disable]
+module LadderDrive
+module Emulator
 
-  @plugin_google_drive_values = {}
-  @plugin_google_drive_times = {}
-  @plugin_google_drive_worker_queue = Queue.new
+class GoogleDrivePlugin < Plugin
 
-  begin
-    # generate config file for google drive session
-    tmp_dir = File.expand_path "tmp"
-    session_path = File.join(tmp_dir, "google_drive_session.json")
-    unless File.exist? session_path
-      mkdir_p tmp_dir
-      conf =
-        [:client_id, :client_secret, :refresh_token].inject({}) do |h, key|
-          v = @plugin_google_drive_config[key]
-          h[key] = v if v
-          h
-        end
-      File.write session_path, JSON.generate(conf)
+  def initialize plc
+    super #plc
+    return if disabled?
+
+    @values = {}
+    @times = {}
+    @worker_queue = Queue.new
+
+    begin
+      # generate config file for google drive session
+      tmp_dir = File.expand_path "tmp"
+      session_path = File.join(tmp_dir, "google_drive_session.json")
+      unless File.exist? session_path
+        mkdir_p tmp_dir
+        conf =
+          [:client_id, :client_secret, :access_token, :refresh_token].inject({}) do |h, key|
+            v = config[key]
+            h[key] = v if v
+            h
+          end
+        File.write session_path, JSON.generate(conf)
+      end
+
+      # create google drive session
+      @session = GoogleDrive::Session.from_config(session_path)
+
+      # start worker thread
+      setup if @session
+    rescue => e
+      p e
+      @session = nil
+      exit(1)
     end
 
-    # create google drive session
-    @plugin_google_drive_session = GoogleDrive::Session.from_config(session_path)
-
-    # start worker thread
-    Thread.start {
-      plugin_google_drive_worker_loop
-    }
-  rescue => e
-    p e
-    @plugin_google_drive_session = nil
   end
+
+  def run_cycle plc
+    return if disabled?
+    return unless @session
+
+    config[:loggings].each do |logging|
+      begin
+        # check triggered or not
+        triggered = false
+        case logging[:trigger][:type]
+        when "interval"
+          now = Time.now
+          t = @times[logging.object_id] || now
+          triggered = t <= now
+          if triggered
+            t += logging[:trigger][:interval] || 300
+            @times[logging.object_id] = t
+          end
+        else
+          d = plc.device_by_name logging[:trigger][:device]
+          v = d.send logging[:trigger][:value_type], logging[:trigger][:text_length] || 8
+          unless @values[logging.object_id] == v
+            @values[logging.object_id] = v
+            case logging[:trigger][:type]
+            when "raise"
+              triggered = !!v
+            when "fall"
+              triggered = !v
+            else
+              triggered = true
+            end
+          end
+        end
+
+        next unless triggered
+
+        # gether values
+        values = logging[:devices].map do |config|
+          d1, d2 = config[:device].split("-").map{|d| plc.device_by_name d}
+          devices = [d1]
+          if d2
+            d3 = d1 + 1
+            devices += [d2.number - d1.number, 0].max.times.inject([]){|a, i| a << d3; d3 += 1; a}
+          end
+          devices.map{|d| d.send config[:type], config[:length] || 8}
+        end.flatten
+        @worker_queue.push logging:logging, values:values, time:Time.now
+      rescue => e
+        #p e, caller
+      end
+    end if config[:loggings]
+  end
+
+  private
+
+    def setup
+      Thread.start {
+        thread_proc
+      }
+    end
+
+    def thread_proc
+      while arg = @worker_queue.pop
+        begin
+          logging = arg[:logging]
+          spread_sheet = @session.spreadsheet_by_key(logging[:spread_sheet][:spread_sheet_key])
+
+          # get worksheet
+          worksheet = begin
+            if logging[:spread_sheet][:sheet_name]
+              spread_sheet.worksheet_by_title logging[:spread_sheet][:sheet_name]
+            else
+              spread_sheet.worksheets[logging[:spread_sheet][:sheet_no] || 0]
+            end
+          end
+
+          # write columns if needs
+          if worksheet.num_rows == 0
+            worksheet[1, 1] = "Time"
+            logging[:columns].split(",").each_with_index do |t, i|
+              worksheet[1, i + 2] = t
+            end
+          end
+
+          # write values
+          r = worksheet.num_rows + 1
+          worksheet[r, 1] = arg[:time]
+          arg[:values].each_with_index do |v, i|
+            worksheet[r, i + 2] = v
+          end if arg[:values]
+          worksheet.save
+        rescue => e
+          # TODO: Resend if it fails.
+          #p e, caller
+        end
+      end
+    end
+
+end
+
+end
+end
+
+
+def plugin_google_drive_init plc
+  @google_drive_plugin = LadderDrive::Emulator::GoogleDrivePlugin.new plc
 end
 
 def plugin_google_drive_exec plc
-  return if @plugin_google_drive_config[:disable]
-  return unless @plugin_google_drive_session
-
-  @plugin_google_drive_config[:loggings].each do |logging|
-    begin
-      # check triggered or not
-      triggered = false
-      case logging[:trigger][:type]
-      when "interval"
-        now = Time.now
-        t = @plugin_google_drive_times[logging.object_id] || now
-        triggered = t <= now
-        if triggered
-          t += logging[:trigger][:interval] || 300
-          @plugin_google_drive_times[logging.object_id] = t
-        end
-      else
-        d = plc.device_by_name logging[:trigger][:device]
-        v = d.send logging[:trigger][:value_type], logging[:trigger][:text_length] || 8
-        unless @plugin_google_drive_values[logging.object_id] == v
-          @plugin_google_drive_values[logging.object_id] = v
-          case logging[:trigger][:type]
-          when "raise"
-            triggered = !!v
-          when "fall"
-            triggered = !v
-          else
-            triggered = true
-          end
-        end
-      end
-
-      next unless triggered
-
-      # gether values
-      values = logging[:devices].map do |config|
-        d1, d2 = config[:device].split("-").map{|d| plc.device_by_name d}
-        devices = [d1]
-        if d2
-          d = d1 + 1
-          devices += [d2.number - d1.number, 0].max.times.inject([]){|a, i| a << d; d += 1; a}
-        end
-        devices.map{|d| d.send config[:type], config[:length] || 8}
-      end.flatten
-      @plugin_google_drive_worker_queue.push logging:logging, values:values, time:Time.now
-    rescue => e
-      p e
-    end
-  end if @plugin_google_drive_config[:loggings]
-end
-
-def plugin_google_drive_worker_loop
-  while arg = @plugin_google_drive_worker_queue.pop
-    begin
-      logging = arg[:logging]
-      spread_sheet = @plugin_google_drive_session.spreadsheet_by_key(logging[:spread_sheet][:spread_sheet_key])
-
-      # get worksheet
-      worksheet = begin
-        if logging[:spread_sheet][:sheet_name]
-          spread_sheet.worksheet_by_title logging[:spread_sheet][:sheet_name]
-        else
-          spread_sheet.worksheets[logging[:spread_sheet][:sheet_no] || 0]
-        end
-      end
-
-      # write columns if needs
-      if worksheet.num_rows == 0
-        worksheet[1, 1] = "Time"
-        logging[:columns].split(",").each_with_index do |t, i|
-          worksheet[1, i + 2] = t
-        end
-      end
-
-      # write values
-      r = worksheet.num_rows + 1
-      worksheet[r, 1] = arg[:time]
-      arg[:values].each_with_index do |v, i|
-        worksheet[r, i + 2] = v
-      end if arg[:values]
-      worksheet.save
-    rescue => e
-      # TODO: Resend if it fails.
-      p e
-    end
-  end
+  @google_drive_plugin.run_cycle plc
 end

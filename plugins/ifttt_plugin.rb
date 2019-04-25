@@ -57,78 +57,111 @@ DOC
 
 require 'net/https'
 
-def plugin_ifttt_init plc
-  @plugin_ifttt_config = load_plugin_config 'ifttt'
-  return if @plugin_ifttt_config[:disable]
+module LadderDrive
+module Emulator
 
-  @plugin_ifttt_values = {}
-  @plugin_ifttt_times = {}
-  @plugin_ifttt_worker_queue = Queue.new
-  Thread.start {
-    plugin_ifttt_worker_loop
-  }
+class IftttPlugin < Plugin
+
+  def initialize plc
+    super #plc
+    return if disabled?
+
+    @values = {}
+    @times = {}
+    @worker_queue = Queue.new
+    setup
+  end
+
+  def run_cycle plc
+    return if disabled?
+    config[:events].each do |event|
+      begin
+        triggered = false
+        case event[:trigger][:type]
+        when "interval"
+          now = Time.now
+          t = @times[event.object_id] || now
+          triggered = t <= now
+          if triggered
+            t += event[:trigger][:interval] || 300
+            @times[event.object_id] = t
+          end
+        else
+          d = plc.device_by_name event[:trigger][:device]
+          v = d.send event[:trigger][:value_type], event[:trigger][:text_length] || 8
+          unless @values[event.object_id] == v
+            @values[event.object_id] = v
+            case event[:trigger][:type]
+            when "raise"
+              triggered = !!v
+            when "fall"
+              triggered = !v
+            else
+              triggered = true
+            end
+          end
+        end
+
+        next unless triggered
+
+        @worker_queue.push event:event[:name], payload:event[:params].dup || {}, value:v
+      rescue => e
+        p e
+      end
+    end if config[:events]
+  end
+
+  def disabled?
+    return false unless super
+    unless config[:web_hook_key]
+      puts "ERROR: IftttPlugin requires web_hook_key."
+      false
+    else
+      super
+    end
+  end
+
+
+  private
+
+    def setup
+      Thread.start {
+        thread_proc
+      }
+    end
+
+    def thread_proc
+      while arg = @worker_queue.pop
+        begin
+          uri = URI.parse("https://maker.ifttt.com/trigger/#{arg[:event]}/with/key/#{config[:web_hook_key]}")
+          http = Net::HTTP.new(uri.host, uri.port)
+          http.use_ssl = true
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+          req = Net::HTTP::Post.new(uri.path)
+          payload = arg[:payload]
+          payload.keys.each do |key|
+            payload[key] = arg[:value] if payload[key] == "__value__"
+          end
+          req.set_form_data(payload)
+
+          http.request(req)
+        rescue => e
+          # TODO: Resend if it fails.
+          p e
+        end
+      end
+    end
+
+end
+
+end
+end
+
+def plugin_ifttt_init plc
+  @ifttt_plugin = LadderDrive::Emulator::IftttPlugin.new plc
 end
 
 def plugin_ifttt_exec plc
-  return if @plugin_ifttt_config[:disable]
-  return unless @plugin_ifttt_config[:web_hook_key]
-
-  @plugin_ifttt_config[:events].each do |event|
-    begin
-      triggered = false
-      case event[:trigger][:type]
-      when "interval"
-        now = Time.now
-        t = @plugin_ifttt_times[event.object_id] || now
-        triggered = t <= now
-        if triggered
-          t += event[:trigger][:interval] || 300
-          @plugin_ifttt_times[event.object_id] = t
-        end
-      else
-        d = plc.device_by_name event[:trigger][:device]
-        v = d.send event[:trigger][:value_type], event[:trigger][:text_length] || 8
-        unless @plugin_ifttt_values[event.object_id] == v
-          @plugin_ifttt_values[event.object_id] = v
-          case event[:trigger][:type]
-          when "raise"
-            triggered = !!v
-          when "fall"
-            triggered = !v
-          else
-            triggered = true
-          end
-        end
-      end
-
-      next unless triggered
-
-      @plugin_ifttt_worker_queue.push event:event[:name], payload:event[:params].dup || {}, value:v
-    rescue => e
-      p e
-    end
-  end if @plugin_ifttt_config[:events]
-end
-
-def plugin_ifttt_worker_loop
-  while arg = @plugin_ifttt_worker_queue.pop
-    begin
-      uri = URI.parse("https://maker.ifttt.com/trigger/#{arg[:event]}/with/key/#{@plugin_ifttt_config[:web_hook_key]}")
-      http = Net::HTTP.new(uri.host, uri.port)
-      http.use_ssl = true
-      http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-
-      req = Net::HTTP::Post.new(uri.path)
-      payload = arg[:payload]
-      payload.keys.each do |key|
-        payload[key] = arg[:value] if payload[key] == "__value__"
-      end
-      req.set_form_data(payload)
-
-      http.request(req)
-    rescue => e
-      # TODO: Resend if it fails.
-      p e
-    end
-  end
+  @ifttt_plugin.run_cycle plc
 end

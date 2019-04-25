@@ -29,6 +29,7 @@ module Mitsubishi
 
     def initialize options={}
       super
+      @socket = nil
       @host = options[:host] || "192.168.0.10"
       @port = options[:port] || 5010
       prepare_device_map

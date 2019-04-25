@@ -29,11 +29,15 @@ module Protocol
 
   class Protocol
 
-    attr_accessor :host, :port, :log_level
+    attr_accessor :host, :port
 
     def initialize options={}
       @logger = Logger.new(STDOUT)
       self.log_level = options[:log_level] || :info
+    end
+
+    def log_level
+      @log_level
     end
 
     def log_level= level

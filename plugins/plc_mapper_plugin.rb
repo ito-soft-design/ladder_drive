@@ -54,13 +54,15 @@ class PlcMapperPlugin < Plugin
 
   def initialize plc
     super #plc
+    return if disabled?
     @lock = Mutex.new
     @values_for_reading = {}
     @values_for_writing = {}
-    setup
+    setup unless config.empty? || config[:disable]
   end
 
   def run_cycle plc
+    return if disabled?
     return false unless super
     @lock.synchronize {
       # set values from plcs to ladder drive.
@@ -81,8 +83,8 @@ class PlcMapperPlugin < Plugin
 
     def setup
       config[:plcs].each do |plc_config|
-        Thread.start(plc_config) {|plc_config|
-          mapping_thread_proc plc_config
+        Thread.start(plc_config) {|config|
+          mapping_thread_proc config
         }
       end
     end
@@ -102,7 +104,9 @@ class PlcMapperPlugin < Plugin
       mappings.map do |h|
         a = []
         h.each do |k, v|
-          devs = v.split("-").map{|d| protocol.device_by_name d.strip}
+          devs = v.split("-").map{|d|
+            protocol.device_by_name d.strip
+          }
           d1 = devs.first
           d2 = devs.last
           a << k
@@ -125,6 +129,7 @@ class PlcMapperPlugin < Plugin
         Time.at t
       end
 
+      alerted = false
       loop do
         begin
           now = Time.now
@@ -133,8 +138,10 @@ class PlcMapperPlugin < Plugin
             next_time += interval
           end
           sleep next_time - Time.now
-        rescue => e
-          puts e, caller
+          alerted = false
+        rescue
+          puts "#{config[:description]} is not reachable." unless alerted
+          alerted = true
         end
       end
     end

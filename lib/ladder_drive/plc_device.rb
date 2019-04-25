@@ -54,7 +54,7 @@ module LadderDrive
       @suffix = nil
       @value = 0
       case a
-      when Fixnum
+      when Integer
         @suffix = ESC_SUFFIXES[a]
         @number = b
       when String, Symbol
@@ -127,7 +127,7 @@ module LadderDrive
 
     def bool
       case @value
-      when Fixnum
+      when Integer
         @value != 0
       else
         !!@value

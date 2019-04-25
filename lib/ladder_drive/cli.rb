@@ -33,7 +33,7 @@ module LadderDrive
     def create(name)
       if File.exist? name
         puts "ERROR: #{name} already exists."
-        exit -1
+        exit(-1)
       end
 
       # copy from template file
@@ -58,7 +58,7 @@ module LadderDrive
       path = File.join(plugins_path, "#{name}_plugin.rb")
       if File.exist? path
         mkdir_p "plugins"
-        cp path, "plugins/#{name}_plugins.rb"
+        cp path, "plugins/#{name}_plugin.rb"
       end
     end
 
