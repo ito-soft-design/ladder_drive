@@ -117,7 +117,7 @@ class Plugin
   end
 
   def disabled?
-    config[:disable]
+    config.empty? || config[:disable]
   end
 
   def run_cycle plc

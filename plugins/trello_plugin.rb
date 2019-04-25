@@ -52,105 +52,122 @@ require 'trello'
 
 # @see https://qiita.com/tbpgr/items/60fc13aca8afd153e37b
 
-=begin
-Dotenv.load
 
-b =  Trello::Board.all.find{|b| b.name == "工程モニター"}
-pp b.lists.map{|l| {id:l.id, name:l.name, cards:l.cards.map{|c| {id:c.id, name:c.name}}}}
-=end
+module LadderDrive
+module Emulator
 
+class TrelloPlugin < Plugin
 
-def plugin_trello_init plc
-  @plugin_trello_config = load_plugin_config 'trello'
+  def initialize plc
+    super #plc
+    return if disabled?
 
-  @plugin_trello_values = {}
-  @plugin_trello_times = {}
-  @plugin_trello_worker_queue = Queue.new
+    @values = {}
+    @times = {}
+    @worker_queue = Queue.new
 
-  @plugin_trello_configured = Trello.configure do |config|
-    config.consumer_key = @plugin_trello_config[:consumer_key]
-    config.consumer_secret = @plugin_trello_config[:consumer_secret]
-    config.oauth_token = @plugin_trello_config[:oauth_token]
+    @configured = Trello.configure do |config|
+      config.consumer_key = self.config[:consumer_key]
+      config.consumer_secret = self.config[:consumer_secret]
+      config.oauth_token = self.config[:oauth_token]
+    end
+    setup
   end
 
-  Thread.start {
-    plugin_trello_worker_loop
-  }
+  def run_cycle plc
+    return if disabled?
+    return if config[:events].nil?
+
+    @config[:events].each do |event|
+      begin
+
+        triggered = false
+        now = Time.now
+        device = nil
+
+        case event[:trigger][:type]
+        when "interval"
+          t = @times[event.object_id] || now
+          triggered = t <= now
+          if triggered
+            triggered = true
+            t += event[:trigger][:interval] || 300
+            @times[event.object_id] = t
+          end
+        else
+          device = plc.device_by_name event[:trigger][:device]
+          v = device.send event[:trigger][:value_type], event[:trigger][:text_length] || 8
+          unless @values[device.name] == v
+            @values[device.name] = v
+            case event[:trigger][:type]
+            when "raise"
+              triggered = !!v
+            when "fall"
+              triggered = !v
+            else
+              triggered = true
+            end
+          end
+        end
+
+        next unless triggered
+
+        @worker_queue.push event:event, device_name:device.name, value:v, time: now
+
+      rescue => e
+        p e
+      end
+    end
+  end
+
+  private
+
+    def setup
+      Thread.start {
+        thread_proc
+      }
+    end
+
+    def thread_proc
+      while arg = @worker_queue.pop
+        begin
+          event = arg[:event]
+
+          board =  Trello::Board.all.find{|b| b.name == event[:board_name]}
+          next unless board
+
+          card_name = event[:card_name].dup || ""
+          card_name.gsub!(/__value__/, arg[:value] || "")
+          next if (card_name || "").empty?
+
+          list_name = event[:list_name]
+          next unless list_name
+          list = board.lists.find{|l| l.name == list_name}
+          next unless list
+
+          card = board.lists.map{|l| l.cards.map{|c| c}}.flatten.find{|c| c.name == card_name}
+          if card
+            card.move_to_list list
+          else
+            card = Trello::Card.create name:card_name, list_id:list.id
+          end
+
+        rescue => e
+          # TODO: Resend if it fails.
+          p e
+        end
+      end
+    end
+
+end
+
+end
+end
+
+def plugin_trello_init plc
+  @trello_plugin = LadderDrive::Emulator::TrelloPlugin.new plc
 end
 
 def plugin_trello_exec plc
-  return if @plugin_trello_config.empty? || @plugin_trello_config[:disable]
-#  return unless @plugin_trello_configured
-
-  @plugin_trello_config[:events].each do |event|
-    begin
-
-      triggered = false
-      now = Time.now
-      device = nil
-
-      case event[:trigger][:type]
-      when "interval"
-        t = @plugin_trello_times[event.object_id] || now
-        triggered = t <= now
-        if triggered
-          triggered = true
-          t += event[:trigger][:interval] || 300
-          @plugin_trello_times[event.object_id] = t
-        end
-      else
-        device = plc.device_by_name event[:trigger][:device]
-        v = device.send event[:trigger][:value_type], event[:trigger][:text_length] || 8
-        unless @plugin_trello_values[device.name] == v
-          @plugin_trello_values[device.name] = v
-          case event[:trigger][:type]
-          when "raise"
-            triggered = !!v
-          when "fall"
-            triggered = !v
-          else
-            triggered = true
-          end
-        end
-      end
-
-      next unless triggered
-
-      @plugin_trello_worker_queue.push event:event, device_name:device.name, value:v, time: now
-
-    rescue => e
-      p e
-    end
-  end if @plugin_trello_config[:events]
-end
-
-def plugin_trello_worker_loop
-  while arg = @plugin_trello_worker_queue.pop
-    begin
-      event = arg[:event]
-
-      board =  Trello::Board.all.find{|b| b.name == event[:board_name]}
-      next unless board
-
-      card_name = event[:card_name].dup || ""
-      card_name.gsub!(/__value__/, arg[:value] || "")
-      next if (card_name || "").empty?
-
-      list_name = event[:list_name]
-      next unless list_name
-      list = board.lists.find{|l| l.name == list_name}
-      next unless list
-
-      card = board.lists.map{|l| l.cards.map{|c| c}}.flatten.find{|c| c.name == card_name}
-      if card
-        card.move_to_list list
-      else
-        card = Trello::Card.create name:card_name, list_id:list.id
-      end
-
-    rescue => e
-      # TODO: Resend if it fails.
-      p e
-    end
-  end
+  @trello_plugin.run_cycle plc
 end

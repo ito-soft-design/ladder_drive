@@ -43,112 +43,139 @@ DOC
 
 require 'net/https'
 
+
+module LadderDrive
+module Emulator
+
+class SlackPlugin < Plugin
+
+  def initialize plc
+    super #plc
+    return if disabled?
+
+    @values = {}
+    @times = {}
+    @worker_queue = Queue.new
+
+    # collect comments
+    @comments = {}
+    config[:device_comments].each do |k, v|
+      d = plc.device_by_name(k)
+      @comments[d.name] = v if d
+    end if config[:device_comments]
+    setup
+  end
+
+  def run_cycle plc
+    return if disabled?
+    return unless config[:events]
+
+    config[:events].each do |event|
+      next unless event[:devices]
+      next unless event[:webhook_url]
+      begin
+
+        # gether values
+        devices = event[:devices].split(",").map{|e| e.split("-")}.map do |devs|
+          devs = devs.map{|d| plc.device_by_name d.strip}
+          d1 = devs.first
+          d2 = devs.last
+          [d2.number - d1.number + 1, 1].max.times.inject([]){|a, i| a << d1; d1 += 1; a}
+        end.flatten
+
+        interval_triggered = false
+        now = Time.now
+        devices.each do |device|
+          triggered = false
+          v = nil
+          case event[:trigger][:type]
+          when "interval"
+            t = @times[event.object_id] || now
+            triggered = t <= now
+            if triggered
+              interval_triggered = true
+              t += event[:trigger][:interval] || 300
+              @times[event.object_id] = t
+            end
+            v = device.send event[:value_type], event[:trigger][:text_length] || 8
+          else
+            v = device.send event[:value_type], event[:text_length] || 8
+            unless @values[device.name] == v
+              @values[device.name] = v
+              case event[:trigger][:type]
+              when "raise"
+                triggered = !!v
+              when "fall"
+                triggered = !v
+              else
+                triggered = true
+              end
+            end
+          end
+
+          next unless triggered || interval_triggered
+
+          @worker_queue.push event:event,
+                                          device_name:device.name,
+                                          value:v,
+                                          time: now
+        end
+      rescue => e
+        p e
+      end
+    end
+  end
+
+  private
+
+    def setup
+      Thread.start {
+        thread_proc
+      }
+    end
+
+    def thread_proc
+      while arg = @worker_queue.pop
+        begin
+          event = arg[:event]
+          uri = URI.parse(event[:webhook_url])
+          http = Net::HTTP.new(uri.host, uri.port)
+          http.use_ssl = true
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+          req = Net::HTTP::Post.new(uri.path)
+          req["Content-Type"] = "application/json"
+
+          format = event[:format] || "__comment__ occured at __time__"
+          format = arg[:value] ? format[:raise] : format[:fall] unless format.is_a? String
+
+          device_name = arg[:device_name]
+          comment = @comments[device_name] || device_name
+          value = arg[:value].to_s
+          time = arg[:time].iso8601
+
+          payload = {text:format.gsub(/__device_comment__/, comment).gsub(/__value__/, value).gsub(/__time__/, time).gsub(/__device_name__/, device_name)
+                    }
+          req.body = payload.to_json
+
+          http.request(req)
+        rescue => e
+          # TODO: Resend if it fails.
+          p e
+        end
+      end
+    end
+
+end
+
+end
+end
+
+
 def plugin_slack_init plc
-  @plugin_slack_config = load_plugin_config 'slack'
-
-  @plugin_slack_values = {}
-  @plugin_slack_times = {}
-  @plugin_slack_worker_queue = Queue.new
-
-  # collect comments
-  @plugin_slack_comments = {}
-  @plugin_slack_config[:device_comments].each do |k, v|
-    d = plc.device_by_name(k)
-    @plugin_slack_comments[d.name] = v if d
-  end if @plugin_slack_config[:device_comments]
-
-  Thread.start {
-    plugin_slack_worker_loop
-  }
+  @slack_plugin = LadderDrive::Emulator::SlackPlugin.new plc
 end
 
 def plugin_slack_exec plc
-  return if @plugin_slack_config.empty? || @plugin_slack_config[:disable]
-
-  @plugin_slack_config[:events].each do |event|
-    next unless event[:devices]
-    next unless event[:webhook_url]
-    begin
-
-      # gether values
-      devices = event[:devices].split(",").map{|e| e.split("-")}.map do |devs|
-        devs = devs.map{|d| plc.device_by_name d.strip}
-        d1 = devs.first
-        d2 = devs.last
-        [d2.number - d1.number + 1, 1].max.times.inject([]){|a, i| a << d1; d1 += 1; a}
-      end.flatten
-
-      interval_triggered = false
-      now = Time.now
-      devices.each do |device|
-        triggered = false
-        v = nil
-        case event[:trigger][:type]
-        when "interval"
-          t = @plugin_slack_times[event.object_id] || now
-          triggered = t <= now
-          if triggered
-            interval_triggered = true
-            t += event[:trigger][:interval] || 300
-            @plugin_slack_times[event.object_id] = t
-          end
-          v = device.send event[:value_type], event[:trigger][:text_length] || 8
-        else
-          v = device.send event[:value_type], event[:text_length] || 8
-          unless @plugin_slack_values[device.name] == v
-            @plugin_slack_values[device.name] = v
-            case event[:trigger][:type]
-            when "raise"
-              triggered = !!v
-            when "fall"
-              triggered = !v
-            else
-              triggered = true
-            end
-          end
-        end
-
-        next unless triggered || interval_triggered
-
-        @plugin_slack_worker_queue.push event:event,
-                                        device_name:device.name,
-                                        value:v,
-                                        time: now
-      end
-    rescue => e
-      p e
-    end
-  end if @plugin_slack_config[:events]
-end
-
-def plugin_slack_worker_loop
-  while arg = @plugin_slack_worker_queue.pop
-    begin
-      event = arg[:event]
-      uri = URI.parse(event[:webhook_url])
-      http = Net::HTTP.new(uri.host, uri.port)
-      http.use_ssl = true
-      http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-
-      req = Net::HTTP::Post.new(uri.path)
-      req["Content-Type"] = "application/json"
-
-      format = event[:format] || "__comment__ occured at __time__"
-      format = arg[:value] ? format[:raise] : format[:fall] unless format.is_a? String
-
-      device_name = arg[:device_name]
-      comment = @plugin_slack_comments[device_name] || device_name
-      value = arg[:value].to_s
-      time = arg[:time].iso8601
-
-      payload = {text:format.gsub(/__device_comment__/, comment).gsub(/__value__/, value).gsub(/__time__/, time).gsub(/__device_name__/, device_name)
-                }
-      req.body = payload.to_json
-
-      http.request(req)
-    rescue => e
-      # TODO: Resend if it fails.
-      p e
-    end
-  end
+  @slack_plugin.run_cycle plc
 end
