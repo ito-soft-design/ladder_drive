@@ -5,7 +5,7 @@ gemspec
 
 gem "test-unit"
 
-gem "activesupport", '~> 4.2', '>= 4.2.7'
+gem "activesupport", '~> 5.0'
 
 gem 'pi_piper', ">=  2.0.0"
 gem "ffi", "~> 1.9.24"
