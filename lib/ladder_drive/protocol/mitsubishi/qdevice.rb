@@ -49,16 +49,19 @@ module Mitsubishi
             @suffix = [a[0,2].to_i(16), a[2,2].to_i(16)].pack "C*"
             @suffix.strip!
             @number = a[4,8].to_i(16)
-          elsif /(X|Y)(.+)/i =~ a
+          elsif /(X|Y|B|W|SB|SW|DX|DY)([0-9a-f]+)/i =~ a
             @suffix = $1.upcase
             @number = $2.to_i(p_adic_number)
-          else
-            /(M|L|S|B|F|T|C|D|W|R|ZR)(.+)/i =~ a
+          elsif /(M|L|S|F|T|C|D|R|ZR)([0-9]+)/i =~ a
             @suffix = $1.upcase
             @number = $2.to_i(p_adic_number)
           end
         end
       end
+    end
+
+    def valid?
+      !!@suffix && !!@number
     end
 
     def p_adic_number
