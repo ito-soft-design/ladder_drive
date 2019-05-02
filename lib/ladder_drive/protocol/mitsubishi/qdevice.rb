@@ -25,7 +25,7 @@ module LadderDrive
 module Protocol
 module Mitsubishi
 
-  class QDevice
+  class QDevice < PlcDevice
 
     attr_reader :suffix, :number
 
