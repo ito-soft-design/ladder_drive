@@ -164,7 +164,8 @@ module Mitsubishi
     def device_by_name name
       case name
       when String
-        QDevice.new name
+        d = QDevice.new name
+        d.valid? ? d : nil
       when EscDevice
         local_device_of name
       else

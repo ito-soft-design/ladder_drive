@@ -59,4 +59,11 @@ class TestQDevice < Test::Unit::TestCase
     assert_equal 100, d.number
   end
 
+  def test_sol_is_invalid_name
+    d = QDevice.new "sol"
+    assert_equal false, d.valid?
+  end
+
+
+
 end
