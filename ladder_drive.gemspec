@@ -22,6 +22,7 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency 'google_drive', '~> 3.0'
   spec.add_runtime_dependency 'ruby-trello', '~>2.1'
 
+  spec.required_ruby_version = '>= 2.3.3'
 
   spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
   spec.bindir        = "exe"
