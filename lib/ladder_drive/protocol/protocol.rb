@@ -198,3 +198,4 @@ require 'keyence/keyence'
 # Use load instead require, because there are two emulator files.
 load File.join(dir, 'emulator/emulator.rb')
 require 'mitsubishi/mitsubishi'
+require 'omron/omron'
