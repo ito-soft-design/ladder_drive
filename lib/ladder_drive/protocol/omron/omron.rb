@@ -24,3 +24,4 @@
 $:.unshift File.dirname(__FILE__)
 
 require 'omron_device'
+require 'c_mode_protocol'

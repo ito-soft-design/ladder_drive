@@ -11,6 +11,7 @@ class TestFxProtocol < Test::Unit::TestCase
   def setup
     @protocol = FxProtocol.new log_level: :debug
     Timeout.timeout(0.5) do
+raise Timeout::Error.new
       @running = !!@protocol.open
     end
   rescue Timeout::Error

@@ -61,10 +61,14 @@ class TestOmronDevice < Test::Unit::TestCase
     assert_equal "0.01", d.name
   end
 
-  def test_sub_18_from_1_1
+  def test_sub_20_from_1_1
     d = OmronDevice.new "1.01"
     d = d - 20
     assert_equal "0.00", d.name
+  end
+
+  def test_sub_from_device
+    assert_equal 18, OmronDevice.new("2.01") - OmronDevice.new("0.15")
   end
 
 
@@ -140,6 +144,11 @@ class TestOmronDevice < Test::Unit::TestCase
     assert_equal "A10.01", d.name
   end
 
+
+  def test_channel_device_for_0_0
+    d = OmronDevice.new "0.0"
+    assert_equal "0", d.channel_device.name
+  end
 
 
 end

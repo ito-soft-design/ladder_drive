@@ -3,7 +3,11 @@ source 'https://rubygems.org'
 # Specify your gem's dependencies in ladder_drive.gemspec
 gemspec
 
-gem "test-unit"
+group :test do
+  gem "test-unit"
+  gem "test-unit-rr"
+  #gem "test-unit-notify"
+end
 
 gem "activesupport", '~> 5.0'
 

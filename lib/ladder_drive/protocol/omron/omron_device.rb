@@ -63,15 +63,20 @@ module Omron
       end
     end
 
+    def channel_device
+      return self unless bit_device?
+      self.class.new suffix, channel
+    end
+
     def valid?
-      !!@channel
+      !!channel
     end
 
     def name
-      if @bit
-        "#{@suffix}#{@channel}.#{bit.to_s.rjust(2, '0')}"
+      if bit
+        "#{suffix}#{channel}.#{bit.to_s.rjust(2, '0')}"
       else
-        "#{@suffix}#{@channel}"
+        "#{suffix}#{channel}"
       end
     end
 
@@ -80,7 +85,7 @@ module Omron
     end
 
     def bit_device?
-      !!@bit
+      !!bit
     end
 
     def suffix_for_code code
@@ -94,24 +99,36 @@ module Omron
     end
 
     def + value
-      if @bit
-        v = @channel * 16 + @bit + value
+      if bit
+        v = channel * 16 + bit + value
         c = v / 16
         b = v % 16
-        self.class.new @suffix, c, b
+        self.class.new suffix, c, b
       else
-        self.class.new @suffix, @channel + value
+        self.class.new suffix, channel + value
       end
     end
 
     def - value
-      if @bit
-        v = [@channel * 16 + @bit - value, 0].max
-        c = v / 16
-        b = v % 16
-        self.class.new @suffix, c, b
+      case value
+      when OmronDevice
+        d = value
+        raise "Can't subtract between different device type." if self.bit_device? ^ d.bit_device?
+        if bit
+          (channel * 16 + bit) - (d.channel * 16 + d.bit)
+        else
+          channel - d.channel
+        end
       else
-        self.class.new @suffix, [@channel - value, 0].max
+        value = value.to_i
+        if bit
+          v = [channel * 16 + bit - value, 0].max
+          c = v / 16
+          b = v % 16
+          self.class.new suffix, c, b
+        else
+          self.class.new suffix, [channel - value, 0].max
+        end
       end
     end
 
