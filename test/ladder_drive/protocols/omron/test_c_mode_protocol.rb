@@ -19,7 +19,7 @@ class TestCModeProtocol < Test::Unit::TestCase
     @protocol.close
   end
 
-#=begin
+=begin
   def test_get_word_from_device_with_1_2_with_stub
     stub(@protocol).receive{ "@00RR00123444*\r" }
     stub(@protocol).send
@@ -50,9 +50,9 @@ class TestCModeProtocol < Test::Unit::TestCase
     assert_equal false, @protocol.get_bit_from_device('1.14')
     assert_equal false, @protocol.get_bit_from_device('1.15')
   end
-#=end
+=end
 
-=begin
+#=begin
   def test_get_word_from_device_with_1_2
     assert_equal 0, @protocol.get_word_from_device('1.2')
   end
@@ -60,6 +60,6 @@ class TestCModeProtocol < Test::Unit::TestCase
   def test_get_word_from_device_with_D1000
     assert_equal 0, @protocol.get_word_from_device('D1000')
   end
-=end
+#=end
 
 end
