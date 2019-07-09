@@ -126,11 +126,6 @@ p e
       end
     end
 
-    def get_word_from_device device
-      device = device_by_name device
-      get_words_from_device(1, device).first
-    end
-
     def get_words_from_device(count, device)
       raise ArgumentError.new("A count #{count} must be between #{available_words_range.first} and #{available_words_range.last} for #{__method__}") unless available_words_range.include? count
 

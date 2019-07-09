@@ -44,6 +44,19 @@ class TestFinsTcpProtocol < Test::Unit::TestCase
     assert_equal [0x1, 0x12, 0x123, 0x1234, 0x2345], @protocol.get_words_from_device(5, "D10")
   end
 
+  def test_set_bit_to_device
+    omit_if(!@running)
+    @protocol.set_bit_to_device(true, "2.0")
+    assert_equal true, @protocol.get_bit_from_device("2.0")
+  end
+
+  def test_set_word_to_device
+    omit_if(!@running)
+    @protocol.set_word_to_device(0x2345, "D10")
+    assert_equal 0x2345, @protocol.get_word_from_device("D10")
+  end
+
+
 
 
   # availble bits/words range

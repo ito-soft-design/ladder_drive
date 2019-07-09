@@ -63,15 +63,15 @@ module Protocol
     def open; end
     def close; end
 
-    def get_bit_from_device device; end
+    def get_bit_from_device device; get_bits_from_device(1, device_by_name(device)).first; end
     def get_bits_from_device count, device; end
-    def set_bits_to_device bits, device; end
     def set_bit_to_device bit, device; set_bits_to_device [bit], device; end
+    def set_bits_to_device bits, device; end
 
-    def get_word_from_device device; end
-    def get_words_from_device(count, device); end
-    def set_words_to_device words, device; end
+    def get_word_from_device device; get_words_from_device(1, device_by_name(device)).first; end
+    def get_words_from_device count, device; end
     def set_word_to_device word, device; set_words_to_device [word], device; end
+    def set_words_to_device words, device; end
 
     def device_by_name name; nil; end
 

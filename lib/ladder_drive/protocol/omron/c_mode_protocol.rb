@@ -71,11 +71,6 @@ module Omron
       @unit_no = [[no, 0].max, 31].min
     end
 
-    def get_bit_from_device device
-      device = device_by_name device
-      get_bits_from_device(1, device).first
-    end
-
     def get_bits_from_device count, device
       device = device_by_name device
 
@@ -98,11 +93,6 @@ module Omron
         index += 1
       end
       bits
-    end
-
-    def get_word_from_device device
-      device = device_by_name device
-      get_words_from_device(1, device).first
     end
 
     def get_words_from_device(count, device)

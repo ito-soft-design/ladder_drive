@@ -79,11 +79,6 @@ module Mitsubishi
       @comm = nil
     end
 
-    def get_bit_from_device device
-      device = device_by_name device
-      get_bits_from_device(1, device).first
-    end
-
     def get_bits_from_device count, device
       raise ArgumentError.new("A count #{count} must be between #{available_bits_range.first} and #{available_bits_range.last} for #{__method__}") unless available_bits_range.include? count
 
@@ -128,11 +123,6 @@ module Mitsubishi
       unless res == ack_packet
         raise "ERROR: return #{res} for set_bits_to_device(#{bits}, #{device.name})"
       end
-    end
-
-    def get_word_from_device device
-      device = device_by_name device
-      get_words_from_device(1, device).first
     end
 
     def get_words_from_device(count, device)

@@ -52,7 +52,7 @@ class TestCModeProtocol < Test::Unit::TestCase
   end
 =end
 
-#=begin
+=begin
   def test_get_word_from_device_with_1_2
     assert_equal 0, @protocol.get_word_from_device('1.2')
   end
@@ -60,6 +60,6 @@ class TestCModeProtocol < Test::Unit::TestCase
   def test_get_word_from_device_with_D1000
     assert_equal 0, @protocol.get_word_from_device('D1000')
   end
-#=end
+=end
 
 end
