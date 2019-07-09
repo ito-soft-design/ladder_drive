@@ -188,6 +188,14 @@ module Protocol
       end
     end
 
+    def destination_ipv4
+      Socket.gethostbyname(self.host)[3].unpack("C4").join('.')
+    end
+
+    def self_ipv4
+      Socket::getaddrinfo(Socket.gethostname,"echo",Socket::AF_INET)[0][3]
+    end
+
   end
 
 end

@@ -1,6 +1,6 @@
- The MIT License (MIT)
+# The MIT License (MIT)
 #
-# Copyright (c) 2016 ITO SOFT DESIGN Inc.
+# Copyright (c) 2019 ITO SOFT DESIGN Inc.
 #
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation files (the
@@ -27,22 +27,62 @@ module Omron
 
   class FinsTcpProtocol < Protocol
 
+    attr_accessor :gateway_count
+    attr_accessor :destination_network
+    attr_accessor :destination_node
+    attr_accessor :destination_unit
+    attr_accessor :source_network
+    attr_accessor :source_node
+    attr_accessor :source_unit
+
+    attr_accessor :ethernet_module
+
+    attr_accessor :tcp_error_code
+
+    IOFINS_DESTINATION_NODE_FROM_IP = 0
+    IOFINS_SOURCE_AUTO_NODE         = 0
+
+    # Available ethernet module.
+    ETHERNET_ETN21  = 0
+    ETHERNET_CP1E   = 1
+    ETHERNET_CP1L   = 2
+    ETHERNET_CP1H   = 3
+
     def initialize options={}
       super
       @socket = nil
       @host = options[:host] || "192.168.250.1"
       @port = options[:port] || 9600
+      @gateway_count = 3
+      @destination_network = 0
+      @destination_node = 0
+      @destination_unit = 0
+      @source_network = 0
+      @source_node = IOFINS_SOURCE_AUTO_NODE
+      @source_unit = 0
+      @ethernet_module = ETHERNET_ETN21
+
+      @tcp_error_code = 0
+
       prepare_device_map
     end
 
     def open
       open!
-    rescue
+    rescue =>e
+p e
       nil
     end
 
     def open!
-      @socket ||= TCPSocket.open(@host, @port)
+      if @socket.nil?
+        @socket = TCPSocket.open(@host, @port)
+        if @socket
+          source_node = IOFINS_SOURCE_AUTO_NODE
+          query_node
+        end
+      end
+      @socket
     end
 
     def close
@@ -50,63 +90,41 @@ module Omron
       @socket = nil
     end
 
-    def get_bit_from_device device
-      device = device_by_name device
-      get_bits_from_device(1, device).first
+    def tcp_error?
+      tcp_error_code != 0
     end
 
-    def get_bits_from_device count, device
+    def create_query_node
+      header = [ "FINS".bytes.to_a,  0, 0, 0, 0xc,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0].flatten
+      header[19] = source_node == IOFINS_SOURCE_AUTO_NODE ? 0 : source_node
+      header
+    end
+
+    def create_fins_frame packet
+      packet = packet.flatten
+      header = [ "FINS".bytes.to_a,  0, 0, 0, 0,  0, 0, 0, 2,  0, 0, 0, 0].flatten
+      header[4, 4] = int_to_a(packet.length + 8, 4)
+      header + packet
+    end
+
+    def get_bits_from_device(count, device)
       raise ArgumentError.new("A count #{count} must be between #{available_bits_range.first} and #{available_bits_range.last} for #{__method__}") unless available_bits_range.include? count
 
       device = device_by_name device
-      packet = make_packet(body_for_get_bits_from_device(count, device))
-      @logger.debug("> #{dump_packet packet}")
-      open
-      @socket.write(packet.pack("C*"))
-      @socket.flush
+      raise ArgumentError.new("#{device.name} is not bit device!") unless device.bit_device?
+
+      command = [1, 1]
+      command << device_to_a(device)
+      command << int_to_a(count, 2)
+
+      send_packet create_fins_frame(fins_header + command)
       res = receive
 
-      # error checking
-      end_code = res[9,2].pack("C*").unpack("v").first
-      unless end_code == 0
-        error = res[11,2].pack("C*").unpack("v").first
-        raise "return end code 0x#{end_code.to_s(16)} error code 0x#{error.to_s(16)} for get_bits_from_device(#{count}, #{device.name})"
-      end
-
-      # get results
-      bits = []
-      count.times do |i|
-        v = res[11 + i / 2]
-        if i % 2 == 0
-          bits << ((v >> 4) != 0)
-        else
-          bits << ((v & 0xf) != 0)
-        end
-      end
-      @logger.debug("get #{device.name} => #{bits}")
-      bits
-    end
-
-    def set_bits_to_device bits, device
-      raise ArgumentError.new("A count #{count} must be between #{available_bits_range.first} and #{available_bits_range.last} for #{__method__}") unless available_bits_range.include? bits.size
-
-      device = device_by_name device
-      packet = make_packet(body_for_set_bits_to_device(bits, device))
-      @logger.debug("> #{dump_packet packet}")
-      open
-      @socket.write(packet.pack("C*"))
-      @socket.flush
-      res = receive
-      @logger.debug("set #{bits} to:#{device.name}")
-
-      # error checking
-      end_code = res[9,2].pack("C*").unpack("v").first
-      unless end_code == 0
-        error = res[11,2].pack("C*").unpack("v").first
-        raise "return end code 0x#{end_code.to_s(16)} error code 0x#{error.to_s(16)} for set_bits_to_device(#{bits}, #{device.name})"
+      count.times.inject([]) do |a, i|
+        a << (res[16 + 10 + 4 + i] == 0 ? false : true)
+        a
       end
     end
-
 
     def get_word_from_device device
       device = device_by_name device
@@ -114,66 +132,72 @@ module Omron
     end
 
     def get_words_from_device(count, device)
-      raise ArgumentError.new("A count #{count} must be between #{available_words_range.first} and #{available_words_range.last} for #{__method__}") unless available_bits_range.include? count
+      raise ArgumentError.new("A count #{count} must be between #{available_words_range.first} and #{available_words_range.last} for #{__method__}") unless available_words_range.include? count
 
       device = device_by_name device
-      packet = make_packet(body_for_get_words_from_device(count, device))
-      @logger.debug("> #{dump_packet packet}")
-      open
-      @socket.write(packet.pack("C*"))
-      @socket.flush
+      device = device.channel_device
+
+      command = [1, 1]
+      command << device_to_a(device)
+      command << int_to_a(count, 2)
+
+      send_packet create_fins_frame(fins_header + command)
       res = receive
 
-      # error checking
-      end_code = res[9,2].pack("C*").unpack("v").first
-      unless end_code == 0
-        error = res[11,2].pack("C*").unpack("v").first
-        raise "return end code 0x#{end_code.to_s(16)} error code 0x#{error.to_s(16)} for get_words_from_device(#{count}, #{device.name})"
+      count.times.inject([]) do |a, i|
+        a << to_int(res[16 + 10 + 4 + i * 2, 2])
+        a
       end
-
-      # get result
-      words = []
-      res[11, 2 * count].each_slice(2) do |pair|
-        words << pair.pack("C*").unpack("v").first
-      end
-      @logger.debug("get from: #{device.name} => #{words}")
-      words
     end
 
-    def set_words_to_device words, device
-      raise ArgumentError.new("A count of words #{words.size} must be between #{available_words_range.first} and #{available_words_range.last} for #{__method__}") unless available_bits_range.include? words.size
+    def set_bits_to_device(bits, device)
+      count = bits.size
+      raise ArgumentError.new("A count #{count} must be between #{available_bits_range.first} and #{available_bits_range.last} for #{__method__}") unless available_bits_range.include? count
 
       device = device_by_name device
-      packet = make_packet(body_for_set_words_to_device(words, device))
-      @logger.debug("> #{dump_packet packet}")
-      open
-      @socket.write(packet.pack("C*"))
-      @socket.flush
+      raise ArgumentError.new("#{device.name} is not bit device!") unless device.bit_device?
+
+      command = [1, 2]
+      command << device_to_a(device)
+      command << int_to_a(count, 2)
+      bits.each do |b|
+        command << (b ? 1 : 0)
+      end
+
+      send_packet create_fins_frame(fins_header + command)
       res = receive
-      @logger.debug("set #{words} to: #{device.name}")
+    end
 
-      # error checking
-      end_code = res[9,2].pack("C*").unpack("v").first
-      unless end_code == 0
-        error = res[11,2].pack("C*").unpack("v").first
-        raise "return end code 0x#{end_code.to_s(16)} error code 0x#{error.to_s(16)} for set_words_to_device(#{words}, #{device.name})"
+    def set_words_to_device(words, device)
+      count = words.size
+      raise ArgumentError.new("A count #{count} must be between #{available_words_range.first} and #{available_words_range.last} for #{__method__}") unless available_words_range.include? count
+
+      device = device_by_name device
+      device = device.channel_device
+
+      command = [1, 2]
+      command << device_to_a(device)
+      command << int_to_a(count, 2)
+      words.each do |w|
+        command << int_to_a(w, 2)
       end
+
+      send_packet create_fins_frame(fins_header + command)
+      res = receive
+    end
+
+    def query_node
+      send_packet create_query_node
+      res = receive
+      self.source_node = res[23]
     end
 
 
-    def device_by_name name
-      case name
-      when String
-        d = OmronDevice.new name
-        d.valid? ? d : nil
-      when EscDevice
-        local_device_of name
-      else
-        # it may be already OmronDevice
-        name
-      end
+    def send_packet packet
+      @socket.write(packet.flatten.pack("c*"))
+      @socket.flush
+      @logger.debug("> #{dump_packet packet}")
     end
-
 
     def receive
       res = []
@@ -181,106 +205,115 @@ module Omron
       begin
         Timeout.timeout(1.0) do
           loop do
-            c = @socket.read(1)
+            c = @socket.getc
             next if c.nil? || c == ""
 
             res << c.bytes.first
-            len = res[7,2].pack("C*").unpack("v*").first if res.length >= 9
-            break if (len + 9 == res.length)
+            next if res.length < 8
+
+            len = to_int(res[4, 4])
+            next if res.length < 8 + len
+
+            tcp_command = to_int(res[8, 4])
+            case tcp_command
+            when 3 # ERROR
+              close
+              raise "Invalidate tcp header: #{res}"
+            end
+            break
           end
         end
-      rescue Timeout::Error
-        puts "*** ERROR: TIME OUT ***"
+        raise "Response error code: #{res[15]}" unless res[15] == 0
+        res
       end
       @logger.debug("< #{dump_packet res}")
       res
     end
 
+    # max length:
+    #  CS1W-ETN21, CJ1W-ETN21   : 2012
+    #  CP1W-CIF41 option board  : 540 (1004 if cpu is CP1L/H)
+
     def available_bits_range device=nil
-      1..(960 * 16)
+      case ethernet_module
+      when ETHERNET_ETN21
+        1..(2012 - 8)
+      when ETHERNET_CP1E
+        1..(540 - 8)
+      when ETHERNET_CP1L, ETHERNET_CP1H
+        1..(1004 - 8)
+      else
+        0..0
+      end
     end
 
     def available_words_range device=nil
-      1..960
-    end
-
-  private
-
-    def make_packet body
-      header = [0x50, 0x00,  0x00,  0xff,  0xff, 0x03,  0x00,  0x00, 0x00,  0x10,  0x00]
-      header[7..8] = data_for_short(body.length + 2)
-      header + body
-    end
-
-    def body_for_get_bit_from_deivce device
-      body_for_get_bits_from_device 1, device
-    end
-
-    def body_for_get_bits_from_device count, device
-      body_for_get_words_from_device count, device, false
-    end
-
-    def body_for_get_words_from_device count, device, word = true
-      body = [0x01, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x90, 0x01, 0x00]
-      body[2] = 1 unless word
-      body[4..7] = data_for_device(device)
-      body[8..9] = data_for_short count
-      body
-    end
-
-
-    def body_for_set_bits_to_device bits, device
-      body = [0x01, 0x14, 0x01, 0x00, 0x00, 0x00, 0x00, 0x90, 0x01, 0x00]
-      d = device
-      bits = [bits] unless bits.is_a? Array
-      bits.each_slice(2) do |pair|
-        body << (pair.first ? 0x10 : 0x00)
-        body[-1] |= (pair.last ? 0x1 : 0x00) if pair.size == 2
-        d = d.next_device
+      case ethernet_module
+      when ETHERNET_ETN21
+        1..((2012 - 8) / 2)
+      when ETHERNET_CP1E
+        1..((540 - 8) / 2)
+      when ETHERNET_CP1L, ETHERNET_CP1H
+        1..((1004 - 8) / 2)
+      else
+        0..0
       end
-      body[4..7] = data_for_device(device)
-      body[8..9] = data_for_short bits.size
-      body
     end
-    alias :body_for_set_bit_to_device :body_for_set_bits_to_device
 
-    def body_for_set_words_to_device words, device
-      body = [0x01, 0x14, 0x00, 0x00, 0x00, 0x00, 0x00, 0x90, 0x01, 0x00]
-      d = device
-      words = [words] unless words.is_a? Array
-      words.each do |v|
-        body += data_for_short v
-        d = d.next_device
+    private
+
+    def fins_header
+      buf = [
+              0x80, # ICF
+              0x00, # RSV
+              0x02, # GCT
+              0x00, # DNA
+              0x01, # DA1
+              0x00, # DA2
+              0x00, # SNA
+              0x01, # SA1
+              0x00, # SA2
+              0x00, # SID
+            ]
+      buf[2] = gateway_count - 1
+      buf[3] = destination_network
+      if destination_node == IOFINS_DESTINATION_NODE_FROM_IP
+        buf[4] = destination_ipv4.split(".").last.to_i
+      else
+        buf[4] = destination_node
       end
-      body[4..7] = data_for_device(device)
-      body[8..9] = data_for_short words.size
-      body
+      buf[6] = source_node
+      buf[7] = source_unit
+
+      buf
     end
 
-    def data_for_device device
-      a = data_for_int device.number
-      a[3] = device.suffix_code
-      a
+    def fins_tcp_cmnd_header
+      header = [ "FINS".bytes.to_a,  0, 0, 0, 0xc,  0, 0, 0, 2,  0, 0, 0, 0].flatten
+      header[19] = source_node == IOFINS_SOURCE_AUTO_NODE ? 0 : source_node
+      header
     end
 
-    def data_for_short value
-      [value].pack("v").unpack("C*")
+    def device_code_of device
+      @@bit_codes ||= { nil => 0x30, "" => 0x30, "W" => 0x31, "H" => 0x32, "A" => 0x33, "T" => 0x09, "C" => 0x09, "D" => 0x02, "E" => 0x0a, "TK" => 0x06 }
+      @@word_codes ||= { nil => 0x30, "" => 0xB0, "W" => 0xB1, "H" => 0xB2, "A" => 0xB3, "TIM" => 0x89, "CNT" => 0x89, "D" => 0x82, "E" => 0x98, "DR" => 0xbc }
+      if device.bit_device?
+        @@bit_codes[device.suffix]
+      else
+        @@word_codes[device.suffix]
+      end
     end
 
-    def data_for_int value
-      [value].pack("V").unpack("C*")
-    end
-
-    def dump_packet packet
+    def device_to_a device
       a = []
-      len = packet.length
-      bytes = packet.dup
-      len.times do |i|
-        a << ("0" + bytes[i].to_s(16))[-2, 2]
-      end
-      "[" + a.join(", ") + "]"
+      a << device_code_of(device)
+      a << int_to_a(device.channel, 2)
+      a << (device.bit_device? ? (device.bit || 0) : 0)
+      a.flatten
     end
 
+
+    # FIXME: It's dummy currently.
     def prepare_device_map
       @conv_dev_dict ||= begin
         h = {}
@@ -303,13 +336,44 @@ module Omron
       end
     end
 
-    def local_device_of device
-      return device if device.is_a? OmronDevice
-      d, c = @conv_dev_dict[device.suffix]
-      return nil unless device.number < c
-      ld = OmronDevice.new(d.suffix, d.number + device.number)
-      device_by_name ld.name
+    def int_to_a value, size
+      a = []
+      (size - 1).downto 0 do |i|
+        a << ((value >> (i * 8)) & 0xff)
+      end
+      a
     end
+
+    def to_int a
+      v = 0
+      a.each do |e|
+        v <<= 8
+        v += e
+      end
+      v
+    end
+
+    def dump_packet packet
+      a =
+        packet.map{|e|
+          e.to_s(16).rjust(2, '0')
+        }
+      "[#{a.join(', ')}]"
+    end
+
+    def device_by_name name
+      case name
+      when String
+        d = OmronDevice.new name
+        d.valid? ? d : nil
+      when EscDevice
+        local_device_of name
+      else
+        # it may be already OmronDevice
+        name
+      end
+    end
+
 
   end
 
