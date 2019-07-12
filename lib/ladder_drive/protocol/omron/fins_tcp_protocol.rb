@@ -184,7 +184,7 @@ p e
     def query_node
       send_packet create_query_node
       res = receive
-      self.source_node = res[23]
+      self.source_node = res[19]
     end
 
 
