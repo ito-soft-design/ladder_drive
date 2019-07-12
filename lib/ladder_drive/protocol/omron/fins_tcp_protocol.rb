@@ -108,6 +108,7 @@ p e
     end
 
     def get_bits_from_device(count, device)
+      open
       raise ArgumentError.new("A count #{count} must be between #{available_bits_range.first} and #{available_bits_range.last} for #{__method__}") unless available_bits_range.include? count
 
       device = device_by_name device
@@ -127,6 +128,7 @@ p e
     end
 
     def get_words_from_device(count, device)
+      open
       raise ArgumentError.new("A count #{count} must be between #{available_words_range.first} and #{available_words_range.last} for #{__method__}") unless available_words_range.include? count
 
       device = device_by_name device
@@ -146,6 +148,7 @@ p e
     end
 
     def set_bits_to_device(bits, device)
+      open
       count = bits.size
       raise ArgumentError.new("A count #{count} must be between #{available_bits_range.first} and #{available_bits_range.last} for #{__method__}") unless available_bits_range.include? count
 
@@ -164,6 +167,7 @@ p e
     end
 
     def set_words_to_device(words, device)
+      open
       count = words.size
       raise ArgumentError.new("A count #{count} must be between #{available_words_range.first} and #{available_words_range.last} for #{__method__}") unless available_words_range.include? count
 
