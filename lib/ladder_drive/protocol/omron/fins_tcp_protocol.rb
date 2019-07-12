@@ -291,7 +291,7 @@ p e
 
     def device_code_of device
       @@bit_codes ||= { nil => 0x30, "" => 0x30, "W" => 0x31, "H" => 0x32, "A" => 0x33, "T" => 0x09, "C" => 0x09, "D" => 0x02, "E" => 0x0a, "TK" => 0x06 }
-      @@word_codes ||= { nil => 0x30, "" => 0xB0, "W" => 0xB1, "H" => 0xB2, "A" => 0xB3, "TIM" => 0x89, "CNT" => 0x89, "D" => 0x82, "E" => 0x98, "DR" => 0xbc }
+      @@word_codes ||= { nil => 0xB0, "" => 0xB0, "W" => 0xB1, "H" => 0xB2, "A" => 0xB3, "TIM" => 0x89, "CNT" => 0x89, "D" => 0x82, "E" => 0x98, "DR" => 0xbc }
       if device.bit_device?
         @@bit_codes[device.suffix]
       else
