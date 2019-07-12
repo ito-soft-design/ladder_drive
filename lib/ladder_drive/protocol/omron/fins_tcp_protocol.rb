@@ -277,8 +277,8 @@ p e
       else
         buf[4] = destination_node
       end
-      buf[6] = source_node
-      buf[7] = source_unit
+      buf[7] = source_node
+      buf[8] = source_unit
 
       buf
     end
