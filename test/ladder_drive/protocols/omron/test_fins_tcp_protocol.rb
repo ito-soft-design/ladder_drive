@@ -19,7 +19,7 @@ class TestFinsTcpProtocol < Test::Unit::TestCase
   def test_query_node
     omit_if(!@running)
     # query node at opening
-    assert_equal 1, @protocol.source_node
+    assert_equal 239, @protocol.source_node
   end
 
   def test_get_words_from_device
