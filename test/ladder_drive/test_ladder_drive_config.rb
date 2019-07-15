@@ -15,6 +15,15 @@ class TestLadderDriveConfigTarget < Test::Unit::TestCase
     assert_equal 1234, protocol.port
   end
 
+  def test_fins_tcp_protocol
+    h = { host:"192.168.0.10", port:1234, protocol:"fins_tcp_protocol" }
+    config = LadderDriveConfigTarget.new h
+    protocol = config.protocol
+    assert_equal FinsTcpProtocol, protocol.class
+    assert_equal "192.168.0.10", protocol.host
+    assert_equal 1234, protocol.port
+  end
+
   def test_uploader
     config = LadderDriveConfigTarget.new
     assert_equal Uploader, config.uploader.class
