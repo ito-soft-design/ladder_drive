@@ -5,6 +5,7 @@ include LadderDrive
 
 class TestLadderDriveConfigTarget < Test::Unit::TestCase
   include Protocol::Mitsubishi
+  include Protocol::Omron
 
   def test_mc_protocol
     h = { host:"192.168.0.10", port:1234, protocol:"mc_protocol" }

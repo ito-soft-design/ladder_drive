@@ -259,6 +259,19 @@ p e
       end
     end
 
+    def device_by_name name
+      case name
+      when String
+        d = OmronDevice.new name
+        d.valid? ? d : nil
+      when EscDevice
+        local_device_of name
+      else
+        # it may be already OmronDevice
+        name
+      end
+    end
+
     private
 
     def fins_header
@@ -359,20 +372,6 @@ p e
         }
       "[#{a.join(', ')}]"
     end
-
-    def device_by_name name
-      case name
-      when String
-        d = OmronDevice.new name
-        d.valid? ? d : nil
-      when EscDevice
-        local_device_of name
-      else
-        # it may be already OmronDevice
-        name
-      end
-    end
-
 
   end
 
