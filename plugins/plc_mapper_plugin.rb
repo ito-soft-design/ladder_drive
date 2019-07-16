@@ -63,7 +63,7 @@ class PlcMapperPlugin < Plugin
 
   def run_cycle plc
     return if disabled?
-    return false unless super
+    #return false unless super # FIXME
     @lock.synchronize {
       # set values from plcs to ladder drive.
       values_for_reading.each do |d, v|
@@ -73,8 +73,9 @@ class PlcMapperPlugin < Plugin
 
       # set values from ladder drive to values_for_writing.
       # then set it to plc at #sync_with_plc
-      values_for_writing.each do |d, v|
-        values_for_writing[d] = plc.device_by_name(d).value
+      self.values_for_writing.each do |d, v|
+        dev = plc.device_by_name(d)
+        self.values_for_writing[d] = dev.bit_device? ? dev.bool : dev.value
       end
     }
   end
@@ -110,7 +111,7 @@ class PlcMapperPlugin < Plugin
           d1 = devs.first
           d2 = devs.last
           a << k
-          a << [d1, [d2.number - d1.number + 1, 1].max]
+          a << [d1, [d2 - d1 + 1, 1].max]
         end
         Hash[*a]
       end
@@ -137,10 +138,10 @@ class PlcMapperPlugin < Plugin
             sync_with_plc protocol, read_mappings, write_mappings
             next_time += interval
           end
-          sleep next_time - Time.now
+          sleep [next_time - Time.now, 0].max
           alerted = false
-        rescue
-          puts "#{config[:description]} is not reachable." unless alerted
+        rescue => e
+          puts "#{config[:description]} is not reachable. #{e}" unless alerted
           alerted = true
         end
       end
@@ -160,7 +161,7 @@ class PlcMapperPlugin < Plugin
         }
       end
 
-      # set values form ladder drive (values_for_writing) to plc
+      # set values from ladder drive (values_for_writing) to plc
       # values_for_writing was set at run_cycle
       # but for the first time, it's not known what device it should take.
       # after running below, devices for need is listed to values_for_writing.
@@ -169,10 +170,12 @@ class PlcMapperPlugin < Plugin
         src_d = plc.device_by_name mapping[:ld].first.name
         values = []
         lock.synchronize {
-          # It may not get the value for the first time, set zero instead of it.
-          values_for_writing[src_d.name] ||= 0
-          values << values_for_writing[src_d.name]
-          src_d = src_d.next_device
+          c.times do
+            # It may not get the value for the first time, set zero instead of it.
+            self.values_for_writing[src_d.name] ||= (src_d.bit_device? ? false : 0)
+            values << self.values_for_writing[src_d.name]
+            src_d = src_d.next_device
+          end
         }
         protocol[dst_d.name, c] = values
       end
@@ -189,5 +192,10 @@ def plugin_plc_mapper_init plc
 end
 
 def plugin_plc_mapper_exec plc
-  @plugin_plc_mapper.run_cycle plc
+  begin
+    @plugin_plc_mapper.run_cycle plc
+  rescue
+puts $!
+puts $@
+  end
 end
