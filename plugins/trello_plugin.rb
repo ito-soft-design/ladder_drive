@@ -117,6 +117,8 @@ class TrelloPlugin < Plugin
 
       rescue => e
         p e
+puts $!
+puts $@
       end
     end
   end
@@ -156,6 +158,8 @@ class TrelloPlugin < Plugin
         rescue => e
           # TODO: Resend if it fails.
           p e
+puts $!
+puts $@
         end
       end
     end
