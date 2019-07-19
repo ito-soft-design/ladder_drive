@@ -215,7 +215,6 @@ p e
             tcp_command = to_int(res[8, 4])
             case tcp_command
             when 3 # ERROR
-              close
               raise "Invalidate tcp header: #{res}"
             end
             break

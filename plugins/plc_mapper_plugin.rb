@@ -63,13 +63,13 @@ class PlcMapperPlugin < Plugin
 
   def run_cycle plc
     return if disabled?
-    #return false unless super # FIXME
+    #return false unless super
     @lock.synchronize {
       # set values from plcs to ladder drive.
-      values_for_reading.each do |d, v|
+      self.values_for_reading.each do |d, v|
         plc.device_by_name(d).value = v
       end
-      values_for_reading.clear
+      self.values_for_reading.clear
 
       # set values from ladder drive to values_for_writing.
       # then set it to plc at #sync_with_plc
@@ -142,7 +142,10 @@ class PlcMapperPlugin < Plugin
           alerted = false
         rescue => e
           puts "#{config[:description]} is not reachable. #{e}" unless alerted
+puts $!
+puts $@
           alerted = true
+          protocol.close
         end
       end
     end
@@ -197,5 +200,6 @@ def plugin_plc_mapper_exec plc
   rescue
 puts $!
 puts $@
+    plc.close
   end
 end
