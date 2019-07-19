@@ -140,7 +140,6 @@ p e
 
       send_packet create_fins_frame(fins_header + command)
       res = receive
-
       count.times.inject([]) do |a, i|
         a << to_int(res[16 + 10 + 4 + i * 2, 2])
         a
@@ -202,7 +201,7 @@ p e
       res = []
       len = 0
       begin
-        Timeout.timeout(1.0) do
+        Timeout.timeout(5.0) do
           loop do
             c = @socket.getc
             next if c.nil? || c == ""
