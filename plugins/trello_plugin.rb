@@ -80,25 +80,26 @@ class TrelloPlugin < Plugin
 
     @config[:events].each do |event|
       begin
-
+        event_id = event.object_id
         triggered = false
         now = Time.now
         device = nil
 
         case event[:trigger][:type]
         when "interval"
-          t = @times[event.object_id] || now
+          t = @times[event_id] || now
           triggered = t <= now
           if triggered
             triggered = true
             t += event[:trigger][:interval] || 300
-            @times[event.object_id] = t
+            @times[event_id] = t
           end
         else
           device = plc.device_by_name event[:trigger][:device]
           v = device.send event[:trigger][:value_type], event[:trigger][:text_length] || 8
-          unless @values[device.name] == v
-            @values[device.name] = v
+          @values[event_id] ||= {}
+          unless @values[event_id][device.name] == v
+            @values[event_id][device.name] = v
             case event[:trigger][:type]
             when "raise"
               triggered = !!v
