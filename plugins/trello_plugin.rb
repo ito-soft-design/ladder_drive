@@ -140,7 +140,7 @@ puts $@
           next unless board
 
           card_name = event[:card_name].dup || ""
-          card_name.gsub!(/__value__/, arg[:value] || "")
+          card_name.gsub!(/__value__/, arg[:value] || "") if arg[:value].is_a? String
           next if (card_name || "").empty?
 
           list_name = event[:list_name]
