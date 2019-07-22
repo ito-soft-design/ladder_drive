@@ -98,14 +98,6 @@ class AmbientPlugin < Plugin
       next unless channel[:write_key]
       begin
 
-        # gether values
-        values = channel[:devices].inject({}) do |h, pair|
-          d = plc.device_by_name pair.last[:device]
-          v = d.send pair.last[:value_type], pair.last[:text_length] || 8
-          h[pair.first] = v
-          h
-        end
-
         interval_triggered = false
         now = Time.now
         triggered = false
@@ -136,6 +128,14 @@ class AmbientPlugin < Plugin
         end
 
         next unless triggered || interval_triggered
+
+        # gether values
+        values = channel[:devices].inject({}) do |h, pair|
+          d = plc.device_by_name pair.last[:device]
+          v = d.send pair.last[:value_type], pair.last[:text_length] || 8
+          h[pair.first] = v
+          h
+        end
 
         @worker_queue.push channel:channel, values:values
       rescue => e
