@@ -159,7 +159,7 @@ class AmbientPlugin < Plugin
         begin
           now = Time.now
           # ignore a request if it's requested in a 5 sec from previous request.
-          next unless @uploaded_at.nil? || (@uploaded_at - now >= 5)
+          next unless @uploaded_at.nil? || (now - @uploaded_at >= 5)
 
           channel = arg[:channel]
           client = AmbientIot::Client.new channel[:channel_id], write_key:channel[:write_key]
