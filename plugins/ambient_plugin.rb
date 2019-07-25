@@ -112,7 +112,7 @@ class AmbientPlugin < Plugin
             @times[channel.object_id] = t
           end
         else
-          device = plc.device_by_name channel[:trigger][:type]
+          device = plc.device_by_name channel[:trigger][:device]
           v = device.send channel[:trigger][:value_type]
           unless @values[device.name] == v
             @values[device.name] = v
