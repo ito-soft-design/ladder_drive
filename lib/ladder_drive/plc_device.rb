@@ -125,6 +125,17 @@ module LadderDrive
       suffixes_for_input.include? @suffix
     end
 
+   def value
+     case @value
+     when true
+       1
+     when false, nil
+       0
+     else
+       @value
+     end
+   end
+
     def bool
       case @value
       when Integer
