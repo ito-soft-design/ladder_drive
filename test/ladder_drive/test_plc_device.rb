@@ -13,4 +13,22 @@ class TestPlcDevice < Test::Unit::TestCase
     assert_equal "X0A", d.name
   end
 
+  def test_value_from_true
+    d = PlcDevice.new "x0a"
+    d.value = true
+    assert_equal 1, d.value
+  end
+
+  def test_value_from_false
+    d = PlcDevice.new "x0a"
+    d.value = false
+    assert_equal 0, d.value
+  end
+
+  def test_value_from_nil
+    d = PlcDevice.new "x0a"
+    d.value = nil
+    assert_equal 0, d.value
+  end
+
 end
