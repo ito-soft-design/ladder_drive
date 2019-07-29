@@ -80,25 +80,26 @@ class TrelloPlugin < Plugin
 
     @config[:events].each do |event|
       begin
-
+        event_id = event.object_id
         triggered = false
         now = Time.now
         device = nil
 
         case event[:trigger][:type]
         when "interval"
-          t = @times[event.object_id] || now
+          t = @times[event_id] || now
           triggered = t <= now
           if triggered
             triggered = true
             t += event[:trigger][:interval] || 300
-            @times[event.object_id] = t
+            @times[event_id] = t
           end
         else
           device = plc.device_by_name event[:trigger][:device]
           v = device.send event[:trigger][:value_type], event[:trigger][:text_length] || 8
-          unless @values[device.name] == v
-            @values[device.name] = v
+          @values[event_id] ||= {}
+          unless @values[event_id][device.name] == v
+            @values[event_id][device.name] = v
             case event[:trigger][:type]
             when "raise"
               triggered = !!v
@@ -116,6 +117,8 @@ class TrelloPlugin < Plugin
 
       rescue => e
         p e
+puts $!
+puts $@
       end
     end
   end
@@ -137,7 +140,7 @@ class TrelloPlugin < Plugin
           next unless board
 
           card_name = event[:card_name].dup || ""
-          card_name.gsub!(/__value__/, arg[:value] || "")
+          card_name.gsub!(/__value__/, arg[:value] || "") if arg[:value].is_a? String
           next if (card_name || "").empty?
 
           list_name = event[:list_name]
@@ -155,6 +158,8 @@ class TrelloPlugin < Plugin
         rescue => e
           # TODO: Resend if it fails.
           p e
+puts $!
+puts $@
         end
       end
     end

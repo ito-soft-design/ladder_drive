@@ -112,7 +112,7 @@ namespace :service do
     # copy lddrive.serive file to /etc/systemd/system
     fname = "lddrive.service"
     s = File.read(File.join(template_dir, fname))
-    s.gsub!("<%= exec_start %>", "/home/pi/project/lddrive")
+    s.gsub!("<%= exec_start %>", "#{Dir.pwd}/lddrive")
     File.write File.join("/etc", "systemd", "system", fname), s
 
     # reload services

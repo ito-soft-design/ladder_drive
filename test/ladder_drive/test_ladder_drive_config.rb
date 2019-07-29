@@ -5,12 +5,22 @@ include LadderDrive
 
 class TestLadderDriveConfigTarget < Test::Unit::TestCase
   include Protocol::Mitsubishi
+  include Protocol::Omron
 
   def test_mc_protocol
     h = { host:"192.168.0.10", port:1234, protocol:"mc_protocol" }
     config = LadderDriveConfigTarget.new h
     protocol = config.protocol
     assert_equal McProtocol, protocol.class
+    assert_equal "192.168.0.10", protocol.host
+    assert_equal 1234, protocol.port
+  end
+
+  def test_fins_tcp_protocol
+    h = { host:"192.168.0.10", port:1234, protocol:"fins_tcp_protocol" }
+    config = LadderDriveConfigTarget.new h
+    protocol = config.protocol
+    assert_equal FinsTcpProtocol, protocol.class
     assert_equal "192.168.0.10", protocol.host
     assert_equal 1234, protocol.port
   end

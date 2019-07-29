@@ -140,7 +140,6 @@ p e
 
       send_packet create_fins_frame(fins_header + command)
       res = receive
-
       count.times.inject([]) do |a, i|
         a << to_int(res[16 + 10 + 4 + i * 2, 2])
         a
@@ -202,7 +201,7 @@ p e
       res = []
       len = 0
       begin
-        Timeout.timeout(1.0) do
+        Timeout.timeout(5.0) do
           loop do
             c = @socket.getc
             next if c.nil? || c == ""
@@ -216,7 +215,6 @@ p e
             tcp_command = to_int(res[8, 4])
             case tcp_command
             when 3 # ERROR
-              close
               raise "Invalidate tcp header: #{res}"
             end
             break
@@ -256,6 +254,19 @@ p e
         1..((1004 - 8) / 2)
       else
         0..0
+      end
+    end
+
+    def device_by_name name
+      case name
+      when String
+        d = OmronDevice.new name
+        d.valid? ? d : nil
+      when EscDevice
+        local_device_of name
+      else
+        # it may be already OmronDevice
+        name
       end
     end
 
@@ -359,20 +370,6 @@ p e
         }
       "[#{a.join(', ')}]"
     end
-
-    def device_by_name name
-      case name
-      when String
-        d = OmronDevice.new name
-        d.valid? ? d : nil
-      when EscDevice
-        local_device_of name
-      else
-        # it may be already OmronDevice
-        name
-      end
-    end
-
 
   end
 

@@ -27,6 +27,7 @@ require 'protocol/protocol'
 
 include LadderDrive::Protocol::Mitsubishi
 include LadderDrive::Protocol::Keyence
+include LadderDrive::Protocol::Omron
 include LadderDrive::Protocol::Emulator
 
 module LadderDrive
