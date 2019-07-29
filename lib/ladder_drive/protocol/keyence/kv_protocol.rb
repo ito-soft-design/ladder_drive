@@ -50,11 +50,6 @@ module Keyence
       @socket = nil
     end
 
-    def get_bit_from_device device
-      device = device_by_name device
-      get_bits_from_device(1, device).first
-    end
-
     def get_bits_from_device count, device
       c = (count + 15) / 16
       words = get_words_from_device c, device
@@ -88,11 +83,6 @@ module Keyence
     end
     alias :set_bit_to_device :set_bits_to_device
 
-
-    def get_word_from_device device
-      device = device_by_name device
-      get_words_from_device(1, device).first
-    end
 
     def get_words_from_device(count, device)
       device = local_device device
