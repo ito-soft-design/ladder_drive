@@ -25,6 +25,7 @@ $:.unshift dir unless $:.include? dir
 
 require 'active_support'
 require 'active_support/core_ext'
+require 'erb'
 
 module PlcPlugins
 
@@ -130,7 +131,8 @@ class Plugin
       h = {}
       path = File.join("config", "plugins", "#{name}.yml")
       if File.exist?(path)
-        h = YAML.load(File.read(path))
+        erb = ERB.new File.read(path)
+        h = YAML.load(erb.result(binding))
         h = JSON.parse(h.to_json, symbolize_names: true)
       end
       h

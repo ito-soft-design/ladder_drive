@@ -25,6 +25,7 @@ require 'active_support/core_ext/string/inflections'
 require 'yaml'
 require 'json'
 require 'protocol/protocol'
+require 'erb'
 
 include LadderDrive::Protocol::Mitsubishi
 include LadderDrive::Protocol::Keyence
@@ -46,7 +47,8 @@ module LadderDrive
       def load path
         h = {}
         if File.exist?(path)
-          h = YAML.load(File.read(path))
+          erb = ERB.new File.read(path)
+          h = YAML.load(erb.result(binding))
           h = JSON.parse(h.to_json, symbolize_names: true)
         end
         new h || {}
