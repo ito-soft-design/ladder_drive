@@ -52,9 +52,11 @@ module Emulator
       Thread.new do
         server = TCPServer.open @port
         puts "launching emulator ... "
+        launched = false
         loop do
           Thread.start(server.accept) do |socket|
-            puts "done launching"
+            puts "done launching" unless launched
+            launched ||= true
             while line = socket.gets
               begin
                 r = @plc.execute_console_commands line
