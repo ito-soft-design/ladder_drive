@@ -26,6 +26,7 @@ $:.unshift dir unless $:.include? dir
 require 'active_support'
 require 'active_support/core_ext'
 require 'erb'
+require 'plugin_trigger_state'
 
 module PlcPlugins
 
@@ -111,6 +112,8 @@ class Plugin
   def initialize plc
     @config = load_config
     @plc = plc
+    @device_states = {}
+    @interval_triggered_times = {}
   end
 
   def name
@@ -123,6 +126,11 @@ class Plugin
 
   def run_cycle plc
     return false unless self.plc == plc
+  end
+
+  def triggered? trigger_config
+    s = @device_states[trigger_config.object_id] ||= PluginTriggerState.new(plc, trigger_config)
+    s.triggered?
   end
 
   private
@@ -138,19 +146,9 @@ class Plugin
       h
     end
 
-end
 
-end
 end
 
 
-# @deprecated use LadderDrive::Emulator::Plugin class instead of this.
-def load_plugin_config name
-  h = {}
-  path = File.join("config", "plugins", "#{name}.yml")
-  if File.exist?(path)
-    h = YAML.load(File.read(path))
-    h = JSON.parse(h.to_json, symbolize_names: true)
-  end
-  h
+end
 end
