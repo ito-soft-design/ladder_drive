@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2018 ITO SOFT DESIGN Inc.
+# Copyright (c) 201 ITO SOFT DESIGN Inc.
 #
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation files (the
@@ -113,7 +113,7 @@ class Plugin
     @config = load_config
     @plc = plc
     @device_states = {}
-    @interval_triggered_times = {}
+    @trigger_states = {}
   end
 
   def name
@@ -129,8 +129,10 @@ class Plugin
   end
 
   def triggered? trigger_config
-    s = @device_states[trigger_config.object_id] ||= PluginTriggerState.new(plc, trigger_config)
-    s.triggered?
+    state = trigger_state_for trigger_config
+    state.reset
+    state.update
+    state.triggered?
   end
 
   private
@@ -144,6 +146,10 @@ class Plugin
         h = JSON.parse(h.to_json, symbolize_names: true)
       end
       h
+    end
+
+    def trigger_state_for trigger_config
+      @trigger_states[trigger_config.object_id] ||= PluginTriggerState.new(plc, trigger_config)
     end
 
 

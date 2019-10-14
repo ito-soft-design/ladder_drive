@@ -18,3 +18,4 @@ gem 'serialport'
 gem 'google_drive'
 gem "ruby-trello"
 gem 'ambient_iot', ">= 0.1.1"
+gem 'dotenv'

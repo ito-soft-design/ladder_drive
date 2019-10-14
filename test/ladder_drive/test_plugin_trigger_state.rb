@@ -109,5 +109,23 @@ class TestPluginTriggerState < Test::Unit::TestCase
     assert_equal(false, state.fallen?)
   end
 
+  def test_interval
+    config = {trigger:{interval:60, type:"interval"}}
+
+    stub(Time).now{ Time.new 2019,10,13,0,0,0 }
+    state = PluginTriggerState.new @plc, config
+    state.update
+    assert_equal(true, state.triggered?)
+
+    state.reset
+    stub(Time).now{ Time.new 2019,10,13,0,0,59 }
+    state.update
+    assert_equal(false, state.triggered?)
+
+    state.reset
+    stub(Time).now{ Time.new 2019,10,13,0,1,0 }
+    state.update
+    assert_equal(true, state.triggered?)
+  end
 
 end

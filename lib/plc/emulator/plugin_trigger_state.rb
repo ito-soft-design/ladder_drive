@@ -42,8 +42,9 @@ class PluginTriggerState
   def initialize plc, config
     @plc = plc
     @config = config
-    @device = plc.device_by_name config[:device]
     @value_type = config[:value_type]
+    @devices = {}
+    @next_trigger_times = {}
   end
 
   def key
@@ -79,10 +80,14 @@ class PluginTriggerState
     !!@triggered
   end
 
+  def device
+    device_with_trigger(config[:triggers]&.first || config[:trigger])
+  end
+
   def update
     return unless @triggered.nil?
 
-    triggers = config[:triggeres]
+    triggers = config[:triggers]
     triggers ||= [config[:trigger]]
 
     @triggered = false
@@ -90,7 +95,9 @@ class PluginTriggerState
     triggers.each do |trigger|
       case trigger[:type]
       when "changed", "raise", "fall", "raise_and_fall"
+        device = device_with_trigger(trigger)
         value = device.send(@value_type || :value)
+
         # update flags
         @changed = @value != value
         case value
@@ -114,7 +121,13 @@ class PluginTriggerState
         end
 
       when "interval"
-        # TODO:
+        now = Time.now
+        t = @next_trigger_times[trigger.object_id] || now
+        while now >= t
+          @triggered ||= true
+          t += trigger[:interval]
+        end
+        @next_trigger_times[trigger.object_id] = t
       else
         @triggered = false
       end
@@ -127,6 +140,10 @@ class PluginTriggerState
     @raised = nil
     @fallen = nil
     @triggered = nil
+  end
+
+  def device_with_trigger trigger
+    @devices[trigger.object_id] ||= @plc.device_by_name(trigger[:device])
   end
 
 end
