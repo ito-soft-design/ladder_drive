@@ -76,36 +76,13 @@ class IftttPlugin < Plugin
     return if disabled?
     config[:events].each do |event|
       begin
-        triggered = false
-        case event[:trigger][:type]
-        when "interval"
-          now = Time.now
-          t = @times[event.object_id] || now
-          triggered = t <= now
-          if triggered
-            t += event[:trigger][:interval] || 300
-            @times[event.object_id] = t
-          end
-        else
-          d = plc.device_by_name event[:trigger][:device]
-          v = d.send event[:trigger][:value_type], event[:trigger][:text_length] || 8
-          unless @values[event.object_id] == v
-            @values[event.object_id] = v
-            case event[:trigger][:type]
-            when "raise"
-              triggered = !!v
-            when "fall"
-              triggered = !v
-            else
-              triggered = true
-            end
-          end
-        end
+        next unless self.triggered?(event)
 
-        next unless triggered
-
+        v = trigger_state_for(event).value
         @worker_queue.push event:event[:name], payload:event[:params].dup || {}, value:v
       rescue => e
+puts $!
+puts $@
         p e
       end
     end if config[:events]

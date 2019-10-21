@@ -82,7 +82,6 @@ class AmbientPlugin < Plugin
     return if disabled?
 
     @values = {}
-    @times = {}
     @worker_queue = Queue.new
 
     setup
@@ -93,41 +92,10 @@ class AmbientPlugin < Plugin
     return unless config[:channels]
 
     config[:channels].each do |channel|
-      channel = channel
       next unless channel[:channel_id]
       next unless channel[:write_key]
       begin
-
-        interval_triggered = false
-        now = Time.now
-        triggered = false
-        v = nil
-        case channel[:trigger][:type]
-        when "interval"
-          t = @times[channel.object_id] || now
-          triggered = t <= now
-          if triggered
-            interval_triggered = true
-            t += channel[:trigger][:interval] || 300
-            @times[channel.object_id] = t
-          end
-        else
-          device = plc.device_by_name channel[:trigger][:device]
-          v = device.send channel[:trigger][:value_type]
-          unless @values[device.name] == v
-            @values[device.name] = v
-            case channel[:trigger][:type]
-            when "raise"
-              triggered = !!v
-            when "fall"
-              triggered = !v
-            else
-              triggered = true
-            end
-          end
-        end
-
-        next unless triggered || interval_triggered
+        next unless self.triggered?(channel)
 
         # gether values
         values = channel[:devices].inject({}) do |h, pair|

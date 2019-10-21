@@ -22,7 +22,7 @@ class TestFinsTcpProtocolOnOffline < Test::Unit::TestCase
     stub(@protocol).receive{ packet }
     stub(@protocol).send_packet
     @protocol.query_node
-    assert_equal 2, @protocol.source_node
+    assert_equal 1, @protocol.source_node
   end
 
 end

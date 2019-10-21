@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2018 ITO SOFT DESIGN Inc.
+# Copyright (c) 201 ITO SOFT DESIGN Inc.
 #
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation files (the
@@ -26,6 +26,7 @@ $:.unshift dir unless $:.include? dir
 require 'active_support'
 require 'active_support/core_ext'
 require 'erb'
+require 'plugin_trigger_state'
 
 module PlcPlugins
 
@@ -111,6 +112,8 @@ class Plugin
   def initialize plc
     @config = load_config
     @plc = plc
+    @device_states = {}
+    @trigger_states = {}
   end
 
   def name
@@ -125,6 +128,18 @@ class Plugin
     return false unless self.plc == plc
   end
 
+  def triggered? trigger_config
+    state = trigger_state_for trigger_config
+    state.reset
+    state.update
+    state.triggered?
+  end
+
+  def trigger_state_for trigger_config
+    @trigger_states[trigger_config.object_id] ||= PluginTriggerState.new(plc, trigger_config)
+  end
+
+
   private
 
     def load_config
@@ -138,19 +153,9 @@ class Plugin
       h
     end
 
-end
 
-end
 end
 
 
-# @deprecated use LadderDrive::Emulator::Plugin class instead of this.
-def load_plugin_config name
-  h = {}
-  path = File.join("config", "plugins", "#{name}.yml")
-  if File.exist?(path)
-    h = YAML.load(File.read(path))
-    h = JSON.parse(h.to_json, symbolize_names: true)
-  end
-  h
+end
 end

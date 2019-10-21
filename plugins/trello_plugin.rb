@@ -80,40 +80,11 @@ class TrelloPlugin < Plugin
 
     @config[:events].each do |event|
       begin
-        event_id = event.object_id
-        triggered = false
-        now = Time.now
-        device = nil
+        next unless self.triggered?(event)
 
-        case event[:trigger][:type]
-        when "interval"
-          t = @times[event_id] || now
-          triggered = t <= now
-          if triggered
-            triggered = true
-            t += event[:trigger][:interval] || 300
-            @times[event_id] = t
-          end
-        else
-          device = plc.device_by_name event[:trigger][:device]
-          v = device.send event[:trigger][:value_type], event[:trigger][:text_length] || 8
-          @values[event_id] ||= {}
-          unless @values[event_id][device.name] == v
-            @values[event_id][device.name] = v
-            case event[:trigger][:type]
-            when "raise"
-              triggered = !!v
-            when "fall"
-              triggered = !v
-            else
-              triggered = true
-            end
-          end
-        end
-
-        next unless triggered
-
-        @worker_queue.push event:event, device_name:device.name, value:v, time: now
+        device = trigger_state_for(event).device
+        v = trigger_state_for(event).value
+        @worker_queue.push event:event, device_name:device.name, value:v, time: Time.now
 
       rescue => e
         p e
