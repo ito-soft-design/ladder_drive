@@ -97,9 +97,9 @@ class SlackPlugin < Plugin
               t += event[:trigger][:interval] || 300
               @times[event.object_id] = t
             end
-            v = device.send event[:value_type], event[:trigger][:text_length] || 8
+            v = device.send event[:value_type] || :device, event[:trigger][:text_length] || 8
           else
-            v = device.send event[:value_type], event[:text_length] || 8
+            v = device.send event[:value_type] || :value, event[:text_length] || 8
             unless @values[device.name] == v
               @values[device.name] = v
               case event[:trigger][:type]
@@ -122,6 +122,8 @@ class SlackPlugin < Plugin
         end
       rescue => e
         p e
+puts $!
+puts $@
       end
     end
   end
