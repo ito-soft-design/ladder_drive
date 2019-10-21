@@ -135,6 +135,11 @@ class Plugin
     state.triggered?
   end
 
+  def trigger_state_for trigger_config
+    @trigger_states[trigger_config.object_id] ||= PluginTriggerState.new(plc, trigger_config)
+  end
+
+
   private
 
     def load_config
@@ -146,10 +151,6 @@ class Plugin
         h = JSON.parse(h.to_json, symbolize_names: true)
       end
       h
-    end
-
-    def trigger_state_for trigger_config
-      @trigger_states[trigger_config.object_id] ||= PluginTriggerState.new(plc, trigger_config)
     end
 
 
