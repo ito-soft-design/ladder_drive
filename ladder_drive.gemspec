@@ -18,7 +18,8 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency 'activesupport',  '~> 4.0'
   spec.add_runtime_dependency 'ffi',            '~> 1.9', '>= 1.9.24'
   spec.add_runtime_dependency 'pi_piper',       '~> 2.0', '>= 2.0.0'
-  spec.add_runtime_dependency 'serialport',     '~> 1.3.1'
+
+  spec.add_runtime_dependency 'serialport',     '~> 1.3', '>= 1.3.1'
   spec.add_runtime_dependency 'ambient_iot',    '~> 0.1', '>= 0.1.1'
   spec.add_runtime_dependency 'google_drive',   '~> 3.0', '>= 3.0.3'
   spec.add_runtime_dependency 'ruby-trello',    '~>2.1'
