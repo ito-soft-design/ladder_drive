@@ -90,6 +90,7 @@ class SlackPlugin < Plugin
           v = nil
           case event[:trigger][:type]
           when "interval"
+
             t = @times[event.object_id] || now
             triggered = t <= now
             if triggered
@@ -97,7 +98,7 @@ class SlackPlugin < Plugin
               t += event[:trigger][:interval] || 300
               @times[event.object_id] = t
             end
-            v = device.send event[:value_type] || :device, event[:trigger][:text_length] || 8
+            v = device.send event[:value_type] || :value, event[:trigger][:text_length] || 8
           else
             v = device.send event[:value_type] || :value, event[:text_length] || 8
             unless @values[device.name] == v
@@ -149,7 +150,15 @@ puts $@
           req["Content-Type"] = "application/json"
 
           format = event[:format] || "__comment__ occured at __time__"
-          format = arg[:value] ? format[:raise] : format[:fall] unless format.is_a? String
+          case format
+          when Hash
+            case arg[:value]
+            when false, nil, 0
+              format = format[:fall]
+            else
+              format = format[:interval] || format[:raise]
+            end
+          end
 
           device_name = arg[:device_name]
           comment = @comments[device_name] || device_name
