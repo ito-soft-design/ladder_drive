@@ -54,11 +54,23 @@ module LadderDrive
     desc "plugin", "Install the specified plugin."
     def plugin(name)
       root_dir = File.expand_path(File.join(File.dirname(__FILE__), "..", ".."))
-      plugins_path = File.join(root_dir, "plugins")
-      path = File.join(plugins_path, "#{name}_plugin.rb")
-      if File.exist? path
+
+      # copy plugin
+      plugins_dir = File.join(root_dir, "plugins")
+      plugin_path = File.join(plugins_dir, "#{name}_plugin.rb")
+      if File.exist? plugin_path
         mkdir_p "plugins"
-        cp path, "plugins/#{name}_plugin.rb"
+        cp plugin_path, "plugins/#{name}_plugin.rb"
+      end
+
+      # copy sample settings
+      config_dir = File.join(plugins_dir, "config")
+      config_path = File.join(config_dir, "#{name}.yaml.example")
+      if File.exist? config_path
+        dst_dir = "config/plugins"
+        mkdir_p dst_dir
+        dst_path = "config/plugins/#{name}.yaml.example"
+        cp config_path, dst_path unless File.exist? dst_path
       end
     end
 

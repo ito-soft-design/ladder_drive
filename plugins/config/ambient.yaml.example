@@ -1,0 +1,34 @@
+# This is a sample setting for ambient plugin
+# Copy this file to ambient.yaml or rename.
+
+# If you want to disable this plugin, uncomment it.
+#disable: true
+
+# Configure ambient channels
+# Set the Ambient channel, which is to send data you want to.
+channels:
+
+  # set ambient configuration.
+  # We recommend setting write_key from an environment variable.
+  - channel_id: 12824
+    write_key: <%= ENV['AMBIENT_WRITE_KEY'] %>
+
+    # Set trigger conditions
+    # You can use type raise, fall, raise_and_fall, changed, and interval.
+    triggers:
+      - type: raise_and_fall
+        device: M100
+      - type: interval
+        interval: 60
+
+    # Set data to send, if triggered.
+    devices:
+      d1:
+        device: D10
+        value_type: value
+      d2:
+        device: D11
+        value_type: value
+      d3:
+        device: D12
+        value_type: value

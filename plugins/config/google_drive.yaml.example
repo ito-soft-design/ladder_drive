@@ -1,0 +1,39 @@
+# This is a sample setting for google drive plugin
+# Copy this file to google_drive.yaml or rename.
+
+# If you want to disable this plugin, uncomment it.
+#disable: true
+
+# Api configuration.
+client_id: <%= ENV['GOOGLE_CLIENT_ID'] %>
+client_secret: <%= ENV['GOOGLE_CLIENT_SECRET'] %>
+access_token: <%= ENV['GOOGLE_ACCESS_TOKEN'] %>
+refresh_token: <%= ENV['GOOGLE_REFRESH_TOKEN'] %>
+
+# Logging setting
+loggings:
+  - name: temperature
+
+    # Set trigger conditions
+    # You can use type raise, fall, raise_and_fall, changed, and interval.
+    trigger:
+      device: M0
+      type: raise_and_fall
+      value_type: bool
+
+    # Column header
+    columns: D0,D1,D2,D3,D4,D5,D6,D7,D8,D9,D20,M0
+
+    # Devices for logging
+    devices:
+      - device: D0-D9
+        type: value
+      - device: D20
+        type: value
+      - device: M0
+        type: bool
+
+    # Spreadsheet to access
+    spread_sheet:
+      spread_sheet_key: <%= ENV['GOOGLE_SPREADSHEET_KEY'] %>
+      sheet_no: 0

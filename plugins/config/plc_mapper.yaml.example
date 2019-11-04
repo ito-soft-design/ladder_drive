@@ -1,0 +1,36 @@
+# This is a sample setting for Plc mapper plugin
+# Copy this file to plc_mapper.yaml or rename.
+
+# If you want to disable this plugin, uncomment it.
+#disable: true
+
+# This is a sample setting for Plc mapper plugin
+plcs:
+  - description: Machine A-123
+
+    # Set connection conditions between PLC
+    protocol: mc_protocol
+    host: 192.168.1.10
+    port: 5010
+    interval: 10
+
+    # Set address mapping.
+    mapping:
+
+      # Read from PLC to set Ladder drive.
+      # plc: PLC address area
+      # ld: Ladder drive area
+      read:
+        - plc: M1000-M1099
+          ld: M0
+        - plc: D1000-D1099
+          ld: D0
+      # Read from Ladder drive to set PLC.
+      # plc: PLC address area
+      # ld: Ladder drive area
+      write:
+        # LadderDrive address: PLC address
+        - plc: M100-M199
+          ld: M1100
+        - plc: D100-D199
+          ld: D1100

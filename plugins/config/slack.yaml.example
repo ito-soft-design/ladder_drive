@@ -1,0 +1,36 @@
+# This is a sample setting for Slack plugin
+# Copy this file to slack.yaml or rename.
+
+# If you want to disable this plugin, uncomment it.
+#disable: true
+
+# Define comment for a device
+device_comments:
+  M210: Full error
+  D10: Running
+
+# Event setting
+events:
+
+  # Set webhook url for IFTTT.
+  # We recommend setting web_hook_key from an environment variable.
+  - webhook_url: <%= ENV['SLACK_WEBHOOK_NOTIFICATION_URL'] %>
+
+    # Set trigger conditions
+    # You can use type raise, fall, raise_and_fall, changed, and interval.
+    trigger:
+      type: raise_and_fall
+
+    # String format to send Slack.
+    format:
+      raise: __device_comment__ has occurred at __time__ .
+      fall: __device_comment__ was reset at __time__ .
+    devices: M210
+
+  - webhook_url: <%= ENV['SLACK_WEBHOOK_URL'] %>
+    trigger:
+      type: raise_and_fall
+    format:
+      raise: Start __device_comment__ at __time__ .
+      fall: Stop __device_comment__ at __time__ .
+    devices: M100

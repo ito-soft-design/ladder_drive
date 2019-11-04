@@ -102,6 +102,11 @@ puts $@
       }
     end
 
+    def label_in_board_with_color board, color
+      l = board.labels.find{|l| l.name == color}
+      l ||= Trello::Label.create board_id:board.id, name:color, color:color
+    end
+
     def thread_proc
       while arg = @worker_queue.pop
         begin
@@ -114,16 +119,23 @@ puts $@
           card_name.gsub!(/__value__/, arg[:value] || "") if arg[:value].is_a? String
           next if (card_name || "").empty?
 
-          list_name = event[:list_name]
-          next unless list_name
-          list = board.lists.find{|l| l.name == list_name}
-          next unless list
+          card = board.cards.find{|c| c.name == card_name}
+          card ||= Trello::Card.create name:card_name
 
-          card = board.lists.map{|l| l.cards.map{|c| c}}.flatten.find{|c| c.name == card_name}
-          if card
-            card.move_to_list list
-          else
-            card = Trello::Card.create name:card_name, list_id:list.id
+          # move card into a list
+          list = board.lists.find{|l| l.name == event[:list_name]} if event[:list_name]
+          card.move_to_list list if list
+
+          # set color label
+          if event[:color]
+            if event[:color][:add]
+              label = label_in_board_with_color board, event[:color][:add]
+              card.add_label label
+            end
+            if event[:color][:remove]
+              label = label_in_board_with_color board, event[:color][:remove]
+              card.remove_label label
+            end
           end
 
         rescue => e
