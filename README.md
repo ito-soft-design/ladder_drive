@@ -298,6 +298,7 @@ $ ladder_drive plugin plugin_name
 |plc_mapper|Share other PLCs data with Ladder drive device.|
 |slack|Cast the data to the Slack.|
 |trello|Move the card of Trello to specified list.|
+|ambient|Writing data to Ambient.|
 
 
 
