@@ -1,0 +1,24 @@
+# This is a sample setting for ifttt plugin
+# Copy this file to ifttt.yaml or rename.
+
+# If you want to disable this plugin, uncomment it.
+#disable: true
+
+# Set webhook key of Webhooks service for IFTTT.
+# To see your webhook key, to open https://ifttt.com/maker_webhook
+# and click the Documentation link.
+# We recommend setting web_hook_key from an environment variable.
+web_hook_key: <%= ENV['IFTTT_WEBHOOK_KEY'] %>
+
+# Set trigger event of webhook.
+# Set event name to name attribute.
+# Pass values to the params to display information.
+events:
+  - name: rubyworldconference2019
+    trigger:
+      type: raise
+      device: M100
+    params:
+      value1: Abnormal temperature
+      value2: Something additional information.
+      value3: and more.

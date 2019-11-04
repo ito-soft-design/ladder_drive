@@ -1,0 +1,41 @@
+# This is a sample setting for Trello plugin
+# Copy this file to trello.yaml or rename.
+
+# If you want to disable this plugin, uncomment it.
+#disable: true
+
+# Connection configuration.
+consumer_key: <%= ENV['TRELLO_CONSUMER_KEY'] %>
+consumer_secret: <%= ENV['TRELLO_CONSUMMER_SECRET'] %>
+oauth_token: <%= ENV['TRELLO_OAUTH_TOKEN'] %>
+
+events:
+
+  # Set trigger conditions
+  # You can use type raise, fall, raise_and_fall, changed, and interval.
+  - trigger:
+      device: M100
+      type: raise
+
+    # Board name
+    board_name: Floor 1
+    # List name.
+    # If you set it, move the card into this list.
+    list_name: RUNNING
+    # Card name.
+    card_name: Machine A
+
+    # color label
+    color:
+      # Add color label
+      add: green
+
+  - trigger:
+      device: M100
+      type: fall
+    board_name: Floor 1
+    list_name: STOPPING
+    card_name: Machine A
+    color:
+      # Remove color label
+      remove: green
