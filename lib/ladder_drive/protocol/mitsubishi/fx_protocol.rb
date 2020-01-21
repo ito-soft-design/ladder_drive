@@ -42,7 +42,6 @@ module Mitsubishi
     NAK = "\u0015"
 
     DELIMITER = "\r\n"
-    TIMEOUT = 1.0
 
     def initialize options={}
       super

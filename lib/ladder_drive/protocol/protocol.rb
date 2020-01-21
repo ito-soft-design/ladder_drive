@@ -58,6 +58,8 @@ module Protocol
       end
     end
 
+    TIMEOUT = 1.0
+
     # abstract methods
 
     def open; end
