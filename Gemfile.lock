@@ -83,7 +83,7 @@ GEM
       ffi
     power_assert (1.1.5)
     public_suffix (4.0.1)
-    rake (10.5.0)
+    rake (13.0.1)
     representable (3.0.4)
       declarative (< 0.1.0)
       declarative-option (< 0.2.0)
@@ -133,7 +133,7 @@ DEPENDENCIES
   google_drive
   ladder_drive!
   pi_piper (>= 2.0.0)
-  rake (~> 10.0)
+  rake (~> 13.0)
   ruby-trello
   serialport
   test-unit
