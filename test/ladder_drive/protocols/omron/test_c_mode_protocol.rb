@@ -1,5 +1,4 @@
 require 'test/unit/rr'
-require 'test/unit/notify'
 
 class TestCModeProtocol < Test::Unit::TestCase
   include Protocol::Omron
