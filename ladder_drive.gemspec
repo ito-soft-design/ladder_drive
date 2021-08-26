@@ -15,7 +15,7 @@ Gem::Specification.new do |spec|
   spec.license       = "MIT"
 
   spec.add_runtime_dependency 'thor',           '~> 0'
-  spec.add_runtime_dependency 'activesupport',  '~> 4.0'
+  spec.add_runtime_dependency 'activesupport',  '~> 6.0'
   spec.add_runtime_dependency 'ffi',            '~> 1.9', '>= 1.9.24'
   spec.add_runtime_dependency 'pi_piper',       '~> 2.0', '>= 2.0.0'
 
@@ -32,7 +32,7 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
-  spec.add_development_dependency "bundler", "~> 1.11"
+  spec.add_development_dependency "bundler"
   spec.add_development_dependency "rake", "~> 10.0"
 
 end

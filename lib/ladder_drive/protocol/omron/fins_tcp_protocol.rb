@@ -48,6 +48,8 @@ module Omron
     ETHERNET_CP1L   = 2
     ETHERNET_CP1H   = 3
 
+    TIMEOUT = 5.0
+
     def initialize options={}
       super
       @socket = nil
@@ -201,7 +203,7 @@ p e
       res = []
       len = 0
       begin
-        Timeout.timeout(5.0) do
+        Timeout.timeout(TIMEOUT) do
           loop do
             c = @socket.getc
             next if c.nil? || c == ""

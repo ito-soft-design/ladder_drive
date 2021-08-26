@@ -169,7 +169,7 @@ module Mitsubishi
       res = []
       len = 0
       begin
-        Timeout.timeout(1.0) do
+        Timeout.timeout(TIMEOUT) do
           loop do
             c = @socket.read(1)
             next if c.nil? || c == ""

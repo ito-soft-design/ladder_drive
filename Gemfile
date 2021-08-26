@@ -6,7 +6,6 @@ gemspec
 group :test do
   gem "test-unit"
   gem "test-unit-rr"
-  #gem "test-unit-notify"
 end
 
 gem "activesupport", '>= 4.0'

@@ -124,7 +124,7 @@ module Keyence
     def receive
       res = ""
       begin
-        Timeout.timeout(0.1) do
+        Timeout.timeout(TIMEOUT) do
           res = @socket.gets
         end
       rescue Timeout::Error
