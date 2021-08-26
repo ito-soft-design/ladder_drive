@@ -49,7 +49,7 @@ module Keyence
 
       def suffixes_for_dec; SUFFIXES_FOR_DEC; end
       def suffixes_for_dec_hex; SUFFIXES_FOR_DEC_HEX; end
-      def suffixeds_for_hex; SUFFIXES_FOR_HEX; end
+      def suffixes_for_hex; SUFFIXES_FOR_HEX; end
       def suffixes_for_bit; SUFFIXES_FOR_BIT; end
 
   end
