@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    ladder_drive (0.6.6)
+    ladder_drive (0.6.7)
       activesupport (~> 6.0)
       ambient_iot (~> 0.1, >= 0.1.1)
       dotenv (~> 2.1)
@@ -90,23 +90,21 @@ GEM
       mime-types-data (~> 3.2015)
     mime-types-data (3.2021.0704)
     mini_mime (1.1.1)
-    mini_portile2 (2.6.1)
     minitest (5.14.4)
     multi_json (1.15.0)
     multipart-post (2.1.1)
     netrc (0.11.0)
-    nokogiri (1.12.3)
-      mini_portile2 (~> 2.6.1)
+    nokogiri (1.12.4-x86_64-darwin)
       racc (~> 1.4)
     oauth (0.5.6)
     os (1.1.1)
     pi_piper (2.0.0)
       eventmachine (= 1.0.9)
       ffi
-    power_assert (2.0.0)
+    power_assert (2.0.1)
     public_suffix (4.0.6)
     racc (1.5.2)
-    rake (10.5.0)
+    rake (13.0.6)
     representable (3.1.1)
       declarative (< 0.1.0)
       trailblazer-option (>= 0.1.1, < 0.2.0)
@@ -149,22 +147,22 @@ GEM
     zeitwerk (2.4.2)
 
 PLATFORMS
-  ruby
+  x86_64-darwin-19
 
 DEPENDENCIES
   activesupport (>= 4.0)
   ambient_iot (>= 0.1.1)
-  bundler
+  bundler (~> 2.1)
   dotenv
   ffi (~> 1.9.24)
   google_drive
   ladder_drive!
   pi_piper (>= 2.0.0)
-  rake (~> 10.0)
+  rake (~> 13.0)
   ruby-trello
   serialport
   test-unit
   test-unit-rr
 
 BUNDLED WITH
-   2.1.4
+   2.2.26
