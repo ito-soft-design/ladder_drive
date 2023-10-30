@@ -38,6 +38,10 @@ module Raspberrypi
         end
       end
 
+      def terminate
+        @server.terminate if @server
+      end
+  
     end
 
     def initialize config = {}
