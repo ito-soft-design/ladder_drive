@@ -23,7 +23,7 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency 'ambient_iot',    '~> 0.1', '>= 0.1.1'
   spec.add_runtime_dependency 'google_drive',   '~> 3.0', '>= 3.0.3'
   spec.add_runtime_dependency 'ruby-trello',    '~>2.1'
-  spec.add_runtime_dependency 'dotenv',    '~>2.1'
+  spec.add_runtime_dependency 'dotenv',         '~>2.1'
 
   spec.required_ruby_version = '>= 2.3.3'
 
